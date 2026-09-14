@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attento</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ LOGO ============ -->
+<template id="tpl-logo">
+  <img src="logo.png" alt="Attento" class="logo-mark">
+</template>
+
+<!-- ============ LOGIN VIEW ============ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-panel">
+    <div class="login-brand">
+      <div class="login-brand-mark" id="login-logo-slot"></div>
+      <h1>Attento</h1>
+      <p class="login-tagline">Gestão de salas, agenda e financeiro em um só lugar, para quem cuida do dia a dia de cada unidade.</p>
+      <ul class="login-highlights">
+        <li><i class="fa-solid fa-door-open" aria-hidden="true"></i> Disponibilidade de salas em tempo real</li>
+        <li><i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Agenda semanal por unidade</li>
+        <li><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i> Financeiro e convênios organizados</li>
+      </ul>
+    </div>
+    <div class="login-card">
+      <h2>Entrar</h2>
+      <p class="login-card-sub">Acesse com suas credenciais para continuar.</p>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" name="email" autocomplete="username" placeholder="seu@email.com">
+          <span class="field-error" id="login-email-error"></span>
+        </div>
+        <div class="field">
+          <label for="login-password">Senha</label>
+          <div class="password-wrap">
+            <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="••••••">
+            <button type="button" class="password-toggle" id="password-toggle" aria-label="Mostrar senha">
+              <i class="fa-solid fa-eye" aria-hidden="true"></i>
+            </button>
+          </div>
+          <span class="field-error" id="login-password-error"></span>
+        </div>
+        <span class="field-error" id="login-general-error"></span>
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit">
+          <span class="btn-label">Entrar</span>
+          <span class="btn-spinner" hidden><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i></span>
+        </button>
+      </form>
+      <div class="login-demo">
+        <p>Credenciais de demonstração</p>
+        <div class="login-demo-row">
+          <button type="button" class="demo-chip" data-demo="admin">
+            <strong>Administrador</strong><span>admin@demo.com · 123456</span>
+          </button>
+          <button type="button" class="demo-chip" data-demo="user">
+            <strong>Usuário</strong><span>usuario@demo.com · 123456</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app-shell" class="app-shell" hidden>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo" id="sidebar-logo-slot"></div>
+        <span class="sidebar-title">Attento</span>
+      </div>
+      <button class="sidebar-close" id="sidebar-close" aria-label="Fechar menu"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav" aria-label="Navegação principal"></nav>
+    <div class="sidebar-bottom">
+      <button class="sidebar-logout" id="btn-logout">
+        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sair
+      </button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="main-col">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Abrir menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+      <h1 class="topbar-title" id="view-title">Dashboard</h1>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="theme-toggle" aria-label="Alternar tema">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+        </button>
+        <button class="icon-btn" id="notif-btn" aria-label="Notificações">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+          <span class="notif-dot" id="notif-dot" hidden></span>
+        </button>
+        <div class="topbar-user">
+          <div class="avatar" id="user-avatar">A</div>
+          <div class="topbar-user-info">
+            <span class="topbar-user-name" id="topbar-user-name">—</span>
+            <span class="topbar-user-role" id="topbar-user-role">—</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content" id="view-root" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- ============ MODAL ROOT ============ -->
+<div id="modal-root" class="modal-root" aria-hidden="true"></div>
+
+<!-- ============ TOAST ROOT ============ -->
+<div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
