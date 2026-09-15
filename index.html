@@ -1,72 +1,79 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attento</title>
-<link rel="icon" type="image/png" href="logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attento</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<!-- ============ LOGO ============ -->
-<template id="tpl-logo">
-  <img src="logo.png" alt="Attento" class="logo-mark">
-</template>
+  <!-- ============ LOGO ============ -->
+  <template id="tpl-logo">
+    <img src="logo.png" alt="Attento" class="logo-mark">
+  </template>
 
-<!-- ============ APP SHELL ============ -->
-<div id="app-shell" class="app-shell" hidden>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-top">
-      <div class="sidebar-brand">
-        <div class="sidebar-logo" id="sidebar-logo-slot"></div>
-        <span class="sidebar-title">Attento</span>
+  <!-- ============ APP SHELL ============ -->
+  <div id="app-shell" class="app-shell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo" id="sidebar-logo-slot"></div>
+          <span class="sidebar-title">Attento</span>
+        </div>
+        <button class="sidebar-close" id="sidebar-close" aria-label="Fechar menu"><i class="fa-solid fa-xmark"
+            aria-hidden="true"></i></button>
       </div>
-      <button class="sidebar-close" id="sidebar-close" aria-label="Fechar menu"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-    </div>
-    <nav class="sidebar-nav" id="sidebar-nav" aria-label="Navegação principal"></nav>
-    <div class="sidebar-bottom">
-      <button class="sidebar-logout" id="btn-logout">
-        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sair
-      </button>
-    </div>
-  </aside>
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-  <div class="main-col">
-    <header class="topbar">
-      <button class="hamburger" id="hamburger" aria-label="Abrir menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
-      <h1 class="topbar-title" id="view-title">Dashboard</h1>
-      <div class="topbar-actions">
-        <button class="icon-btn" id="theme-toggle" aria-label="Alternar tema">
-          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+      <nav class="sidebar-nav" id="sidebar-nav" aria-label="Navegação principal"></nav>
+      <div class="sidebar-bottom">
+        <button class="sidebar-logout" id="btn-logout">
+          <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sair
         </button>
-        <div class="topbar-user">
-          <div class="avatar" id="user-avatar">A</div>
-          <div class="topbar-user-info">
-            <span class="topbar-user-name" id="topbar-user-name">—</span>
-            <span class="topbar-user-role" id="topbar-user-role">—</span>
+      </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="main-col">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Abrir menu"><i class="fa-solid fa-bars"
+            aria-hidden="true"></i></button>
+        <h1 class="topbar-title" id="view-title">Dashboard</h1>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="theme-toggle" aria-label="Alternar tema">
+            <i class="fa-solid fa-moon" aria-hidden="true"></i>
+          </button>
+          <div class="topbar-user">
+            <div class="avatar" id="user-avatar">A</div>
+            <div class="topbar-user-info">
+              <span class="topbar-user-name" id="topbar-user-name">—</span>
+              <span class="topbar-user-role" id="topbar-user-role">—</span>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <main class="content" id="view-root" tabindex="-1"></main>
+      <main class="content" id="view-root" tabindex="-1"></main>
+    </div>
   </div>
-</div>
 
-<!-- ============ MODAL ROOT ============ -->
-<div id="modal-root" class="modal-root" aria-hidden="true"></div>
+  <!-- ============ MODAL ROOT ============ -->
+  <div id="modal-root" class="modal-root" aria-hidden="true"></div>
 
-<!-- ============ TOAST ROOT ============ -->
-<div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+  <!-- ============ TOAST ROOT ============ -->
+  <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="auth.js"></script>
-<script src="data-utils.js"></script>
-<script src="contact.js"></script>
-<script src="script.js"></script>
+  <script src="auth.js"></script>
+  <script src="data-utils.js"></script>
+  <script src="contact.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
