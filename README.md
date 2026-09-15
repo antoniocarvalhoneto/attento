@@ -78,7 +78,7 @@ npx http-server -p 8080
 ```
 Depois acesse `http://localhost:8080`.
 
-> Os quatro arquivos (`index.html`, `style.css`, `script.js`, `logo.png`) precisam estar na mesma pasta — a logo é referenciada por caminho relativo.
+> Os cinco arquivos (`index.html`, `style.css`, `auth.js`, `script.js`, `logo.png`) precisam estar na mesma pasta — scripts, estilos e logo usam caminhos relativos.
 
 ## Acesso de demonstração
 
@@ -102,11 +102,18 @@ A tela de login tem atalhos que já preenchem essas credenciais automaticamente:
 ├── index.html     # marcação e templates da aplicação
 ├── style.css      # design tokens, layout e temas (claro/escuro)
 ├── script.js      # estado, roteamento, renderização e regras de negócio
+├── auth.js        # validação de acesso e persistência da sessão de demonstração
 ├── logo.png       # identidade visual (fundo transparente)
 └── README.md
 ```
 
-O `script.js` concentra toda a aplicação em módulos por responsabilidade: estado global, autenticação, roteamento (hash-based), renderizadores por view, modais, e utilitários (toast, máscara de moeda, exportação CSV).
+O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar a sessão e sair. Ele recebe acesso à lista de usuários e ao armazenamento, sem depender das telas. O `script.js` controla o formulário, a troca entre login e dashboard, o estado global, as permissões das rotas, os renderizadores, os modais e os utilitários. A autenticação permanece simulada e usa as mesmas credenciais e a chave de sessão já existente.
+
+Para verificar o serviço de autenticação com Node.js:
+
+```bash
+node --test tests/auth.test.cjs
+```
 
 ## Persistência de dados
 

@@ -54,7 +54,7 @@
   const KEYS = {
     users: 'app_users', units: 'app_units', rooms: 'app_rooms', professionals: 'app_professionals',
     schedules: 'app_schedules', financial: 'app_financial_accounts', insurance: 'app_insurance',
-    settings: 'app_settings', session: 'app_session'
+    settings: 'app_settings'
   };
   function loadData(key) { try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
   function saveData(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error('Falha ao salvar', key, e); } }
@@ -171,6 +171,7 @@
     units: [], rooms: [], professionals: [], schedules: [], financialAccounts: [], insuranceRecords: [], users: [],
     filters: { availUnit: 'all', availRoom: 'all', availWeek: 0, agendaWeek: 0 }
   };
+  const auth = window.AttentoAuth.create({ getUsers: () => STATE.users, storage: localStorage });
 
   function loadAllIntoState() {
     STATE.units = loadData(KEYS.units) || [];
@@ -281,35 +282,24 @@
   function toggleTheme() { applyTheme(STATE.theme === 'dark' ? 'light' : 'dark'); }
 
   /* ==========================================================================
-     AUTH
+     TRANSIÇÃO ENTRE LOGIN E APLICAÇÃO
      ========================================================================== */
-  function attemptLogin(email, password) {
-    const user = STATE.users.find(u => u.email.toLowerCase() === String(email).toLowerCase() && u.password === password);
-    return user || null;
-  }
-  function login(user) {
+  function login(email, password) {
+    const user = auth.signIn(email, password);
+    if (!user) return false;
     STATE.currentUser = user;
-    saveData(KEYS.session, { userId: user.id });
     showApp();
+    return true;
   }
   function logout() {
     STATE.currentUser = null;
-    localStorage.removeItem(KEYS.session);
+    auth.signOut();
     $('#app-shell').hidden = true;
     $('#login-screen').hidden = false;
     $('#login-form').reset();
     SUPPRESS_HASHCHANGE = true;
     history.replaceState(null, '', location.pathname + location.search);
   }
-  function restoreSession() {
-    const session = loadData(KEYS.session);
-    if (session) {
-      const user = STATE.users.find(u => u.id === session.userId);
-      if (user) { STATE.currentUser = user; return true; }
-    }
-    return false;
-  }
-
   const NAV_ITEMS = {
     admin: [
       { key: 'dashboard', label: 'Dashboard', icon: 'fa-house' },
@@ -1337,12 +1327,10 @@
       submitBtn.querySelector('.btn-spinner').hidden = false;
 
       setTimeout(() => {
-        const user = attemptLogin(email, password);
         submitBtn.disabled = false;
         submitBtn.querySelector('.btn-label').hidden = false;
         submitBtn.querySelector('.btn-spinner').hidden = true;
-        if (user) { login(user); }
-        else { $('#login-general-error').textContent = 'E-mail ou senha inválidos.'; }
+        if (!login(email, password)) { $('#login-general-error').textContent = 'E-mail ou senha inválidos.'; }
       }, 500);
     });
 
@@ -1382,7 +1370,8 @@
     $('#login-logo-slot').appendChild(tpl);
     $('#notif-dot').hidden = false;
 
-    if (restoreSession()) { showApp(); }
+    STATE.currentUser = auth.restoreSession();
+    if (STATE.currentUser) { showApp(); }
   }
 
   document.addEventListener('DOMContentLoaded', init);
