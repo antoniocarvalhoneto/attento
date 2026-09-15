@@ -144,8 +144,7 @@ Interface testada e ajustada para três faixas principais:
 ## Roadmap sugerido
 
 - Integração com uma API/backend real (autenticação, banco de dados).
-- Notificações em tempo real.
-- Testes automatizados (unitários e end-to-end).
+- Testes end-to-end no navegador.
 
 ---
 

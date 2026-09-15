@@ -1329,10 +1329,6 @@
     $('#hamburger').addEventListener('click', openSidebarMobile);
     $('#sidebar-close').addEventListener('click', closeSidebarMobile);
     $('#sidebar-overlay').addEventListener('click', closeSidebarMobile);
-    $('#notif-btn').addEventListener('click', () => {
-      $('#notif-dot').hidden = true;
-      showToast('Você não tem novas notificações.', 'info');
-    });
     window.addEventListener('hashchange', handleHashChange);
   }
 
@@ -1346,8 +1342,6 @@
     loadAllIntoState();
     applyTheme(STATE.theme);
     bindGlobalEvents();
-    $('#notif-dot').hidden = false;
-
     showApp();
   }
 
