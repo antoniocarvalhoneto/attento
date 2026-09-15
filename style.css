@@ -288,6 +288,8 @@ ul{list-style:none;margin:0;padding:0;}
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
   padding:18px 20px;display:flex;align-items:flex-start;gap:14px;
 }
+.stat-card-link{color:inherit;text-decoration:none;}
+.stat-card-link:hover{border-color:var(--primary);}
 .stat-icon{
   width:42px;height:42px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;
   font-size:1.05rem;flex:none;background:var(--surface-alt);color:var(--text-muted);
@@ -296,6 +298,7 @@ ul{list-style:none;margin:0;padding:0;}
 .stat-icon.red{background:var(--danger-bg);color:var(--danger-text);}
 .stat-info{display:flex;flex-direction:column;gap:2px;}
 .stat-value{font-family:var(--font-display);font-size:1.4rem;font-weight:800;letter-spacing:-.01em;}
+.stat-value-action{font-size:1rem;color:var(--primary-dark);}
 .stat-card-amber .stat-value{color:var(--warning-text);}
 .stat-card-red .stat-value{color:var(--danger-text);}
 .stat-label{font-size:.78rem;color:var(--text-muted);font-weight:600;}

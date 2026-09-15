@@ -41,7 +41,7 @@ O projeto é **100% front-end**: não depende de servidor, banco de dados ou bui
 - **Convênios** — controle de repasses e status de pagamento.
 - **Relatórios** — exportação de dados em **CSV**.
 - **Meus Horários** (perfil usuário) — agenda pessoal com link direto para **WhatsApp**.
-- **Configurações** — tema claro/escuro, dados da conta.
+- **Configurações** — tema claro/escuro, dados da conta e WhatsApp da unidade.
 - **Autenticação** com sessão persistida, controle de permissões por perfil e roteamento por hash (suporta voltar/avançar do navegador e links diretos).
 - **Modo escuro** completo, com tokens de cor dedicados.
 - Login e navegação local sem espera artificial, com estados vazios e mensagens de erro.
@@ -100,6 +100,7 @@ A tela de login tem atalhos que já preenchem essas credenciais automaticamente:
 ├── script.js      # estado, roteamento, renderização e regras de negócio
 ├── auth.js        # validação de acesso e persistência da sessão de demonstração
 ├── data-utils.js  # filtros financeiros e cálculos de datas da agenda
+├── contact.js     # validação do número e criação dos links de WhatsApp
 ├── login.js       # eventos e validação dos campos do formulário de login
 ├── login-page.js  # inicialização do login, tema e redirecionamento para o painel
 ├── logo.png       # identidade visual (fundo transparente)
@@ -139,13 +140,11 @@ Interface testada e ajustada para três faixas principais:
 
 - Autenticação é simulada (comparação de senha em texto plano no client) — **não deve ser usada em produção** sem um backend real.
 - Sem multiusuário simultâneo: dados vivem no `localStorage` do navegador local.
-- Número de WhatsApp usado no link de contato é um placeholder de demonstração.
 
 ## Roadmap sugerido
 
 - Integração com uma API/backend real (autenticação, banco de dados).
 - Notificações em tempo real.
-- Configuração do número de WhatsApp via tela de Configurações.
 - Testes automatizados (unitários e end-to-end).
 
 ---

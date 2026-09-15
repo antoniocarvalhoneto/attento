@@ -33,7 +33,6 @@
   }
   const DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
-  const WHATSAPP_NUMBER = '5579999999999'; // número configurável (formato: DDI+DDD+numero)
 
   function downloadCSV(filename, rows) {
     const csv = rows.map(r => r.map(c => {
@@ -160,7 +159,7 @@
      STATE
      ========================================================================== */
   const STATE = {
-    currentUser: null, currentView: 'dashboard', theme: 'light',
+    currentUser: null, currentView: 'dashboard', theme: 'light', whatsapp: '',
     units: [], rooms: [], professionals: [], schedules: [], financialAccounts: [], insuranceRecords: [],
     filters: {
       availUnit: 'all', availRoom: 'all', availWeek: 0, agendaWeek: 0,
@@ -170,6 +169,7 @@
   };
   const auth = window.AttentoAuth.create({ storage: localStorage });
   const dataUtils = window.AttentoData;
+  const contact = window.AttentoContact;
 
   function loadAllIntoState() {
     STATE.units = loadData(KEYS.units) || [];
@@ -178,13 +178,16 @@
     STATE.schedules = loadData(KEYS.schedules) || [];
     STATE.financialAccounts = loadData(KEYS.financial) || [];
     STATE.insuranceRecords = loadData(KEYS.insurance) || [];
-    STATE.theme = (loadData(KEYS.settings) || {}).theme || 'light';
+    const settings = loadData(KEYS.settings) || {};
+    STATE.theme = settings.theme || 'light';
+    STATE.whatsapp = settings.whatsapp || '';
   }
   function persist(key, data) { saveData(key, data); }
 
   function unitName(id) { return (STATE.units.find(u => u.id === id) || {}).name || '—'; }
   function roomName(id) { return (STATE.rooms.find(r => r.id === id) || {}).name || '—'; }
   function profName(id) { return (STATE.professionals.find(p => p.id === id) || {}).name || '—'; }
+  function whatsappLink(message) { return contact.whatsappUrl(STATE.whatsapp, message); }
 
   /* ==========================================================================
      TOASTS
@@ -495,6 +498,8 @@
     const weekReservations = mine.filter(sc => sc.week === 0).length;
     const proximo = mine[0];
     const disponiveis = STATE.rooms.filter(r => r.status === 'disponivel').length;
+    const helpMessage = 'Olá! Preciso de ajuda com meu acesso ou meus horários no Attento.';
+    const helpUrl = whatsappLink(helpMessage);
     return `
   <div class="page-head">
     <div class="page-head-text">
@@ -508,7 +513,9 @@
       ${statCard('fa-clock', 'neutral', 'Próximo horário', proximo ? `${DAYS[proximo.day]} ${proximo.time}` : 'Nenhum')}
       ${statCard('fa-calendar-days', 'neutral', 'Reservas nesta semana', weekReservations)}
       ${statCard('fa-door-open', 'neutral', 'Salas disponíveis', disponiveis)}
-      ${statCard('fa-comments', 'neutral', 'Precisa de ajuda?', 'Fale conosco')}
+      ${helpUrl
+        ? `<a class="stat-card stat-card-link" target="_blank" rel="noopener" href="${helpUrl}"><div class="stat-icon neutral"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></div><div class="stat-info"><span class="stat-value stat-value-action">Fale conosco</span><span class="stat-label">Atendimento pelo WhatsApp</span></div></a>`
+        : statCard('fa-comments', 'neutral', 'Contato da unidade', 'Não configurado')}
     </div>
   </div>
   <div class="section">
@@ -699,9 +706,9 @@
           setTimeout(() => {
             openModal({
               title: 'Horário confirmado',
-              bodyHTML: `<p>Seu horário foi reservado. Você pode confirmar diretamente pelo WhatsApp com a unidade.</p>`,
+              bodyHTML: `<p>${whatsappLink(msg) ? 'Seu horário foi reservado. Você pode confirmar diretamente pelo WhatsApp com a unidade.' : 'Seu horário foi reservado. O contato da unidade ainda não foi configurado.'}</p>`,
               footHTML:`<button class="btn btn-secondary" id="wa-close">Fechar</button>
-              <a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Falar pelo WhatsApp</a>`,
+              ${whatsappLink(msg) ? `<a class="btn btn-primary" target="_blank" rel="noopener" href="${whatsappLink(msg)}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Falar pelo WhatsApp</a>` : ''}`,
               onMount: (o2) => o2.querySelector('#wa-close').addEventListener('click', closeModal)
             });
           }, 120);
@@ -1068,7 +1075,9 @@
       return [
         `${m.week === 0 ? 'Esta semana' : 'Próxima semana'} · ${DAYS[m.day]}`, m.time, esc(roomName(m.roomId)), esc(unitName(m.unitId)),
         m.professionalId ? esc(profName(m.professionalId)) : '—', fmtCurrency(m.value),
-        `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> WhatsApp</a>`
+        whatsappLink(msg)
+          ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${whatsappLink(msg)}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> WhatsApp</a>`
+          : '<span class="text-muted">Não configurado</span>'
       ];
     });
     return `
@@ -1140,6 +1149,18 @@
       <div class="info-row"><span>E-mail</span><span>${esc(STATE.currentUser.email)}</span></div>
       <div class="info-row"><span>Perfil</span><span>${STATE.currentUser.role === 'admin' ? 'Administrador' : 'Usuário'}</span></div>
       <p class="mt-16" style="font-size:.78rem;">Este é um ambiente de demonstração. A autenticação é simulada no navegador e não deve ser usada como controle de acesso real.</p>
+    </div>
+    <div class="card">
+      <h3>Contato da unidade</h3>
+      <p class="mt-8">Informe o WhatsApp que receberá pedidos de ajuda e confirmação de horários.</p>
+      <form id="contact-settings" class="mt-16">
+        <div class="field">
+          <label for="settings-whatsapp">WhatsApp com DDD</label>
+          <input type="tel" id="settings-whatsapp" value="${esc(STATE.whatsapp)}" placeholder="+55 11 99999-9999" autocomplete="tel">
+          <span class="field-error" id="settings-whatsapp-error"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar contato</button>
+      </form>
     </div>
   </div>`;
   }
@@ -1273,6 +1294,23 @@
       const lb = $('#theme-light'), db = $('#theme-dark');
       if (lb) lb.addEventListener('click', () => { applyTheme('light'); rerender(); });
       if (db) db.addEventListener('click', () => { applyTheme('dark'); rerender(); });
+      const contactForm = $('#contact-settings');
+      if (contactForm) contactForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const input = $('#settings-whatsapp');
+        const normalized = contact.normalizeWhatsApp(input.value);
+        $('#settings-whatsapp-error').textContent = '';
+        if (input.value.trim() && !normalized) {
+          $('#settings-whatsapp-error').textContent = 'Informe um número válido com DDD.';
+          return;
+        }
+        STATE.whatsapp = normalized;
+        const settings = loadData(KEYS.settings) || {};
+        settings.whatsapp = normalized;
+        persist(KEYS.settings, settings);
+        showToast(normalized ? 'Contato atualizado com sucesso.' : 'Contato removido.', 'success');
+        rerender();
+      });
     }
   }
 
