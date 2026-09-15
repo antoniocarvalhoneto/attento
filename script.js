@@ -356,20 +356,14 @@
     const view = STATE.currentView;
     $('#view-title').textContent = VIEW_TITLES[view] || 'Attento';
     $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-    let root = $('#view-root');
-    root.innerHTML = '<div class="skeleton" style="height:120px;border-radius:16px;margin-bottom:16px;"></div><div class="skeleton" style="height:220px;border-radius:16px;"></div>';
-    setTimeout(() => {
-      const renderer = RENDERERS[view];
-      root.innerHTML = renderer ? renderer() : '<div class="empty-state"><i class="fa-solid fa-circle-question"></i><p>Módulo não encontrado.</p></div>';
-      /* Corrige acúmulo de event listeners: #view-root nunca é substituído entre
-         navegações (só o innerHTML muda), então listeners delegados adicionados
-         em bindViewEvents ficavam se empilhando a cada render. Clonar o nó
-         descarta os listeners antigos sem afetar o HTML recém-gerado. */
-      const freshRoot = root.cloneNode(true);
-      root.parentNode.replaceChild(freshRoot, root);
-      bindViewEvents(view);
-      freshRoot.focus();
-    }, 160);
+    const root = $('#view-root');
+    const renderer = RENDERERS[view];
+    // Mantém os atributos do contêiner e descarta os eventos da tela anterior.
+    const freshRoot = root.cloneNode(false);
+    freshRoot.innerHTML = renderer ? renderer() : '<div class="empty-state"><i class="fa-solid fa-circle-question"></i><p>Módulo não encontrado.</p></div>';
+    root.parentNode.replaceChild(freshRoot, root);
+    bindViewEvents(view);
+    freshRoot.focus();
   }
 
   /* Ponto único de navegação: decide a rota, valida permissão e sincroniza o

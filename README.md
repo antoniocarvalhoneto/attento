@@ -44,7 +44,7 @@ O projeto é **100% front-end**: não depende de servidor, banco de dados ou bui
 - **Configurações** — tema claro/escuro, dados da conta.
 - **Autenticação** com sessão persistida, controle de permissões por perfil e roteamento por hash (suporta voltar/avançar do navegador e links diretos).
 - **Modo escuro** completo, com tokens de cor dedicados.
-- Estados de carregamento (*skeleton*), estados vazios e mensagens de erro tratados em todas as telas.
+- Login e navegação local sem espera artificial, com estados vazios e mensagens de erro.
 
 ## Stack técnica
 
@@ -107,10 +107,10 @@ A tela de login tem atalhos que já preenchem essas credenciais automaticamente:
 
 O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar a sessão e sair. Ele usa os usuários já salvos e cria as contas de demonstração no primeiro acesso quando necessário, sem depender das telas. O `login.js` gerencia o formulário e suas mensagens; o `login-page.js` conecta o formulário à autenticação e abre o painel após o acesso. O `script.js` verifica a sessão antes de inicializar o painel e controla seu estado, permissões, renderização, modais e utilitários. A autenticação permanece simulada e usa as mesmas credenciais e chaves de armazenamento já existentes.
 
-Para verificar a autenticação e os fluxos de entrada das páginas com Node.js:
+Para verificar a autenticação, o formulário e os fluxos de entrada das páginas com Node.js:
 
 ```bash
-node --test tests/auth.test.cjs tests/pages.test.cjs
+node --test
 ```
 
 ## Persistência de dados

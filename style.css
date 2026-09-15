@@ -486,10 +486,6 @@ tbody tr:hover{background:var(--surface-alt);}
   letter-spacing:2px;
 }
 
-.skeleton{background:linear-gradient(90deg,var(--surface-alt) 25%,var(--border) 37%,var(--surface-alt) 63%);
-  background-size:400% 100%;animation:skeleton-loading 1.4s ease infinite;border-radius:6px;}
-@keyframes skeleton-loading{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
-
 .tooltip-wrap{position:relative;display:inline-flex;}
 .tooltip-wrap[data-tip]:hover::after{
   content:attr(data-tip);position:absolute;bottom:130%;left:50%;transform:translateX(-50%);
