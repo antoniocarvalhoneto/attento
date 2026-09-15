@@ -337,7 +337,6 @@
   function showApp() {
     $('#login-screen').hidden = true;
     $('#app-shell').hidden = false;
-    $('#login-logo-slot').innerHTML = '';
     $('#sidebar-logo-slot').innerHTML = '';
     const tpl = $('#tpl-logo').content.cloneNode(true);
     $('#sidebar-logo-slot').appendChild(tpl);
