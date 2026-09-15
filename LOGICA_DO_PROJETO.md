@@ -1,6 +1,6 @@
 # Lógica do Attento
 
-Guia da aplicação atual em HTML, CSS e JavaScript, revisada em 15/09/2026. As explicações ficam neste arquivo; esta revisão não altera o comportamento da aplicação. Os nomes das funções permitem encontrá-las pela busca do editor.
+Guia da aplicação atual em HTML, CSS e JavaScript, revisada em 15/09/2026 e atualizado após a remoção dos trechos sem uso. As explicações ficam neste arquivo. Os nomes das funções permitem encontrá-las pela busca do editor.
 
 ## 1. Como as partes se conectam
 
@@ -73,7 +73,6 @@ O login é uma simulação local. A validação de perfil organiza a interface, 
 | Evento `submit` | Impede o envio HTML padrão, limpa erros, exige e-mail e senha, desabilita o botão, chama `onSubmit` e restaura o botão em `finally`. Credenciais recusadas e falhas de execução produzem mensagens diferentes. |
 | Clique em `password-toggle` | Alterna a senha entre texto e conteúdo oculto, atualizando ícone e descrição acessível. |
 | Clique em `.demo-chip` | Preenche e-mail e senha da conta de demonstração escolhida; não envia o formulário. |
-| `reset()` retornado por `mount()` | Executa o reset nativo do formulário. Atualmente o site não usa esse retorno. |
 | `login-page.js: init()` | Verifica sessão, define o destino, restaura o tema e conecta o formulário. |
 | `login-page.js: onSubmit(email, password)` | Chama `signIn`, retorna `false` para credenciais recusadas e confirma a persistência com `restoreSession`. Só então redireciona. |
 | Evento `DOMContentLoaded` | Executa `init` quando o HTML está pronto. |
@@ -177,7 +176,7 @@ O contrato atual de `onSubmit` é síncrono. Uma futura autenticação por API e
 | --- | --- |
 | `renderAvailability()` | Aplica filtros de unidade, sala e semana, exclui salas inativas e monta uma agenda por sala. |
 | `scheduleFor(week, roomId, day, time)` | Procura o primeiro registro correspondente à combinação de semana, sala, dia e hora. |
-| `renderRoomAgenda(room, week, isAdmin)` | Monta a grade de dias/horários. Sem registro, considera a célula disponível. O parâmetro `isAdmin` atualmente só participa de um cálculo sem uso. |
+| `renderRoomAgenda(room, week)` | Monta a grade de dias/horários. Sem registro, considera a célula disponível. |
 | `statusLabelPlain(status)` | Retorna o texto do status da célula; disponível recebe texto vazio. |
 | `openAllocateModal(roomId, day, time, week)` | Abre a alocação do administrador. Exige um profissional, monta a reserva com valor, turno e observação, salva e atualiza a tela. |
 | `openSelectSlotModal(roomId, day, time, week)` | Abre a reserva do usuário. Escolhe o primeiro profissional ativo da sala ou, como alternativa, o primeiro ativo geral. Salva o horário vinculado ao usuário e abre a confirmação com contato opcional. |
@@ -225,16 +224,16 @@ As funções anônimas usadas em `map`, `filter`, `find`, `reduce` e `sort` tran
 
 ## 8. O que está sem uso ou redundante
 
-Constatações da leitura do código e busca de referências. São candidatos para uma limpeza posterior, não alterações já realizadas.
+Constatações da leitura do código e busca de referências. Os itens marcados como removidos já foram limpos; as simplificações de código que ainda é utilizado permanecem como sugestões.
 
 | Item | Evidência e avaliação |
 | --- | --- |
-| `statuses`, dentro de `initializeData` | A lista é declarada, mas nenhuma instrução a lê. Os status são escolhidos pelas condições sobre `seed`. Pode ser removida. |
-| `STATE.filters.agendaWeek` | Existe na inicialização, sem outras referências no código ativo. A agenda usa `availWeek`. Pode ser removido. |
-| `label`, dentro de `renderRoomAgenda` | O texto é calculado, mas não entra no HTML. O HTML chama `statusLabelPlain` diretamente. Pode ser removido. |
-| Parâmetro `isAdmin` de `renderRoomAgenda` | Só é lido no cálculo inútil de `label`. Depois de remover esse cálculo, o parâmetro e seu argumento podem sair. O `isAdmin` de `renderAvailability` continua necessário para o texto da página. |
+| `statuses`, dentro de `initializeData` | Removido. A lista não era lida; os status continuam sendo escolhidos pelas condições sobre `seed`. |
+| `STATE.filters.agendaWeek` | Removido. A agenda utiliza `availWeek`. |
+| `label`, dentro de `renderRoomAgenda` | Removido. O HTML já chama `statusLabelPlain` diretamente. |
+| Parâmetro `isAdmin` de `renderRoomAgenda` | Removido junto com o argumento na chamada. O `isAdmin` de `renderAvailability` continua necessário para o texto da página. |
 | `persist()` | É usado, mas apenas chama `saveData()`. Pode ser unificado numa etapa própria, atualizando seus consumidores. Não é uma função morta. |
-| `reset()` retornado por `AttentoLogin.mount()` | O retorno não é consumido pelo código ativo nem pelos testes atuais. Pode ser retirado se não houver intenção de oferecer essa operação. |
+| `reset()` retornado por `AttentoLogin.mount()` | Removido. Nenhum consumidor utilizava esse retorno. |
 | `ROOMS_CACHE` | É usado na criação da agenda, mas repete manualmente vínculos de salas e unidades. Convém obter essas informações da mesma fonte dos cadastros. Não remover sem substituir seu uso. |
 | Resumo semanal e gráfico no dashboard | Apresentam as mesmas contagens por dia em dois lugares. É uma repetição de interface, não cálculo sem uso. Pode ser consolidada. |
 | `react-app/` | Contém o esqueleto separado da migração, com tela de exemplo e contador. Não é carregado por `index.html` ou `login.html` da raiz. Está fora desta documentação de funções do sistema e não precisa ser apagado para limpar a aplicação atual. |
@@ -253,7 +252,7 @@ Estes pontos são distintos da limpeza de código. Foram identificados por leitu
 6. **Contato global com rótulo de unidade.** Há um único `settings.whatsapp` para todas as unidades e o formulário está disponível nos dois perfis. Se o contato deve variar por unidade ou ser alterado só pelo administrador, a regra precisa ser implementada.
 7. **Escolha automática de profissional.** A reserva do usuário pode recorrer a um profissional de outra sala quando não encontra um ativo na sala selecionada. Convém definir explicitamente se essa alternativa é permitida.
 
-Ordem sugerida: remover as sobras comprovadas em um commit pequeno; corrigir data/disponibilidade; tratar vínculos e falhas de persistência. A migração de interface para React não corrige essas regras por si só.
+As sobras comprovadas já foram removidas. Próximas prioridades sugeridas: corrigir data/disponibilidade; tratar vínculos e falhas de persistência. A migração de interface para React não corrige essas regras por si só.
 
 ## 10. Testes e funções de apoio
 

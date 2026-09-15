@@ -47,8 +47,6 @@
       $('#login-email').value = kind === 'admin' ? 'admin@demo.com' : 'usuario@demo.com';
       $('#login-password').value = '123456';
     }));
-
-    return { reset: () => $('#login-form').reset() };
   }
 
   window.AttentoLogin = { mount };

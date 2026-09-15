@@ -91,7 +91,6 @@
       const schedules = [];
       const roomIds = ['room_1', 'room_2', 'room_4', 'room_5'];
       const profIds = ['prof_1', 'prof_2', 'prof_3', 'prof_4'];
-      const statuses = ['disponivel', 'ocupado', 'reservado', 'disponivel', 'disponivel', 'manutencao'];
       [0, 1].forEach(week => {
         roomIds.forEach((roomId, ri) => {
           for (let day = 0; day < 6; day++) {
@@ -162,7 +161,7 @@
     currentUser: null, currentView: 'dashboard', theme: 'light', whatsapp: '',
     units: [], rooms: [], professionals: [], schedules: [], financialAccounts: [], insuranceRecords: [],
     filters: {
-      availUnit: 'all', availRoom: 'all', availWeek: 0, agendaWeek: 0,
+      availUnit: 'all', availRoom: 'all', availWeek: 0,
       finProf: 'all', finStatus: 'all', finMonth: 'all',
       repProf: 'all', repStatus: 'all', repMonth: 'all'
     }
@@ -619,13 +618,13 @@
   </div>
 
   ${rooms.length === 0 ? `<div class="table-wrap"><div class="empty-state"><i class="fa-solid fa-door-closed"></i><p>Nenhuma sala encontrada com os filtros atuais.</p></div></div>` :
-        rooms.map(room => renderRoomAgenda(room, f.availWeek, isAdmin)).join('')}
+        rooms.map(room => renderRoomAgenda(room, f.availWeek)).join('')}
   `;
   }
   function scheduleFor(week, roomId, day, time) {
     return STATE.schedules.find(s => s.week === week && s.roomId === roomId && s.day === day && s.time === time);
   }
-  function renderRoomAgenda(room, week, isAdmin) {
+  function renderRoomAgenda(room, week) {
     return `
   <div class="section">
     <div class="section-head"><h3>${esc(room.name)} <span class="text-muted" style="font-weight:500;font-size:.82rem;">— ${esc(unitName(room.unitId))}</span></h3></div>
@@ -639,7 +638,6 @@
       const sc = scheduleFor(week, room.id, dayIdx, time);
       const status = sc ? sc.status : 'disponivel';
       const clickable = status === 'disponivel';
-      const label = status === 'disponivel' ? '' : (isAdmin ? '●' : (status === 'manutencao' ? 'Manutenção' : '●'));
       return `<div class="agenda-cell ${status}" ${clickable ? `data-action="slot" data-room="${room.id}" data-day="${dayIdx}" data-time="${time}" data-week="${week}"` : ''} ${!clickable ? `tabindex="0" aria-label="${statusLabelPlain(status)}"` : `tabindex="0" role="button" aria-label="Horário disponível ${room.name} ${DAYS[dayIdx]} ${time}"`}>
               ${status !== 'disponivel' ? `<span class="agenda-cell-label">${statusLabelPlain(status)}</span>` : ''}
             </div>`;
