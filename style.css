@@ -136,7 +136,7 @@ ul{list-style:none;margin:0;padding:0;}
    ========================================================================== */
 .login-screen{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:var(--background);
+  background:#061525 url('assets/login-background.gif') center / cover no-repeat;
   padding:24px;
 }
 .login-panel{
