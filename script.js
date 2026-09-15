@@ -14,6 +14,7 @@
   const esc = (str) => String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmtCurrency = (n) => (Number(n) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmtDate = (iso) => { if (!iso) return '—'; const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
+  const fmtLongDate = (date = new Date()) => date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const todayISO = () => new Date().toISOString().slice(0, 10);
 
   
@@ -443,7 +444,7 @@
   }
   function renderDashboardAdmin() {
     const s = computeDashboardStats();
-    const weekCounts = DAYS.map((d, i) => STATE.schedules.filter(sc => sc.week === 0 && sc.day === i && sc.status !== 'disponivel').length);
+    const weekCounts = DAYS.map((d, i) => STATE.schedules.filter(sc => sc.week === 0 && sc.day === i && sc.status === 'reservado').length);
     const maxCount = Math.max(1, ...weekCounts);
     const financeStatus = {
       pago: STATE.financialAccounts.filter(a => a.status === 'pago').length,
@@ -451,6 +452,9 @@
       vencido: STATE.financialAccounts.filter(a => a.status === 'vencido').length
     };
     const totalFin = financeStatus.pago + financeStatus.pendente + financeStatus.vencido || 1;
+    const financialSummary = financeStatus.pendente === 0 && financeStatus.vencido === 0
+      ? 'Nenhuma conta pendente ou vencida.'
+      : `${financeStatus.pendente} ${financeStatus.pendente === 1 ? 'conta pendente' : 'contas pendentes'} · ${financeStatus.vencido} ${financeStatus.vencido === 1 ? 'conta vencida' : 'contas vencidas'}`;
     const reservations = STATE.schedules
       .filter(sc => sc.status === 'reservado')
       .sort((a, b) => (a.week - b.week) || (a.day - b.day) || a.time.localeCompare(b.time));
@@ -459,9 +463,11 @@
     return `
   <div class="page-head">
     <div class="page-head-text">
-      <h1>Bom dia, ${esc(STATE.currentUser.name.split(' ')[0])}</h1>
-      <p>Veja o resumo da sua operação.</p>
+      <h1>Olá, ${esc(STATE.currentUser.name.split(' ')[0])}</h1>
+      <p>${esc(fmtLongDate())} · Todas as unidades</p>
+      <p>${financialSummary}</p>
     </div>
+    <a href="#financial">Ver financeiro</a>
   </div>
 
   <div class="section">
@@ -477,7 +483,7 @@
     <div class="section-head">
       <div>
         <h2>Agenda de reservas</h2>
-        <p>Semana atual e próxima semana · ${reservations.length} reservas</p>
+        <p>Semana atual e próxima semana · Exibindo ${agendaPreview.length} de ${reservations.length} ${reservations.length === 1 ? 'reserva' : 'reservas'}</p>
       </div>
       <a href="#availability">Abrir agenda completa</a>
     </div>
@@ -487,18 +493,18 @@
   </div>
 
   <div class="section">
-    <div class="section-head"><h2>Resumo da semana</h2></div>
+    <div class="section-head"><h2>Reservas nesta semana</h2></div>
     <div class="week-strip">
-      ${DAYS.map((d, i) => `<div class="week-day"><div class="wd-label">${d}</div><div class="wd-count">${weekCounts[i]}</div><div class="wd-sub">reservas</div></div>`).join('')}
+      ${DAYS.map((d, i) => `<div class="week-day"><div class="wd-label">${d}</div><div class="wd-count">${weekCounts[i]}</div><div class="wd-sub">${weekCounts[i] === 1 ? 'reserva' : 'reservas'}</div></div>`).join('')}
     </div>
   </div>
 
   <div class="section two-col">
     <div class="card">
-      <h3>Receitas do mês</h3>
-      <p class="text-muted mt-8">Comparativo semanal (semana atual)</p>
+      <h3>Reservas por dia</h3>
+      <p class="text-muted mt-8">Quantidade de reservas na semana atual, em todas as unidades.</p>
       <div class="bars">
-        ${weekCounts.map((c, i) => `<div class="bar-col"><div class="bar" style="height:${(c / maxCount * 100) || 4}%"></div><span class="bar-label">${DAYS[i]}</span></div>`).join('')}
+        ${weekCounts.map((c, i) => `<div class="bar-col" role="img" aria-label="${DAYS[i]}: ${c} ${c === 1 ? 'reserva' : 'reservas'}"><div class="bar" style="height:${c / maxCount * 100}%"></div><span class="bar-label">${DAYS[i]}</span></div>`).join('')}
       </div>
     </div>
     <div class="card">
@@ -519,19 +525,21 @@
   }
   function renderDashboardUser() {
     const mine = STATE.schedules.filter(sc => sc.userId === STATE.currentUser.id);
+    const weekReservations = mine.filter(sc => sc.week === 0 && sc.status === 'reservado').length;
     const proximo = mine.sort((a, b) => (a.week - b.week) || (a.day - b.day))[0];
     const disponiveis = STATE.rooms.filter(r => r.status === 'disponivel').length;
     return `
   <div class="page-head">
     <div class="page-head-text">
       <h1>Olá, ${esc(STATE.currentUser.name.split(' ')[0])}</h1>
-      <p>Confira seus próximos horários e a disponibilidade das salas.</p>
+      <p>${esc(fmtLongDate())}</p>
+      <p>${weekReservations === 0 ? 'Você ainda não tem reservas nesta semana.' : `Você tem ${weekReservations} ${weekReservations === 1 ? 'reserva' : 'reservas'} nesta semana.`}</p>
     </div>
   </div>
   <div class="section">
     <div class="stat-grid">
       ${statCard('fa-clock', 'neutral', 'Próximo horário', proximo ? `${DAYS[proximo.day]} ${proximo.time}` : 'Nenhum')}
-      ${statCard('fa-calendar-days', 'neutral', 'Horários na semana', mine.filter(m => m.week === 0).length)}
+      ${statCard('fa-calendar-days', 'neutral', 'Reservas nesta semana', weekReservations)}
       ${statCard('fa-door-open', 'neutral', 'Salas disponíveis', disponiveis)}
       ${statCard('fa-comments', 'neutral', 'Precisa de ajuda?', 'Fale conosco')}
     </div>
