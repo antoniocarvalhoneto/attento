@@ -61,14 +61,7 @@ Não há dependências de build (webpack, npm, etc.) nem chamadas a APIs externa
 
 ## Como executar
 
-Por ser uma aplicação estática, basta abrir o `index.html` em um navegador moderno. Duas formas recomendadas:
-
-**Opção 1 — abrir diretamente**
-```
-Dê duplo clique em index.html
-```
-
-**Opção 2 — servidor local (recomendado, evita restrições de alguns navegadores)**
+Execute a aplicação com um servidor estático local para que `login.html` e `index.html` compartilhem a sessão na mesma origem. O comportamento de `localStorage` entre arquivos abertos diretamente com duplo clique varia entre navegadores.
 ```bash
 # Python 3
 python3 -m http.server 8080
@@ -78,7 +71,9 @@ npx http-server -p 8080
 ```
 Depois acesse `http://localhost:8080`.
 
-> Os seis arquivos (`index.html`, `style.css`, `auth.js`, `login.js`, `script.js`, `logo.png`) precisam estar na mesma pasta — scripts, estilos e logo usam caminhos relativos.
+> Mantenha `index.html`, `login.html`, `style.css`, `auth.js`, `login.js`, `login-page.js`, `script.js` e `logo.png` na mesma pasta — scripts, estilos, logo e redirecionamentos usam caminhos relativos.
+
+`login.html` contém apenas a tela de acesso; `index.html` contém o painel. Sem sessão, o painel redireciona para o login e preserva a seção solicitada no hash da URL. Ao entrar, a aplicação retorna a essa seção, respeitando as permissões do perfil. Ao sair, a sessão é removida e o navegador retorna ao login.
 
 ## Acesso de demonstração
 
@@ -99,21 +94,23 @@ A tela de login tem atalhos que já preenchem essas credenciais automaticamente:
 
 ```
 .
-├── index.html     # marcação e templates da aplicação
+├── index.html     # marcação e templates do painel
+├── login.html     # página de acesso independente
 ├── style.css      # design tokens, layout e temas (claro/escuro)
 ├── script.js      # estado, roteamento, renderização e regras de negócio
 ├── auth.js        # validação de acesso e persistência da sessão de demonstração
 ├── login.js       # eventos e validação dos campos do formulário de login
+├── login-page.js  # inicialização do login, tema e redirecionamento para o painel
 ├── logo.png       # identidade visual (fundo transparente)
 └── README.md
 ```
 
-O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar a sessão e sair. Ele recebe acesso à lista de usuários e ao armazenamento, sem depender das telas. O `login.js` expõe `AttentoLogin`, que recebe a tela de login e uma função para solicitar a entrada: ele gerencia os campos, as mensagens de erro, a exibição da senha e os atalhos de demonstração. O `script.js` conecta os dois módulos e controla a troca entre login e dashboard, o estado global, as permissões das rotas, os renderizadores, os modais e os utilitários. A autenticação permanece simulada e usa as mesmas credenciais e a chave de sessão já existente.
+O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar a sessão e sair. Ele usa os usuários já salvos e cria as contas de demonstração no primeiro acesso quando necessário, sem depender das telas. O `login.js` gerencia o formulário e suas mensagens; o `login-page.js` conecta o formulário à autenticação e abre o painel após o acesso. O `script.js` verifica a sessão antes de inicializar o painel e controla seu estado, permissões, renderização, modais e utilitários. A autenticação permanece simulada e usa as mesmas credenciais e chaves de armazenamento já existentes.
 
-Para verificar o serviço de autenticação com Node.js:
+Para verificar a autenticação e os fluxos de entrada das páginas com Node.js:
 
 ```bash
-node --test tests/auth.test.cjs
+node --test tests/auth.test.cjs tests/pages.test.cjs
 ```
 
 ## Persistência de dados

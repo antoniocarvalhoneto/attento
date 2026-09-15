@@ -52,7 +52,7 @@
      STORAGE
      ========================================================================== */
   const KEYS = {
-    users: 'app_users', units: 'app_units', rooms: 'app_rooms', professionals: 'app_professionals',
+    units: 'app_units', rooms: 'app_rooms', professionals: 'app_professionals',
     schedules: 'app_schedules', financial: 'app_financial_accounts', insurance: 'app_insurance',
     settings: 'app_settings'
   };
@@ -145,13 +145,6 @@
       ];
       saveData(KEYS.insurance, insurance);
     }
-    if (!loadData(KEYS.users)) {
-      const users = [
-        { id: 'admin_demo', name: 'Administrador', email: 'admin@demo.com', password: '123456', role: 'admin' },
-        { id: 'user_demo', name: 'Usuário Demonstração', email: 'usuario@demo.com', password: '123456', role: 'user' }
-      ];
-      saveData(KEYS.users, users);
-    }
     if (!loadData(KEYS.settings)) {
       saveData(KEYS.settings, { theme: 'light' });
     }
@@ -168,10 +161,10 @@
      ========================================================================== */
   const STATE = {
     currentUser: null, currentView: 'dashboard', theme: 'light',
-    units: [], rooms: [], professionals: [], schedules: [], financialAccounts: [], insuranceRecords: [], users: [],
+    units: [], rooms: [], professionals: [], schedules: [], financialAccounts: [], insuranceRecords: [],
     filters: { availUnit: 'all', availRoom: 'all', availWeek: 0, agendaWeek: 0 }
   };
-  const auth = window.AttentoAuth.create({ getUsers: () => STATE.users, storage: localStorage });
+  const auth = window.AttentoAuth.create({ storage: localStorage });
 
   function loadAllIntoState() {
     STATE.units = loadData(KEYS.units) || [];
@@ -180,7 +173,6 @@
     STATE.schedules = loadData(KEYS.schedules) || [];
     STATE.financialAccounts = loadData(KEYS.financial) || [];
     STATE.insuranceRecords = loadData(KEYS.insurance) || [];
-    STATE.users = loadData(KEYS.users) || [];
     STATE.theme = (loadData(KEYS.settings) || {}).theme || 'light';
   }
   function persist(key, data) { saveData(key, data); }
@@ -282,25 +274,13 @@
   function toggleTheme() { applyTheme(STATE.theme === 'dark' ? 'light' : 'dark'); }
 
   /* ==========================================================================
-     TRANSIÇÃO ENTRE LOGIN E APLICAÇÃO
+     ENCERRAMENTO DA SESSÃO
      ========================================================================== */
-  let loginView;
-
-  function login(email, password) {
-    const user = auth.signIn(email, password);
-    if (!user) return false;
-    STATE.currentUser = user;
-    showApp();
-    return true;
-  }
   function logout() {
     STATE.currentUser = null;
     auth.signOut();
     $('#app-shell').hidden = true;
-    $('#login-screen').hidden = false;
-    loginView.reset();
-    SUPPRESS_HASHCHANGE = true;
-    history.replaceState(null, '', location.pathname + location.search);
+    location.replace('login.html');
   }
   const NAV_ITEMS = {
     admin: [
@@ -327,7 +307,6 @@
   };
 
   function showApp() {
-    $('#login-screen').hidden = true;
     $('#app-shell').hidden = false;
     $('#sidebar-logo-slot').innerHTML = '';
     const tpl = $('#tpl-logo').content.cloneNode(true);
@@ -1313,7 +1292,7 @@
      BOOTSTRAP
      ========================================================================== */
   function bindGlobalEvents() {
-    $('#btn-logout').addEventListener('click', () => { logout(); showToast('Sessão encerrada.', 'info'); });
+    $('#btn-logout').addEventListener('click', logout);
     $('#theme-toggle').addEventListener('click', toggleTheme);
     $('#hamburger').addEventListener('click', openSidebarMobile);
     $('#sidebar-close').addEventListener('click', closeSidebarMobile);
@@ -1326,18 +1305,22 @@
   }
 
   function init() {
+    STATE.currentUser = auth.restoreSession();
+    if (!STATE.currentUser) {
+      location.replace('login.html' + location.hash);
+      return;
+    }
     initializeData();
     loadAllIntoState();
     applyTheme(STATE.theme);
-    loginView = window.AttentoLogin.mount({ root: $('#login-screen'), onSubmit: login });
     bindGlobalEvents();
-    const tpl = $('#tpl-logo').content.cloneNode(true);
-    $('#login-logo-slot').appendChild(tpl);
     $('#notif-dot').hidden = false;
 
-    STATE.currentUser = auth.restoreSession();
-    if (STATE.currentUser) { showApp(); }
+    showApp();
   }
 
   document.addEventListener('DOMContentLoaded', init);
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) location.reload();
+  });
 })();

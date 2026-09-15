@@ -25,7 +25,12 @@
         submitBtn.disabled = false;
         submitBtn.querySelector('.btn-label').hidden = false;
         submitBtn.querySelector('.btn-spinner').hidden = true;
-        if (!onSubmit(email, password)) { $('#login-general-error').textContent = 'E-mail ou senha inválidos.'; }
+        try {
+          if (!onSubmit(email, password)) { $('#login-general-error').textContent = 'E-mail ou senha inválidos.'; }
+        } catch (error) {
+          console.error('Falha ao concluir o acesso', error);
+          $('#login-general-error').textContent = 'Não foi possível concluir o acesso. Verifique se o navegador permite salvar dados deste site.';
+        }
       }, 500);
     });
 

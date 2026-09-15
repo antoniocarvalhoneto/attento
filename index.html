@@ -17,54 +17,6 @@
   <img src="logo.png" alt="Attento" class="logo-mark">
 </template>
 
-<!-- ============ LOGIN VIEW ============ -->
-<div id="login-screen" class="login-screen">
-  <div class="login-panel">
-    <div class="login-brand">
-      <div class="login-brand-mark" id="login-logo-slot"></div>
-      <h1>Attento</h1>
-    </div>
-    <div class="login-card">
-      <h2>Entrar</h2>
-      <p class="login-card-sub">Use seu e-mail e senha para acessar sua unidade.</p>
-      <form id="login-form" novalidate>
-        <div class="field">
-          <label for="login-email">E-mail</label>
-          <input type="email" id="login-email" name="email" autocomplete="username" placeholder="seu@email.com">
-          <span class="field-error" id="login-email-error"></span>
-        </div>
-        <div class="field">
-          <label for="login-password">Senha</label>
-          <div class="password-wrap">
-            <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="••••••">
-            <button type="button" class="password-toggle" id="password-toggle" aria-label="Mostrar senha">
-              <i class="fa-solid fa-eye" aria-hidden="true"></i>
-            </button>
-          </div>
-          <span class="field-error" id="login-password-error"></span>
-        </div>
-        <span class="field-error" id="login-general-error"></span>
-        <button type="submit" class="btn btn-primary btn-block" id="login-submit">
-          <span class="btn-label">Entrar</span>
-          <span class="btn-spinner" hidden><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i></span>
-        </button>
-      </form>
-      <p class="login-help">Não consegue entrar? Peça ajuda ao responsável pela sua unidade.</p>
-      <details class="login-demo">
-        <summary>Experimentar com uma conta de demonstração</summary>
-        <div class="login-demo-row">
-          <button type="button" class="demo-chip" data-demo="admin">
-            <strong>Administrador</strong><span>admin@demo.com · 123456</span>
-          </button>
-          <button type="button" class="demo-chip" data-demo="user">
-            <strong>Usuário</strong><span>usuario@demo.com · 123456</span>
-          </button>
-        </div>
-      </details>
-    </div>
-  </div>
-</div>
-
 <!-- ============ APP SHELL ============ -->
 <div id="app-shell" class="app-shell" hidden>
   <aside class="sidebar" id="sidebar">
@@ -117,7 +69,6 @@
 <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
 
 <script src="auth.js"></script>
-<script src="login.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
