@@ -139,21 +139,26 @@ ul{list-style:none;margin:0;padding:0;}
   background:#0b1726;
   padding:24px;position:relative;isolation:isolate;overflow:hidden;
 }
+.login-screen::before,.login-screen::after{
+  content:'';position:absolute;inset:-15%;z-index:0;pointer-events:none;
+}
 .login-screen::before{
-  content:'';position:absolute;inset:-8%;z-index:-1;pointer-events:none;
-  background:
-    radial-gradient(ellipse at 18% 24%,rgba(86,139,197,.22),transparent 55%),
-    radial-gradient(ellipse at 82% 76%,rgba(72,129,151,.16),transparent 55%);
-  animation:login-light-drift 24s ease-in-out infinite alternate;
+  background:radial-gradient(ellipse at 15% 30%,rgba(86,139,197,.58),transparent 58%);
+  animation:login-light-drift 14s ease-in-out infinite alternate;
+}
+.login-screen::after{
+  background:radial-gradient(ellipse at 85% 70%,rgba(72,145,167,.4),transparent 55%);
+  animation:login-light-drift 18s ease-in-out -9s infinite alternate-reverse;
 }
 @keyframes login-light-drift{
-  from{transform:translate(-2%,-1%) scale(1);opacity:.7;}
-  to{transform:translate(2%,1%) scale(1.04);opacity:1;}
+  from{transform:translate(-6%,-4%) scale(1);opacity:.65;}
+  to{transform:translate(6%,4%) scale(1.08);opacity:1;}
 }
 @media (prefers-reduced-motion:reduce){
-  .login-screen::before{animation:none;}
+  .login-screen::before,.login-screen::after{animation:none;}
 }
 .login-panel{
+  position:relative;z-index:1;
   width:100%;max-width:440px;
   background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;
   border:1px solid var(--border);
