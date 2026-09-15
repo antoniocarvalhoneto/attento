@@ -436,14 +436,10 @@
   function computeDashboardStats() {
     const rooms = STATE.rooms;
     const disponiveis = rooms.filter(r => r.status === 'disponivel').length;
-    const ocupadas = rooms.filter(r => r.status !== 'disponivel').length;
     const totalProf = STATE.professionals.filter(p => p.status === 'ativo').length;
     const agendados = STATE.schedules.filter(s => s.status === 'reservado').length;
     const pendentes = STATE.financialAccounts.filter(a => a.status === 'pendente');
-    const pagos = STATE.financialAccounts.filter(a => a.status === 'pago');
-    const valorRecebido = pagos.reduce((s, a) => s + Number(a.value), 0);
-    const valorPendente = pendentes.reduce((s, a) => s + Number(a.value), 0);
-    return { disponiveis, ocupadas, totalProf, agendados, pendentesCount: pendentes.length, pagosCount: pagos.length, valorRecebido, valorPendente };
+    return { disponiveis, totalProf, agendados, pendentesCount: pendentes.length };
   }
   function renderDashboardAdmin() {
     const s = computeDashboardStats();
@@ -468,13 +464,9 @@
   <div class="section">
     <div class="stat-grid">
       ${statCard('fa-door-open', 'blue', 'Salas disponíveis', s.disponiveis)}
-      ${statCard('fa-door-closed', 'amber', 'Salas ocupadas', s.ocupadas)}
       ${statCard('fa-users', 'blue', 'Profissionais ativos', s.totalProf)}
       ${statCard('fa-calendar-check', 'green', 'Horários agendados', s.agendados)}
       ${statCard('fa-hourglass-half', 'amber', 'Contas pendentes', s.pendentesCount)}
-      ${statCard('fa-circle-check', 'green', 'Contas pagas', s.pagosCount)}
-      ${statCard('fa-sack-dollar', 'green', 'Valor recebido', fmtCurrency(s.valorRecebido))}
-      ${statCard('fa-clock', 'red', 'Valor pendente', fmtCurrency(s.valorPendente))}
     </div>
   </div>
 
