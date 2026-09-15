@@ -162,9 +162,14 @@
   const STATE = {
     currentUser: null, currentView: 'dashboard', theme: 'light',
     units: [], rooms: [], professionals: [], schedules: [], financialAccounts: [], insuranceRecords: [],
-    filters: { availUnit: 'all', availRoom: 'all', availWeek: 0, agendaWeek: 0 }
+    filters: {
+      availUnit: 'all', availRoom: 'all', availWeek: 0, agendaWeek: 0,
+      finProf: 'all', finStatus: 'all', finMonth: 'all',
+      repProf: 'all', repStatus: 'all', repMonth: 'all'
+    }
   };
   const auth = window.AttentoAuth.create({ storage: localStorage });
+  const dataUtils = window.AttentoData;
 
   function loadAllIntoState() {
     STATE.units = loadData(KEYS.units) || [];
@@ -402,7 +407,7 @@
     const rooms = STATE.rooms;
     const disponiveis = rooms.filter(r => r.status === 'disponivel').length;
     const totalProf = STATE.professionals.filter(p => p.status === 'ativo').length;
-    const agendados = STATE.schedules.filter(s => s.status === 'reservado').length;
+    const agendados = dataUtils.upcomingSchedules(STATE.schedules).length;
     const pendentes = STATE.financialAccounts.filter(a => a.status === 'pendente');
     return { disponiveis, totalProf, agendados, pendentesCount: pendentes.length };
   }
@@ -419,9 +424,7 @@
     const financialSummary = financeStatus.pendente === 0 && financeStatus.vencido === 0
       ? 'Nenhuma conta pendente ou vencida.'
       : `${financeStatus.pendente} ${financeStatus.pendente === 1 ? 'conta pendente' : 'contas pendentes'} · ${financeStatus.vencido} ${financeStatus.vencido === 1 ? 'conta vencida' : 'contas vencidas'}`;
-    const reservations = STATE.schedules
-      .filter(sc => sc.status === 'reservado')
-      .sort((a, b) => (a.week - b.week) || (a.day - b.day) || a.time.localeCompare(b.time));
+    const reservations = dataUtils.upcomingSchedules(STATE.schedules);
     const agendaPreview = reservations.slice(0, 6);
 
     return `
@@ -488,9 +491,9 @@
   </div>`;
   }
   function renderDashboardUser() {
-    const mine = STATE.schedules.filter(sc => sc.userId === STATE.currentUser.id);
-    const weekReservations = mine.filter(sc => sc.week === 0 && sc.status === 'reservado').length;
-    const proximo = mine.sort((a, b) => (a.week - b.week) || (a.day - b.day))[0];
+    const mine = dataUtils.upcomingSchedules(STATE.schedules.filter(sc => sc.userId === STATE.currentUser.id));
+    const weekReservations = mine.filter(sc => sc.week === 0).length;
+    const proximo = mine[0];
     const disponiveis = STATE.rooms.filter(r => r.status === 'disponivel').length;
     return `
   <div class="page-head">
@@ -565,9 +568,7 @@
         <option value="1" ${f.availWeek === 1 ? 'selected' : ''}>Próxima semana</option>
       </select>
     </div>
-    <div class="filter-field"><label for="f-month">Mês</label>
-      <select id="f-month"><option>Agosto 2026</option><option>Setembro 2026</option></select>
-    </div>
+    <p class="filter-context"><i class="fa-regular fa-calendar" aria-hidden="true"></i> ${dataUtils.weekRangeLabel(f.availWeek)}</p>
     <button class="btn btn-ghost btn-sm" id="clear-avail-filters"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Limpar</button>
   </div>
 
@@ -885,9 +886,8 @@
      ========================================================================== */
   function renderFinancial() {
     const f = STATE.filters;
-    let list = STATE.financialAccounts.slice();
-    if (f.finProf && f.finProf !== 'all') list = list.filter(a => a.professionalId === f.finProf);
-    if (f.finStatus && f.finStatus !== 'all') list = list.filter(a => a.status === f.finStatus);
+    const list = dataUtils.filterAccounts(STATE.financialAccounts, { professional: f.finProf, status: f.finStatus, month: f.finMonth });
+    const months = dataUtils.monthOptions(STATE.financialAccounts);
 
     const total = list.reduce((s, a) => s + Number(a.value), 0);
     const pago = list.filter(a => a.status === 'pago').reduce((s, a) => s + Number(a.value), 0);
@@ -915,7 +915,7 @@
     <div class="filter-field"><label for="fin-status">Status</label>
       <select id="fin-status"><option value="all">Todos</option><option value="pago" ${f.finStatus === 'pago' ? 'selected' : ''}>Pago</option><option value="pendente" ${f.finStatus === 'pendente' ? 'selected' : ''}>Pendente</option><option value="vencido" ${f.finStatus === 'vencido' ? 'selected' : ''}>Vencido</option></select>
     </div>
-    <div class="filter-field"><label for="fin-month">Mês</label><select id="fin-month"><option>Agosto 2026</option><option>Setembro 2026</option></select></div>
+    <div class="filter-field"><label for="fin-month">Mês de vencimento</label><select id="fin-month"><option value="all">Todos</option>${months.map(month => `<option value="${month.value}" ${f.finMonth === month.value ? 'selected' : ''}>${month.label}</option>`).join('')}</select></div>
     <button class="btn btn-ghost btn-sm" id="clear-fin-filters"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Limpar</button>
   </div>
   <div class="section">
@@ -1061,7 +1061,7 @@
      MEUS HORÁRIOS (USUÁRIO)
      ========================================================================== */
   function renderMySchedule() {
-    const mine = STATE.schedules.filter(sc => sc.userId === STATE.currentUser.id).sort((a, b) => (a.week - b.week) || (a.day - b.day));
+    const mine = dataUtils.upcomingSchedules(STATE.schedules.filter(sc => sc.userId === STATE.currentUser.id));
     const rows = mine.map(m => {
       const dayLabelFull = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'][m.day];
       const msg = `Olá! Gostaria de confirmar o horário reservado para ${dayLabelFull} às ${m.time} na ${roomName(m.roomId)}.`;
@@ -1082,9 +1082,8 @@
      ========================================================================== */
   function renderReports() {
     const f = STATE.filters;
-    let list = STATE.financialAccounts.slice();
-    if (f.repProf && f.repProf !== 'all') list = list.filter(a => a.professionalId === f.repProf);
-    if (f.repStatus && f.repStatus !== 'all') list = list.filter(a => a.status === f.repStatus);
+    const list = dataUtils.filterAccounts(STATE.financialAccounts, { professional: f.repProf, status: f.repStatus, month: f.repMonth });
+    const months = dataUtils.monthOptions(STATE.financialAccounts);
 
     const recebido = list.filter(a => a.status === 'pago').reduce((s, a) => s + Number(a.value), 0);
     const pendente = list.filter(a => a.status === 'pendente').reduce((s, a) => s + Number(a.value), 0);
@@ -1099,14 +1098,13 @@
     <button class="btn btn-primary" id="export-csv"><i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i> Exportar CSV</button>
   </div>
   <div class="filter-bar">
-    <div class="filter-field"><label for="rep-month">Mês</label><select id="rep-month"><option>Agosto 2026</option><option>Setembro 2026</option></select></div>
+    <div class="filter-field"><label for="rep-month">Mês de vencimento</label><select id="rep-month"><option value="all">Todos</option>${months.map(month => `<option value="${month.value}" ${f.repMonth === month.value ? 'selected' : ''}>${month.label}</option>`).join('')}</select></div>
     <div class="filter-field"><label for="rep-prof">Profissional</label>
       <select id="rep-prof"><option value="all">Todos</option>${STATE.professionals.map(p => `<option value="${p.id}" ${f.repProf === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}</select>
     </div>
     <div class="filter-field"><label for="rep-status">Status</label>
       <select id="rep-status"><option value="all">Todos</option><option value="pago" ${f.repStatus === 'pago' ? 'selected' : ''}>Pago</option><option value="pendente" ${f.repStatus === 'pendente' ? 'selected' : ''}>Pendente</option><option value="vencido" ${f.repStatus === 'vencido' ? 'selected' : ''}>Vencido</option></select>
     </div>
-    <div class="filter-field"><label for="rep-type">Tipo</label><select id="rep-type"><option>Todos</option><option>Particular</option><option>Convênio</option></select></div>
     <button class="btn btn-ghost btn-sm" id="clear-rep-filters"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Limpar</button>
   </div>
   <div class="section">
@@ -1210,11 +1208,12 @@
     }
 
     if (view === 'financial') {
-      const pf = $('#fin-prof'), sf = $('#fin-status');
+      const pf = $('#fin-prof'), sf = $('#fin-status'), mf = $('#fin-month');
       if (pf) pf.addEventListener('change', e => { STATE.filters.finProf = e.target.value; rerender(); });
       if (sf) sf.addEventListener('change', e => { STATE.filters.finStatus = e.target.value; rerender(); });
+      if (mf) mf.addEventListener('change', e => { STATE.filters.finMonth = e.target.value; rerender(); });
       const clearBtn = $('#clear-fin-filters');
-      if (clearBtn) clearBtn.addEventListener('click', () => { STATE.filters.finProf = 'all'; STATE.filters.finStatus = 'all'; rerender(); });
+      if (clearBtn) clearBtn.addEventListener('click', () => { STATE.filters.finProf = 'all'; STATE.filters.finStatus = 'all'; STATE.filters.finMonth = 'all'; rerender(); });
       const nb = $('[data-action="new-fin"]'); if (nb) nb.addEventListener('click', () => {
         if (!STATE.professionals.length) { showToast('Cadastre um profissional antes de criar uma conta.', 'error'); return; }
         openFinModal(null);
@@ -1251,19 +1250,20 @@
     }
 
     if (view === 'reports') {
-      const pf = $('#rep-prof'), sf = $('#rep-status');
+      const pf = $('#rep-prof'), sf = $('#rep-status'), mf = $('#rep-month');
       if (pf) pf.addEventListener('change', e => { STATE.filters.repProf = e.target.value; rerender(); });
       if (sf) sf.addEventListener('change', e => { STATE.filters.repStatus = e.target.value; rerender(); });
-      const clearBtn = $('#clear-rep-filters'); if (clearBtn) clearBtn.addEventListener('click', () => { STATE.filters.repProf = 'all'; STATE.filters.repStatus = 'all'; rerender(); });
+      if (mf) mf.addEventListener('change', e => { STATE.filters.repMonth = e.target.value; rerender(); });
+      const clearBtn = $('#clear-rep-filters'); if (clearBtn) clearBtn.addEventListener('click', () => { STATE.filters.repProf = 'all'; STATE.filters.repStatus = 'all'; STATE.filters.repMonth = 'all'; rerender(); });
       const exportBtn = $('#export-csv');
       if (exportBtn) exportBtn.addEventListener('click', () => {
-        let list = STATE.financialAccounts.slice();
-        if (STATE.filters.repProf && STATE.filters.repProf !== 'all') list = list.filter(a => a.professionalId === STATE.filters.repProf);
-        if (STATE.filters.repStatus && STATE.filters.repStatus !== 'all') list = list.filter(a => a.status === STATE.filters.repStatus);
+        const list = dataUtils.filterAccounts(STATE.financialAccounts, {
+          professional: STATE.filters.repProf, status: STATE.filters.repStatus, month: STATE.filters.repMonth
+        });
         const header = ['Profissional', 'Descrição', 'Valor', 'Vencimento', 'Status', 'Data de pagamento'];
         const rows = list.map(a => [profName(a.professionalId), a.description, a.value.toFixed(2).replace('.', ','), fmtDate(a.dueDate), a.status, fmtDate(a.paymentDate)]);
-        const now = new Date();
-        const filename = `relatorio-financeiro-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}.csv`;
+        const period = STATE.filters.repMonth === 'all' ? 'todos-periodos' : STATE.filters.repMonth;
+        const filename = `relatorio-financeiro-${period}.csv`;
         downloadCSV(filename, [header, ...rows]);
         showToast('Relatório exportado com sucesso.', 'success');
       });

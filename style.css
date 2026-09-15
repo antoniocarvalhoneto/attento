@@ -378,6 +378,7 @@ tbody tr:hover{background:var(--surface-alt);}
   font-size:.83rem;min-width:150px;transition:border-color var(--transition),box-shadow var(--transition);
 }
 .filter-field select:focus,.filter-field input:focus{border-color:var(--primary);box-shadow:var(--shadow-focus);outline:none;}
+.filter-context{display:flex;align-items:center;gap:7px;min-height:36px;padding:0 4px;font-size:.83rem;color:var(--text-muted);}
 .search-field{position:relative;min-width:220px;}
 .search-field i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:.8rem;}
 .search-field input{padding-left:30px;width:100%;}

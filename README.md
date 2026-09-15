@@ -71,7 +71,7 @@ npx http-server -p 8080
 ```
 Depois acesse `http://localhost:8080`.
 
-> Mantenha `index.html`, `login.html`, `style.css`, `auth.js`, `login.js`, `login-page.js`, `script.js` e `logo.png` na mesma pasta — scripts, estilos, logo e redirecionamentos usam caminhos relativos.
+> Mantenha `index.html`, `login.html`, `style.css`, `auth.js`, `data-utils.js`, `login.js`, `login-page.js`, `script.js` e `logo.png` na mesma pasta — scripts, estilos, logo e redirecionamentos usam caminhos relativos.
 
 `login.html` contém apenas a tela de acesso; `index.html` contém o painel. Sem sessão, o painel redireciona para o login e preserva a seção solicitada no hash da URL. Ao entrar, a aplicação retorna a essa seção, respeitando as permissões do perfil. Ao sair, a sessão é removida e o navegador retorna ao login.
 
@@ -99,6 +99,7 @@ A tela de login tem atalhos que já preenchem essas credenciais automaticamente:
 ├── style.css      # design tokens, layout e temas (claro/escuro)
 ├── script.js      # estado, roteamento, renderização e regras de negócio
 ├── auth.js        # validação de acesso e persistência da sessão de demonstração
+├── data-utils.js  # filtros financeiros e cálculos de datas da agenda
 ├── login.js       # eventos e validação dos campos do formulário de login
 ├── login-page.js  # inicialização do login, tema e redirecionamento para o painel
 ├── logo.png       # identidade visual (fundo transparente)
