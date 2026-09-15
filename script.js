@@ -316,30 +316,29 @@
 
   function showApp() {
     $('#app-shell').hidden = false;
-    $('#sidebar-logo-slot').innerHTML = '';
+    $('#app-logo-slot').innerHTML = '';
     const tpl = $('#tpl-logo').content.cloneNode(true);
-    $('#sidebar-logo-slot').appendChild(tpl);
+    $('#app-logo-slot').appendChild(tpl);
 
     const role = STATE.currentUser.role;
     $('#user-avatar').textContent = STATE.currentUser.name.charAt(0).toUpperCase();
     $('#topbar-user-name').textContent = STATE.currentUser.name;
     $('#topbar-user-role').textContent = role === 'admin' ? 'Administrador' : 'Usuário';
 
-    renderSidebarNav(role);
+    renderMainNav(role);
     const requested = location.hash.slice(1);
     const initialView = (requested && viewAllowedForRole(requested, role)) ? requested : 'dashboard';
     setRoute(initialView, { silent: true });
   }
 
-  function renderSidebarNav(role) {
-    const nav = $('#sidebar-nav');
+  function renderMainNav(role) {
+    const nav = $('#main-nav');
     nav.innerHTML = NAV_ITEMS[role].map(item => `
     <button class="nav-item" data-view="${item.key}">
       <i class="fa-solid ${item.icon}" aria-hidden="true"></i><span>${item.label}</span>
     </button>`).join('');
     $$('.nav-item', nav).forEach(btn => btn.addEventListener('click', () => {
       navigate(btn.dataset.view);
-      closeSidebarMobile();
     }));
   }
 
@@ -348,7 +347,7 @@
      ========================================================================== */
   const RENDERERS = {}; // preenchido mais abaixo, por módulo
   /* Views restritas por perfil. Impede acesso via navegação manual/hash mesmo
-     quando o item não aparece no menu lateral. */
+     quando o item não aparece no menu principal. */
   const ADMIN_ONLY_VIEWS = ['rooms', 'professionals', 'financial', 'insurance', 'reports'];
   const USER_ONLY_VIEWS = ['myschedule'];
 
@@ -363,7 +362,16 @@
   function renderCurrentView() {
     const view = STATE.currentView;
     $('#view-title').textContent = VIEW_TITLES[view] || 'Attento';
-    $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    $$('.nav-item').forEach(b => {
+      const active = b.dataset.view === view;
+      b.classList.toggle('active', active);
+      if (active) {
+        b.setAttribute('aria-current', 'page');
+        b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      } else {
+        b.removeAttribute('aria-current');
+      }
+    });
     const root = $('#view-root');
     const renderer = RENDERERS[view];
     // Mantém os atributos do contêiner e descarta os eventos da tela anterior.
@@ -1315,20 +1323,11 @@
   }
 
   /* ==========================================================================
-     SIDEBAR MOBILE (drawer)
-     ========================================================================== */
-  function openSidebarMobile() { $('#sidebar').classList.add('open'); $('#sidebar-overlay').classList.add('show'); }
-  function closeSidebarMobile() { $('#sidebar').classList.remove('open'); $('#sidebar-overlay').classList.remove('show'); }
-
-  /* ==========================================================================
      BOOTSTRAP
      ========================================================================== */
   function bindGlobalEvents() {
     $('#btn-logout').addEventListener('click', logout);
     $('#theme-toggle').addEventListener('click', toggleTheme);
-    $('#hamburger').addEventListener('click', openSidebarMobile);
-    $('#sidebar-close').addEventListener('click', closeSidebarMobile);
-    $('#sidebar-overlay').addEventListener('click', closeSidebarMobile);
     window.addEventListener('hashchange', handleHashChange);
   }
 

@@ -23,41 +23,31 @@
 
   <!-- ============ APP SHELL ============ -->
   <div id="app-shell" class="app-shell" hidden>
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-top">
-        <div class="sidebar-brand">
-          <div class="sidebar-logo" id="sidebar-logo-slot"></div>
-          <span class="sidebar-title">Attento</span>
-        </div>
-        <button class="sidebar-close" id="sidebar-close" aria-label="Fechar menu"><i class="fa-solid fa-xmark"
-            aria-hidden="true"></i></button>
-      </div>
-      <nav class="sidebar-nav" id="sidebar-nav" aria-label="Navegação principal"></nav>
-      <div class="sidebar-bottom">
-        <button class="sidebar-logout" id="btn-logout">
-          <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sair
-        </button>
-      </div>
-    </aside>
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
     <div class="main-col">
-      <header class="topbar">
-        <button class="hamburger" id="hamburger" aria-label="Abrir menu"><i class="fa-solid fa-bars"
-            aria-hidden="true"></i></button>
-        <h1 class="topbar-title" id="view-title">Dashboard</h1>
-        <div class="topbar-actions">
-          <button class="icon-btn" id="theme-toggle" aria-label="Alternar tema">
-            <i class="fa-solid fa-moon" aria-hidden="true"></i>
-          </button>
-          <div class="topbar-user">
-            <div class="avatar" id="user-avatar">A</div>
-            <div class="topbar-user-info">
-              <span class="topbar-user-name" id="topbar-user-name">—</span>
-              <span class="topbar-user-role" id="topbar-user-role">—</span>
+      <header class="app-header">
+        <div class="topbar">
+          <div class="app-brand">
+            <div class="app-logo" id="app-logo-slot"></div>
+            <span class="app-brand-title">Attento</span>
+          </div>
+          <h1 class="topbar-title" id="view-title">Dashboard</h1>
+          <div class="topbar-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="Alternar tema">
+              <i class="fa-solid fa-moon" aria-hidden="true"></i>
+            </button>
+            <div class="topbar-user">
+              <div class="avatar" id="user-avatar">A</div>
+              <div class="topbar-user-info">
+                <span class="topbar-user-name" id="topbar-user-name">—</span>
+                <span class="topbar-user-role" id="topbar-user-role">—</span>
+              </div>
             </div>
+            <button class="header-logout" id="btn-logout">
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sair
+            </button>
           </div>
         </div>
+        <nav class="main-nav" id="main-nav" aria-label="Navegação principal"></nav>
       </header>
 
       <main class="content" id="view-root" tabindex="-1"></main>

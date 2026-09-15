@@ -126,9 +126,9 @@ Todos os dados (usuários, salas, profissionais, agenda, contas, convênios) sã
 ## Responsividade
 
 Interface testada e ajustada para três faixas principais:
-- **Mobile** (~375px): sidebar em off-canvas, tabelas e agenda com rolagem horizontal, formulários empilhados.
+- **Mobile** (~375px): menu horizontal no topo com rolagem, tabelas e agenda com rolagem horizontal, formulários empilhados.
 - **Tablet** (~768px): painel de login em coluna única, grade de indicadores adaptada.
-- **Desktop**: layout completo com sidebar fixa.
+- **Desktop**: layout com menu horizontal fixo no topo.
 
 ## Acessibilidade
 
