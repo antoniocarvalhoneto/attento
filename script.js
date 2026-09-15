@@ -367,7 +367,14 @@
       b.classList.toggle('active', active);
       if (active) {
         b.setAttribute('aria-current', 'page');
-        b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        const nav = b.parentElement;
+        const navBounds = nav.getBoundingClientRect();
+        const itemBounds = b.getBoundingClientRect();
+        if (itemBounds.left < navBounds.left) {
+          nav.scrollLeft += itemBounds.left - navBounds.left;
+        } else if (itemBounds.right > navBounds.right) {
+          nav.scrollLeft += itemBounds.right - navBounds.right;
+        }
       } else {
         b.removeAttribute('aria-current');
       }
@@ -379,7 +386,7 @@
     freshRoot.innerHTML = renderer ? renderer() : '<div class="empty-state"><i class="fa-solid fa-circle-question"></i><p>Módulo não encontrado.</p></div>';
     root.parentNode.replaceChild(freshRoot, root);
     bindViewEvents(view);
-    freshRoot.focus();
+    freshRoot.focus({ preventScroll: true });
   }
 
   /* Ponto único de navegação: decide a rota, valida permissão e sincroniza o
@@ -398,6 +405,7 @@
       location.hash = view;
     }
     renderCurrentView();
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }
   let SUPPRESS_HASHCHANGE = false;
   function handleHashChange() {
