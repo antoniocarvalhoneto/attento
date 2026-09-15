@@ -451,7 +451,10 @@
       vencido: STATE.financialAccounts.filter(a => a.status === 'vencido').length
     };
     const totalFin = financeStatus.pago + financeStatus.pendente + financeStatus.vencido || 1;
-    const upcoming = STATE.schedules.filter(sc => sc.status === 'reservado').slice(0, 6);
+    const reservations = STATE.schedules
+      .filter(sc => sc.status === 'reservado')
+      .sort((a, b) => (a.week - b.week) || (a.day - b.day) || a.time.localeCompare(b.time));
+    const agendaPreview = reservations.slice(0, 6);
 
     return `
   <div class="page-head">
@@ -468,6 +471,19 @@
       ${statCard('fa-calendar-check', 'green', 'Horários agendados', s.agendados)}
       ${statCard('fa-hourglass-half', 'amber', 'Contas pendentes', s.pendentesCount)}
     </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <h2>Agenda de reservas</h2>
+        <p>Semana atual e próxima semana · ${reservations.length} reservas</p>
+      </div>
+      <a href="#availability">Abrir agenda completa</a>
+    </div>
+    ${tableOrEmpty(agendaPreview, ['Semana', 'Horário', 'Sala', 'Profissional', 'Unidade', 'Status'], agendaPreview.map(sc => [
+      sc.week === 0 ? 'Atual' : 'Próxima', `${DAYS[sc.day]} · ${sc.time}`, roomName(sc.roomId), sc.professionalId ? profName(sc.professionalId) : '—', unitName(sc.unitId), statusBadge(sc.status)
+    ]), 'Nenhuma reserva cadastrada. Abra a agenda para reservar um horário.', 'fa-calendar-xmark')}
   </div>
 
   <div class="section">
@@ -499,13 +515,6 @@
         <span class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Vencido (${financeStatus.vencido})</span>
       </div>
     </div>
-  </div>
-
-  <div class="section">
-    <div class="section-head"><h2>Próximos horários</h2></div>
-    ${tableOrEmpty(upcoming, ['Horário', 'Sala', 'Profissional', 'Unidade', 'Status'], upcoming.map(sc => [
-      `${DAYS[sc.day]} · ${sc.time}`, roomName(sc.roomId), sc.professionalId ? profName(sc.professionalId) : '—', unitName(sc.unitId), statusBadge(sc.status)
-    ]), 'Nenhum horário agendado.', 'fa-calendar-xmark')}
   </div>`;
   }
   function renderDashboardUser() {
