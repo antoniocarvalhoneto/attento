@@ -22,8 +22,10 @@
   --success-bg:#E9FAF0;
   --warning:#F59E0B;
   --warning-bg:#FEF6E6;
+  --warning-text:#8A4B0F;
   --danger:#EF4444;
   --danger-bg:#FDECEC;
+  --danger-text:#B42318;
   --info:#3974AE;
 
   --font-display:'Manrope', sans-serif;
@@ -55,7 +57,9 @@
   --primary-light:#1C2E42;
   --success-bg:#123424;
   --warning-bg:#3A2C10;
+  --warning-text:#FBBF24;
   --danger-bg:#3A1717;
+  --danger-text:#FCA5A5;
 }
 
 *,*::before,*::after{box-sizing:border-box;}
@@ -298,14 +302,14 @@ ul{list-style:none;margin:0;padding:0;}
 }
 .stat-icon{
   width:42px;height:42px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;
-  font-size:1.05rem;flex:none;
+  font-size:1.05rem;flex:none;background:var(--surface-alt);color:var(--text-muted);
 }
-.stat-icon.blue{background:var(--primary-light);color:var(--primary-dark);}
-.stat-icon.green{background:var(--success-bg);color:var(--success);}
-.stat-icon.amber{background:var(--warning-bg);color:var(--warning);}
-.stat-icon.red{background:var(--danger-bg);color:var(--danger);}
+.stat-icon.amber{background:var(--warning-bg);color:var(--warning-text);}
+.stat-icon.red{background:var(--danger-bg);color:var(--danger-text);}
 .stat-info{display:flex;flex-direction:column;gap:2px;}
 .stat-value{font-family:var(--font-display);font-size:1.4rem;font-weight:800;letter-spacing:-.01em;}
+.stat-card-amber .stat-value{color:var(--warning-text);}
+.stat-card-red .stat-value{color:var(--danger-text);}
 .stat-label{font-size:.78rem;color:var(--text-muted);font-weight:600;}
 
 @media (max-width:1180px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
@@ -320,7 +324,7 @@ ul{list-style:none;margin:0;padding:0;}
   border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 8px;text-align:center;background:var(--surface-alt);
 }
 .week-day .wd-label{font-size:.72rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
-.week-day .wd-count{font-family:var(--font-display);font-size:1.35rem;font-weight:800;margin-top:5px;color:var(--primary-dark);}
+.week-day .wd-count{font-family:var(--font-display);font-size:1.35rem;font-weight:800;margin-top:5px;color:var(--text);}
 .week-day .wd-sub{font-size:.68rem;color:var(--text-faint);}
 @media (max-width:560px){.week-strip{grid-template-columns:repeat(3,1fr);}}
 

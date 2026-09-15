@@ -466,10 +466,10 @@
 
   <div class="section">
     <div class="stat-grid">
-      ${statCard('fa-door-open', 'blue', 'Salas disponíveis', s.disponiveis)}
-      ${statCard('fa-users', 'blue', 'Profissionais ativos', s.totalProf)}
-      ${statCard('fa-calendar-check', 'green', 'Horários agendados', s.agendados)}
-      ${statCard('fa-hourglass-half', 'amber', 'Contas pendentes', s.pendentesCount)}
+      ${statCard('fa-door-open', 'neutral', 'Salas disponíveis', s.disponiveis)}
+      ${statCard('fa-users', 'neutral', 'Profissionais ativos', s.totalProf)}
+      ${statCard('fa-calendar-check', 'neutral', 'Horários agendados', s.agendados)}
+      ${statCard('fa-hourglass-half', s.pendentesCount > 0 ? 'amber' : 'neutral', 'Contas pendentes', s.pendentesCount)}
     </div>
   </div>
 
@@ -530,10 +530,10 @@
   </div>
   <div class="section">
     <div class="stat-grid">
-      ${statCard('fa-clock', 'blue', 'Próximo horário', proximo ? `${DAYS[proximo.day]} ${proximo.time}` : 'Nenhum')}
-      ${statCard('fa-calendar-days', 'blue', 'Horários na semana', mine.filter(m => m.week === 0).length)}
-      ${statCard('fa-door-open', 'green', 'Salas disponíveis', disponiveis)}
-      ${statCard('fa-comments', 'amber', 'Precisa de ajuda?', 'Fale conosco')}
+      ${statCard('fa-clock', 'neutral', 'Próximo horário', proximo ? `${DAYS[proximo.day]} ${proximo.time}` : 'Nenhum')}
+      ${statCard('fa-calendar-days', 'neutral', 'Horários na semana', mine.filter(m => m.week === 0).length)}
+      ${statCard('fa-door-open', 'neutral', 'Salas disponíveis', disponiveis)}
+      ${statCard('fa-comments', 'neutral', 'Precisa de ajuda?', 'Fale conosco')}
     </div>
   </div>
   <div class="section">
@@ -543,7 +543,7 @@
   </div>`;
   }
   function statCard(icon, color, label, value) {
-    return `<div class="stat-card"><div class="stat-icon ${color}"><i class="fa-solid ${icon}" aria-hidden="true"></i></div><div class="stat-info"><span class="stat-value">${esc(value)}</span><span class="stat-label">${esc(label)}</span></div></div>`;
+    return `<div class="stat-card stat-card-${color}"><div class="stat-icon ${color}"><i class="fa-solid ${icon}" aria-hidden="true"></i></div><div class="stat-info"><span class="stat-value">${esc(value)}</span><span class="stat-label">${esc(label)}</span></div></div>`;
   }
   function statusBadge(status) {
     const map = {
@@ -948,10 +948,10 @@
   </div>
   <div class="section">
     <div class="stat-grid">
-      ${statCard('fa-wallet', 'blue', 'Total', fmtCurrency(total))}
-      ${statCard('fa-circle-check', 'green', 'Pago', fmtCurrency(pago))}
-      ${statCard('fa-hourglass-half', 'amber', 'Pendente', fmtCurrency(pendente))}
-      ${statCard('fa-triangle-exclamation', 'red', 'Vencido', fmtCurrency(vencido))}
+      ${statCard('fa-wallet', 'neutral', 'Total', fmtCurrency(total))}
+      ${statCard('fa-circle-check', 'neutral', 'Pago', fmtCurrency(pago))}
+      ${statCard('fa-hourglass-half', pendente > 0 ? 'amber' : 'neutral', 'Pendente', fmtCurrency(pendente))}
+      ${statCard('fa-triangle-exclamation', vencido > 0 ? 'red' : 'neutral', 'Vencido', fmtCurrency(vencido))}
     </div>
   </div>
   ${tableOrEmpty(list, ['Profissional', 'Descrição', 'Valor', 'Vencimento', 'Status', 'Pagamento', 'Ações'], rows, 'Nenhuma conta encontrada.', 'fa-file-invoice')}
@@ -1139,10 +1139,10 @@
   </div>
   <div class="section">
     <div class="stat-grid">
-      ${statCard('fa-sack-dollar', 'green', 'Total recebido', fmtCurrency(recebido))}
-      ${statCard('fa-hourglass-half', 'amber', 'Total pendente', fmtCurrency(pendente))}
-      ${statCard('fa-triangle-exclamation', 'red', 'Total vencido', fmtCurrency(vencido))}
-      ${statCard('fa-wallet', 'blue', 'Total geral', fmtCurrency(totalGeral))}
+      ${statCard('fa-sack-dollar', 'neutral', 'Total recebido', fmtCurrency(recebido))}
+      ${statCard('fa-hourglass-half', pendente > 0 ? 'amber' : 'neutral', 'Total pendente', fmtCurrency(pendente))}
+      ${statCard('fa-triangle-exclamation', vencido > 0 ? 'red' : 'neutral', 'Total vencido', fmtCurrency(vencido))}
+      ${statCard('fa-wallet', 'neutral', 'Total geral', fmtCurrency(totalGeral))}
     </div>
   </div>
   ${tableOrEmpty(list, ['Profissional', 'Descrição', 'Valor', 'Vencimento', 'Status', 'Pagamento'], rows, 'Nenhum dado encontrado para os filtros selecionados.', 'fa-chart-line')}
