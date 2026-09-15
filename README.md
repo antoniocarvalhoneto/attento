@@ -78,7 +78,7 @@ npx http-server -p 8080
 ```
 Depois acesse `http://localhost:8080`.
 
-> Os cinco arquivos (`index.html`, `style.css`, `auth.js`, `script.js`, `logo.png`) precisam estar na mesma pasta — scripts, estilos e logo usam caminhos relativos.
+> Os seis arquivos (`index.html`, `style.css`, `auth.js`, `login.js`, `script.js`, `logo.png`) precisam estar na mesma pasta — scripts, estilos e logo usam caminhos relativos.
 
 ## Acesso de demonstração
 
@@ -103,11 +103,12 @@ A tela de login tem atalhos que já preenchem essas credenciais automaticamente:
 ├── style.css      # design tokens, layout e temas (claro/escuro)
 ├── script.js      # estado, roteamento, renderização e regras de negócio
 ├── auth.js        # validação de acesso e persistência da sessão de demonstração
+├── login.js       # eventos e validação dos campos do formulário de login
 ├── logo.png       # identidade visual (fundo transparente)
 └── README.md
 ```
 
-O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar a sessão e sair. Ele recebe acesso à lista de usuários e ao armazenamento, sem depender das telas. O `script.js` controla o formulário, a troca entre login e dashboard, o estado global, as permissões das rotas, os renderizadores, os modais e os utilitários. A autenticação permanece simulada e usa as mesmas credenciais e a chave de sessão já existente.
+O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar a sessão e sair. Ele recebe acesso à lista de usuários e ao armazenamento, sem depender das telas. O `login.js` expõe `AttentoLogin`, que recebe a tela de login e uma função para solicitar a entrada: ele gerencia os campos, as mensagens de erro, a exibição da senha e os atalhos de demonstração. O `script.js` conecta os dois módulos e controla a troca entre login e dashboard, o estado global, as permissões das rotas, os renderizadores, os modais e os utilitários. A autenticação permanece simulada e usa as mesmas credenciais e a chave de sessão já existente.
 
 Para verificar o serviço de autenticação com Node.js:
 

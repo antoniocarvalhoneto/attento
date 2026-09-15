@@ -284,6 +284,8 @@
   /* ==========================================================================
      TRANSIÇÃO ENTRE LOGIN E APLICAÇÃO
      ========================================================================== */
+  let loginView;
+
   function login(email, password) {
     const user = auth.signIn(email, password);
     if (!user) return false;
@@ -296,7 +298,7 @@
     auth.signOut();
     $('#app-shell').hidden = true;
     $('#login-screen').hidden = false;
-    $('#login-form').reset();
+    loginView.reset();
     SUPPRESS_HASHCHANGE = true;
     history.replaceState(null, '', location.pathname + location.search);
   }
@@ -1311,44 +1313,6 @@
      BOOTSTRAP
      ========================================================================== */
   function bindGlobalEvents() {
-    $('#login-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = $('#login-email').value.trim();
-      const password = $('#login-password').value;
-      $('#login-email-error').textContent = ''; $('#login-password-error').textContent = ''; $('#login-general-error').textContent = '';
-      let valid = true;
-      if (!email) { $('#login-email-error').textContent = 'Informe o e-mail.'; valid = false; }
-      if (!password) { $('#login-password-error').textContent = 'Informe a senha.'; valid = false; }
-      if (!valid) return;
-
-      const submitBtn = $('#login-submit');
-      submitBtn.disabled = true;
-      submitBtn.querySelector('.btn-label').hidden = true;
-      submitBtn.querySelector('.btn-spinner').hidden = false;
-
-      setTimeout(() => {
-        submitBtn.disabled = false;
-        submitBtn.querySelector('.btn-label').hidden = false;
-        submitBtn.querySelector('.btn-spinner').hidden = true;
-        if (!login(email, password)) { $('#login-general-error').textContent = 'E-mail ou senha inválidos.'; }
-      }, 500);
-    });
-
-    $('#password-toggle').addEventListener('click', () => {
-      const input = $('#login-password');
-      const icon = $('#password-toggle i');
-      const showing = input.type === 'text';
-      input.type = showing ? 'password' : 'text';
-      icon.className = showing ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
-      $('#password-toggle').setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
-    });
-
-    $$('.demo-chip').forEach(chip => chip.addEventListener('click', () => {
-      const kind = chip.dataset.demo;
-      $('#login-email').value = kind === 'admin' ? 'admin@demo.com' : 'usuario@demo.com';
-      $('#login-password').value = '123456';
-    }));
-
     $('#btn-logout').addEventListener('click', () => { logout(); showToast('Sessão encerrada.', 'info'); });
     $('#theme-toggle').addEventListener('click', toggleTheme);
     $('#hamburger').addEventListener('click', openSidebarMobile);
@@ -1365,6 +1329,7 @@
     initializeData();
     loadAllIntoState();
     applyTheme(STATE.theme);
+    loginView = window.AttentoLogin.mount({ root: $('#login-screen'), onSubmit: login });
     bindGlobalEvents();
     const tpl = $('#tpl-logo').content.cloneNode(true);
     $('#login-logo-slot').appendChild(tpl);
