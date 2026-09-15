@@ -425,7 +425,10 @@
   function renderDashboardAdmin() {
     const s = computeDashboardStats();
     const weekCounts = DAYS.map((d, i) => STATE.schedules.filter(sc => sc.week === 0 && sc.day === i && sc.status === 'reservado').length);
-    const maxCount = Math.max(1, ...weekCounts);
+    const chartStep = Math.max(1, Math.ceil(Math.max(...weekCounts) / 4));
+    const chartMax = chartStep * 4;
+    const weekTotal = weekCounts.reduce((total, count) => total + count, 0);
+    const todayIndex = (new Date().getDay() + 6) % 7;
     const financeStatus = {
       pago: STATE.financialAccounts.filter(a => a.status === 'pago').length,
       pendente: STATE.financialAccounts.filter(a => a.status === 'pendente').length,
@@ -479,11 +482,24 @@
 
   <div class="section two-col">
     <div class="card">
-      <h3>Reservas por dia</h3>
-      <p class="text-muted mt-8">Quantidade de reservas na semana atual, em todas as unidades.</p>
-      <div class="bars">
-        ${weekCounts.map((c, i) => `<div class="bar-col" role="img" aria-label="${DAYS[i]}: ${c} ${c === 1 ? 'reserva' : 'reservas'}"><div class="bar" style="height:${c / maxCount * 100}%"></div><span class="bar-label">${DAYS[i]}</span></div>`).join('')}
+      <div class="reservation-chart-head">
+        <h3>Reservas por dia</h3>
+        <span class="reservation-chart-total">${weekTotal} ${weekTotal === 1 ? 'reserva' : 'reservas'}</span>
       </div>
+      <p class="text-muted mt-8">Semana atual · Todas as unidades</p>
+      <div class="reservation-chart" role="img" aria-label="Reservas por dia, semana atual. ${weekCounts.map((c, i) => `${DAYS[i]}: ${c} ${c === 1 ? 'reserva' : 'reservas'}`).join('; ')}">
+        <div class="chart-axis" aria-hidden="true">
+          ${[4, 3, 2, 1, 0].map(tick => `<span>${tick * chartStep}</span>`).join('')}
+        </div>
+        <div class="chart-plot" aria-hidden="true">
+          ${weekCounts.map((c, i) => `
+            <div class="chart-column${i === todayIndex ? ' is-today' : ''}">
+              <div class="chart-bar" style="height:${c / chartMax * 100}%"><span class="chart-value">${c}</span></div>
+              <span class="chart-day">${DAYS[i]}${i === todayIndex ? '<small>Hoje</small>' : ''}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+      ${weekTotal === 0 ? '<p class="text-muted mt-8">Nenhuma reserva nesta semana.</p>' : ''}
     </div>
     <div class="card">
       <h3>Situação financeira</h3>
