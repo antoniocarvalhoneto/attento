@@ -1,0 +1,82 @@
+body {
+    background-color: #F6F5F1;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.topo {
+    text-align: center;
+}
+
+.topo h1 {
+    color: #174A70;
+}
+
+.logo img{
+    width: 50px;
+    height: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    padding: 10px 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+thead {
+    background-color: #6E93B8;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #c9c9c9;
+}
+
+.status-pago {
+    background-color: #89ffa4;
+}
+.status-pendente {
+    background-color: #ff727e;
+}
+
+.barra-cima {
+    border: 1px solid #174A70;
+    padding: 10px;
+}
+
+.chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+    position: relative;
+    top: 10px;
+}
+.chip {
+    background-color: #9accff;
+}
+
+.campo {
+    display: flex;
+    gap: 12px
+}
+
+.pagina {
+    border: 1px solid black;
+    padding: 20px;
+}
+
+#button-busca {
+    background-color: #6E93B8;
+}
+.tabela-head {
+    position: relative;
+    top: 20px;
+}
+

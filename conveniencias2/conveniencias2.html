@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attento Conveniências</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="topo">
+        <img src="assets/imgs/attentologo2.png" width="100" height="100">
+        <h1>Aqui você encontra nossas conveniências!</h1>
+    </div>
+
+    <p align="center">
+        <a href="index.html">INÍCIO</a> /
+        <a href="disponibilidadedesalas1.html">DISPONIBILIDADE DE SALAS</a> /
+        <a href="conveniencias2.html">CONVENIÊNCIAS</a> /
+        <a href="contasfinanceiro3.html">CONTAS E FINANCEIRO</a>
+    </p>
+    <hr width="90%" size="2" color="#174A70">
+
+    <div class="pagina">
+        <!--O FILTRO-->
+        <section class="campo">
+            <form class="campo-busca">
+                <input type="text" placeholder="Buscar por funcionário ou item">
+                <button id="button-busca" type="submit">Buscar</button>
+            </form>
+            <div class="filtro-item">
+                <label for="data-inicial">Data Inicial:</label>
+                <input type="date" id="data-inicial" name="data-inicial">
+            </div>
+            <div class="filtro-item">
+                <label for="data-final">Nome do profissional:</label>
+                <input type="text" id="profissional" name="profissional" placeholder="Digite o nome do funcionário">
+            </div>
+        </section>
+
+        <section class="filtro-rapido">
+            <ul class="chips">
+                <li><button type="button" class="chip">Cappucino</button></li>
+                <li><button type="button" class="chip">Este mês</button></li>
+                <li><button type="button" class="chip">Pago</button></li>
+                <li><button type="button" class="chip">Pendente</button></li>
+                <li><button type="button" class="chip">Impresso</button></li>
+            </ul>
+        </section>
+    </div>
+
+    <!--A TABELA-->
+    <div class="tabela-head">
+        <table>
+            <thead>
+                <tr>
+                    <th>Profissional</th>
+                    <th>Conveniência</th>
+                    <th>Quantidade</th>
+                    <th>Data</th>
+                    <th>Valor unitário</th>
+                    <th>Total</th>
+                    <th>Pagamento</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Dr. João</td>
+                    <td>Xerox P&B</td>
+                    <td>20</td>
+                    <td>01/01/2023</td>
+                    <td>R$ 0,50</td>
+                    <td>R$ 10,00</td>
+                    <td class="status-pendente">Pendente</td>
+                </tr>
+                <tr>
+                    <td>Dra. Ana</td>
+                    <td>Cappucino</td>
+                    <td>3</td>
+                    <td>15/01/2023</td>
+                    <td>R$ 4,00</td>
+                    <td>R$ 12,00</td>
+                    <td class="status-pago">Pago</td>
+                </tr>
+                <tr>
+                    <td>Dr. Carlos</td>
+                    <td>Xerox RGB</td>
+                    <td>10</td>
+                    <td>01/02/2023</td>
+                    <td>R$ 0,75</td>
+                    <td>R$ 7,50</td>
+                    <td class="status-pago">Pago</td>
+                </tr>
+                <tr>
+                    <td>Dr. Pedro</td>
+                    <td>Chocolate</td>
+                    <td>2</td>
+                    <td>01/03/2023</td>
+                    <td>R$ 3,00</td>
+                    <td>R$ 6,00</td>
+                    <td class="status-pendente">Pendente</td>
+                </tr>
+                <tr>
+                    <td>Dr. Lucas</td>
+                    <td>Água</td>
+                    <td>1</td>
+                    <td>01/04/2023</td>
+                    <td>R$ 1,00</td>
+                    <td>R$ 1,00</td>
+                    <td class="status-pago">Pago</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Total</th>
+                    <td>-</td>
+                    <td>33</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>R$ 36,50</td>
+                    <td>-</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</body>
+</html>
