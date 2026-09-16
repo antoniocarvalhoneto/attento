@@ -1,6 +1,6 @@
 # Lógica do Attento
 
-Guia da aplicação atual em HTML, CSS e JavaScript, revisada em 15/09/2026 e atualizado após a remoção dos trechos sem uso. As explicações ficam neste arquivo. Os nomes das funções permitem encontrá-las pela busca do editor.
+Guia da aplicação atual em HTML, CSS e JavaScript, atualizado em 16/09/2026 após a limpeza e as correções de reservas, vínculos e persistência. As explicações ficam neste arquivo. Os nomes das funções permitem encontrá-las pela busca do editor.
 
 ## 1. Como as partes se conectam
 
@@ -44,7 +44,7 @@ Exemplo: salvar uma sala chama o evento configurado por `openRoomModal()`. O eve
 | `app_units` | Unidades. |
 | `app_rooms` | Salas e seus vínculos com unidades. |
 | `app_professionals` | Profissionais, sala, unidade, turno e valor. |
-| `app_schedules` | Horários: sala, semana relativa, dia, hora, status, profissional e usuário. |
+| `app_schedules` | Horários: sala, data fixa, dia, hora, status, profissional e usuário. Registros antigos conservam campos legados, mas a data fixa tem precedência. |
 | `app_financial_accounts` | Contas, vencimentos, pagamentos e valores. |
 | `app_insurance` | Atendimentos por convênio, quantidade e valor unitário. |
 | `app_settings` | Tema e WhatsApp configurado. |
@@ -118,10 +118,11 @@ O contrato atual de `onSubmit` é síncrono. Uma futura autenticação por API e
 | `maskCurrencyInput(el)` | Conecta um evento de digitação que trata os dígitos como centavos e reapresenta o valor com duas casas decimais. |
 | `downloadCSV(filename, rows)` | Monta CSV separado por ponto e vírgula, escapa aspas e separadores, cria um arquivo temporário no navegador e dispara o download. |
 | `loadData(key)` | Lê e interpreta JSON do armazenamento; retorna `null` em ausência ou erro. |
-| `saveData(key, value)` | Serializa e salva JSON; registra falhas no console. Não retorna confirmação de sucesso. |
+| `saveData(key, value)` | Serializa e salva JSON. Propaga a falha para o chamador, que trata o erro na inicialização ou em `persist`. |
 | `initializeData()` | Preenche as coleções ausentes com dados de demonstração: unidades, salas, profissionais, duas semanas de horários, contas e convênios. Também inicializa configurações ausentes. |
 | `loadAllIntoState()` | Lê as coleções e preferências salvas para `STATE`. |
-| `persist(key, data)` | Repassa a chamada diretamente para `saveData`, sem regra adicional. |
+| `persist(key, data)` | Tenta gravar e retorna verdadeiro somente em caso de sucesso. Atualiza a coleção correspondente em `STATE` após salvar; em falha, mostra erro e mantém o estado anterior. `STATE_FIELDS` relaciona chaves de armazenamento com coleções em memória. |
+| `saveRecord(key, existing, data, prefix)` | Prepara uma nova lista para criação/edição, sem modificar objetos existentes, e a entrega a `persist`. |
 | `unitName(id)` | Procura o nome da unidade em `STATE.units`; usa travessão se não encontrar. |
 | `roomName(id)` | Procura o nome da sala em `STATE.rooms`; usa travessão se não encontrar. |
 | `profName(id)` | Procura o nome do profissional; usa travessão se não encontrar. |
@@ -138,7 +139,7 @@ O contrato atual de `onSubmit` é síncrono. Uma futura autenticação por API e
 | `activeModalCleanup()` | Callback que remove o evento de teclado do modal ao fechá-lo. |
 | `closeModal()` | Inicia a saída visual, atualiza o atributo de acessibilidade, remove o evento de teclado e agenda a remoção do elemento após 160 ms. |
 | `confirmModal(message, onConfirm)` | Cria um diálogo de confirmação de exclusão. Executa `onConfirm` quando o usuário confirma. |
-| `applyTheme(theme)` | Atualiza o tema em `STATE`, no HTML, no ícone do cabeçalho e nas configurações salvas. |
+| `applyTheme(theme, save)` | Quando `save` é verdadeiro (padrão), grava antes de atualizar tema e ícone. Na inicialização usa `save: false` para apenas aplicar a preferência já carregada. |
 | `toggleTheme()` | Alterna entre claro e escuro usando `applyTheme`. |
 | `logout()` | Limpa o usuário em memória, encerra a sessão e redireciona para o login. |
 
@@ -164,7 +165,7 @@ O contrato atual de `onSubmit` é síncrono. Uma futura autenticação por API e
 | Função | O que faz |
 | --- | --- |
 | `computeDashboardStats()` | Conta salas com status disponível, profissionais ativos, reservas futuras e contas pendentes. Disponibilidade aqui é o status cadastral da sala, não um cálculo por horário. |
-| `renderDashboardAdmin()` | Produz os indicadores, próximos agendamentos, resumo semanal, gráfico de reservas e distribuição das contas por status. O gráfico conta reservas da semana relativa zero, incluindo dias já passados. |
+| `renderDashboardAdmin()` | Produz os indicadores, próximos agendamentos, resumo semanal, gráfico de reservas e distribuição das contas por status. O gráfico compara datas fixas com os dias da semana atual, incluindo dias já passados. |
 | `renderDashboardUser()` | Produz os indicadores e próximos horários do usuário conectado, além do acesso ao WhatsApp configurado. A contagem semanal considera apenas reservas ainda futuras. |
 | `statCard(icon, color, label, value)` | Retorna o HTML de um indicador. |
 | `statusBadge(status)` | Converte status de reservas, contas e profissionais em rótulo com classe visual. |
@@ -175,8 +176,8 @@ O contrato atual de `onSubmit` é síncrono. Uma futura autenticação por API e
 | Função | O que faz |
 | --- | --- |
 | `renderAvailability()` | Aplica filtros de unidade, sala e semana, exclui salas inativas e monta uma agenda por sala. |
-| `scheduleFor(week, roomId, day, time)` | Procura o primeiro registro correspondente à combinação de semana, sala, dia e hora. |
-| `renderRoomAgenda(room, week)` | Monta a grade de dias/horários. Sem registro, considera a célula disponível. |
+| `scheduleFor(week, roomId, day, time)` | Converte semana/dia em data fixa e procura o primeiro registro de sala/data/hora correspondente. |
+| `renderRoomAgenda(room, week)` | Monta a grade de dias/horários. Usa `slotUnavailableReason` para bloquear passado, conflitos e salas indisponíveis. |
 | `statusLabelPlain(status)` | Retorna o texto do status da célula; disponível recebe texto vazio. |
 | `openAllocateModal(roomId, day, time, week)` | Abre a alocação do administrador. Exige um profissional, monta a reserva com valor, turno e observação, salva e atualiza a tela. |
 | `openSelectSlotModal(roomId, day, time, week)` | Abre a reserva do usuário. Escolhe o primeiro profissional ativo da sala ou, como alternativa, o primeiro ativo geral. Salva o horário vinculado ao usuário e abre a confirmação com contato opcional. |
@@ -232,7 +233,7 @@ Constatações da leitura do código e busca de referências. Os itens marcados 
 | `STATE.filters.agendaWeek` | Removido. A agenda utiliza `availWeek`. |
 | `label`, dentro de `renderRoomAgenda` | Removido. O HTML já chama `statusLabelPlain` diretamente. |
 | Parâmetro `isAdmin` de `renderRoomAgenda` | Removido junto com o argumento na chamada. O `isAdmin` de `renderAvailability` continua necessário para o texto da página. |
-| `persist()` | É usado, mas apenas chama `saveData()`. Pode ser unificado numa etapa própria, atualizando seus consumidores. Não é uma função morta. |
+| `persist()` | Mantido e ampliado: agora trata falhas de gravação e sincroniza o estado somente após sucesso. Não é mais um simples repasse. |
 | `reset()` retornado por `AttentoLogin.mount()` | Removido. Nenhum consumidor utilizava esse retorno. |
 | `ROOMS_CACHE` | É usado na criação da agenda, mas repete manualmente vínculos de salas e unidades. Convém obter essas informações da mesma fonte dos cadastros. Não remover sem substituir seu uso. |
 | Resumo semanal e gráfico no dashboard | Apresentam as mesmas contagens por dia em dois lugares. É uma repetição de interface, não cálculo sem uso. Pode ser consolidada. |
@@ -247,12 +248,12 @@ Estes pontos são distintos da limpeza de código. Foram identificados por leitu
 1. **Datas fixas implementadas.** As reservas usam `date` no formato `AAAA-MM-DD`. `migrateSchedules()` converte registros legados uma única vez, tomando a semana do primeiro acesso após a atualização como referência; a data histórica original não pode ser recuperada do formato anterior. `dateKey()` formata o dia local, `slotDate()` converte a posição na grade em data e `inWeek()` verifica a semana da reserva. Dados já datados não são deslocados pela migração.
 2. **Disponibilidade validada.** `slotUnavailableReason()` bloqueia horários passados, salas não disponíveis e conflitos de sala/data/hora. A grade desativa esses horários. `checkSlot()` relê salas e agenda do armazenamento ao abrir e ao confirmar uma reserva, recusando a ação se não conseguir verificar os dados. A data selecionada permanece fixa enquanto o modal está aberto. Isso não substitui controle transacional no servidor para uso multiusuário.
 3. **Exclusões protegidas.** `deletionBlocked()` verifica vínculos de salas com profissionais/agenda e de profissionais com agenda/contas/convênios, incluindo histórico. `canDelete()` relê os registros ao confirmar a exclusão e bloqueia a remoção se houver vínculos ou se não for possível verificá-los. A mensagem orienta usar a inativação. Vínculos quebrados antes desta atualização não são reparados automaticamente.
-4. **Falha ao salvar pode parecer sucesso.** `saveData()` captura o erro e não sinaliza a falha aos formulários, que podem exibir sucesso mesmo sem persistência. O login já tem uma verificação adicional; os cadastros não.
+4. **Falhas de gravação tratadas.** Cadastros, reservas, pagamentos, exclusões, tema e contato só confirmam sucesso após salvar. As alterações de coleções são preparadas sem modificar os registros atuais. Em falha, o formulário permanece aberto para nova tentativa. A inicialização interrompe a carga e mostra uma opção de tentar novamente quando não consegue gravar dados iniciais ou a migração.
 5. **Status financeiro manual.** Uma conta pendente com vencimento passado não muda automaticamente para vencida. Indicadores e filtros seguem o campo `status` armazenado. É preciso definir a regra esperada.
 6. **Contato global com rótulo de unidade.** Há um único `settings.whatsapp` para todas as unidades e o formulário está disponível nos dois perfis. Se o contato deve variar por unidade ou ser alterado só pelo administrador, a regra precisa ser implementada.
 7. **Escolha automática de profissional.** A reserva do usuário pode recorrer a um profissional de outra sala quando não encontra um ativo na sala selecionada. Convém definir explicitamente se essa alternativa é permitida.
 
-As sobras comprovadas já foram removidas. Próximas prioridades sugeridas: corrigir data/disponibilidade; tratar vínculos e falhas de persistência. A migração de interface para React não corrige essas regras por si só.
+As sobras comprovadas foram removidas e os itens 1 a 4 foram implementados em commits separados. Os itens 5 a 7 continuam como decisões de regra de negócio para uma etapa posterior. A migração de interface para React não corrige essas regras por si só.
 
 ## 10. Testes e funções de apoio
 
@@ -267,6 +268,7 @@ Os arquivos `.test.cjs` executam cenários e verificam resultados. Eles não mos
 | `data-utils.test.cjs` | Testa meses, combinação de filtros, datas semanais e seleção de reservas futuras. |
 | `pages.test.cjs: startPage(filename, options)` | Executa uma página em contexto simulado, capturando armazenamento, formulário, eventos e redirecionamentos. |
 | `navigation.test.cjs: startNavigation()` | Executa o trecho real de roteamento com DOM simulado para verificar foco, volta ao topo e deslocamento horizontal da aba. |
+| `persistence.test.cjs: setup()` | Carrega o código real em contexto isolado e simula formulários/armazenamento. Testa falhas e novas tentativas nos cadastros, pagamento, preferências, reservas e migração, além da consulta de vínculos. As funções locais `element` e os callbacks de captura simulam os elementos e registram mensagens, fechamento e renderização. |
 
 Os callbacks passados a `test()` representam cada cenário. Os métodos anônimos dos objetos simulados substituem recursos do navegador durante o teste. A suíte não comprova a aparência, não cobre todos os cadastros e não reproduz a rolagem real de um navegador.
 

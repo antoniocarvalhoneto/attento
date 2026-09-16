@@ -56,7 +56,7 @@
     settings: 'app_settings'
   };
   function loadData(key) { try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
-  function saveData(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error('Falha ao salvar', key, e); } }
+  function saveData(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 
   function initializeData() {
     if (!loadData(KEYS.units)) {
@@ -186,7 +186,28 @@
     STATE.theme = settings.theme || 'light';
     STATE.whatsapp = settings.whatsapp || '';
   }
-  function persist(key, data) { saveData(key, data); }
+  const STATE_FIELDS = {
+    [KEYS.rooms]: 'rooms', [KEYS.professionals]: 'professionals',
+    [KEYS.schedules]: 'schedules', [KEYS.financial]: 'financialAccounts',
+    [KEYS.insurance]: 'insuranceRecords'
+  };
+  function persist(key, data) {
+    try {
+      saveData(key, data);
+    } catch (error) {
+      showToast('Não foi possível salvar. Verifique o espaço e a permissão de armazenamento do navegador e tente novamente.', 'error');
+      return false;
+    }
+    if (STATE_FIELDS[key]) STATE[STATE_FIELDS[key]] = data;
+    return true;
+  }
+  function saveRecord(key, existing, data, prefix) {
+    const records = STATE[STATE_FIELDS[key]];
+    const next = existing
+      ? records.map(item => item.id === existing.id ? { ...item, ...data } : item)
+      : [...records, { id: uid(prefix), ...data }];
+    return persist(key, next);
+  }
 
   function unitName(id) { return (STATE.units.find(u => u.id === id) || {}).name || '—'; }
   function roomName(id) { return (STATE.rooms.find(r => r.id === id) || {}).name || '—'; }
@@ -284,7 +305,7 @@
       footHTML: `<button class="btn btn-secondary" id="cm-cancel">Cancelar</button><button class="btn btn-danger" id="cm-confirm">Excluir</button>`,
       onMount: (overlay) => {
         overlay.querySelector('#cm-cancel').addEventListener('click', closeModal);
-        overlay.querySelector('#cm-confirm').addEventListener('click', () => { onConfirm(); closeModal(); });
+        overlay.querySelector('#cm-confirm').addEventListener('click', () => { if (onConfirm() !== false) closeModal(); });
       }
     });
   }
@@ -292,14 +313,16 @@
   /* ==========================================================================
      THEME
      ========================================================================== */
-  function applyTheme(theme) {
+  function applyTheme(theme, save = true) {
+    if (save) {
+      const settings = loadData(KEYS.settings) || {};
+      if (!persist(KEYS.settings, { ...settings, theme })) return false;
+    }
     STATE.theme = theme;
     document.documentElement.setAttribute('data-theme', theme);
     const icon = $('#theme-toggle i');
     if (icon) icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-    const settings = loadData(KEYS.settings) || {};
-    settings.theme = theme;
-    persist(KEYS.settings, settings);
+    return true;
   }
   function toggleTheme() { applyTheme(STATE.theme === 'dark' ? 'light' : 'dark'); }
 
@@ -738,8 +761,7 @@
             value: parseCurrencyInput(valueInput.value), note: overlay.querySelector('#al-note').value.trim(),
             status: 'reservado', userId: null
           };
-          STATE.schedules.push(newSchedule);
-          persist(KEYS.schedules, STATE.schedules);
+          if (!persist(KEYS.schedules, [...STATE.schedules, newSchedule])) return;
           closeModal();
           showToast('Horário alocado com sucesso.', 'success');
           rerender();
@@ -772,8 +794,7 @@
             id: uid('sch'), date, unitId: room.unitId, roomId, day, time, shift: '', professionalId: prof ? prof.id : null,
             value: prof ? prof.value : 0, note: '', status: 'reservado', userId: STATE.currentUser.id
           };
-          STATE.schedules.push(newSchedule);
-          persist(KEYS.schedules, STATE.schedules);
+          if (!persist(KEYS.schedules, [...STATE.schedules, newSchedule])) return;
           closeModal();
           showToast('Horário selecionado com sucesso.', 'success');
           const dayLabelFull = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'][day];
@@ -853,9 +874,8 @@
             name, unitId: overlay.querySelector('#r-unit').value, description: overlay.querySelector('#r-desc').value.trim(),
             capacity: Number(overlay.querySelector('#r-cap').value) || 1, status: overlay.querySelector('#r-status').value
           };
-          if (existing) { Object.assign(existing, data); showToast('Sala atualizada com sucesso.', 'success'); }
-          else { STATE.rooms.push({ id: uid('room'), ...data }); showToast('Sala cadastrada com sucesso.', 'success'); }
-          persist(KEYS.rooms, STATE.rooms);
+          if (!saveRecord(KEYS.rooms, existing, data, 'room')) return;
+          showToast(existing ? 'Sala atualizada com sucesso.' : 'Sala cadastrada com sucesso.', 'success');
           closeModal(); rerender();
         });
       }
@@ -939,9 +959,8 @@
             roomId: overlay.querySelector('#p-room').value, shift: overlay.querySelector('#p-shift').value,
             value: parseCurrencyInput(overlay.querySelector('#p-value').value), status: overlay.querySelector('#p-status').value
           };
-          if (existing) { Object.assign(existing, data); showToast('Profissional atualizado com sucesso.', 'success'); }
-          else { STATE.professionals.push({ id: uid('prof'), ...data }); showToast('Profissional cadastrado com sucesso.', 'success'); }
-          persist(KEYS.professionals, STATE.professionals);
+          if (!saveRecord(KEYS.professionals, existing, data, 'prof')) return;
+          showToast(existing ? 'Profissional atualizado com sucesso.' : 'Profissional cadastrado com sucesso.', 'success');
           closeModal(); rerender();
         });
       }
@@ -1045,17 +1064,15 @@
             value: parseCurrencyInput(overlay.querySelector('#fn-value').value), dueDate: overlay.querySelector('#fn-due').value,
             status, paymentDate: status === 'pago' ? (existing && existing.paymentDate ? existing.paymentDate : todayISO()) : null
           };
-          if (existing) { Object.assign(existing, data); showToast('Conta atualizada com sucesso.', 'success'); }
-          else { STATE.financialAccounts.push({ id: uid('fin'), ...data }); showToast('Conta cadastrada com sucesso.', 'success'); }
-          persist(KEYS.financial, STATE.financialAccounts);
+          if (!saveRecord(KEYS.financial, existing, data, 'fin')) return;
+          showToast(existing ? 'Conta atualizada com sucesso.' : 'Conta cadastrada com sucesso.', 'success');
           closeModal(); rerender();
         });
       }
     });
   }
   function markPaid(account) {
-    account.status = 'pago'; account.paymentDate = todayISO();
-    persist(KEYS.financial, STATE.financialAccounts);
+    if (!saveRecord(KEYS.financial, account, { status: 'pago', paymentDate: todayISO() })) return;
     showToast('Conta marcada como paga.', 'success');
     rerender();
   }
@@ -1130,9 +1147,8 @@
             insuranceType: overlay.querySelector('#in-type').value, professionalId: overlay.querySelector('#in-prof').value,
             quantity: Number(qty.value) || 1, unitValue: parseCurrencyInput(val.value), status: overlay.querySelector('#in-status').value
           };
-          if (existing) { Object.assign(existing, data); showToast('Registro atualizado com sucesso.', 'success'); }
-          else { STATE.insuranceRecords.push({ id: uid('ins'), ...data }); showToast('Registro cadastrado com sucesso.', 'success'); }
-          persist(KEYS.insurance, STATE.insuranceRecords);
+          if (!saveRecord(KEYS.insurance, existing, data, 'ins')) return;
+          showToast(existing ? 'Registro atualizado com sucesso.' : 'Registro cadastrado com sucesso.', 'success');
           closeModal(); rerender();
         });
       }
@@ -1281,8 +1297,9 @@
         if (btn.dataset.action === 'view-room') viewRoomModal(room);
         if (btn.dataset.action === 'edit-room') openRoomModal(room);
         if (btn.dataset.action === 'delete-room') confirmModal(`Tem certeza que deseja excluir a sala "${room.name}"?`, () => {
-          if (!canDelete('room', id)) return;
-          STATE.rooms = STATE.rooms.filter(r => r.id !== id); persist(KEYS.rooms, STATE.rooms); showToast('Registro excluído.', 'success'); rerender();
+          if (!canDelete('room', id)) return false;
+          if (!persist(KEYS.rooms, STATE.rooms.filter(r => r.id !== id))) return false;
+          showToast('Registro excluído.', 'success'); rerender();
         });
       });
     }
@@ -1298,8 +1315,8 @@
         if (btn.dataset.action === 'view-prof') viewProfModal(p);
         if (btn.dataset.action === 'edit-prof') openProfModal(p);
         if (btn.dataset.action === 'delete-prof') confirmModal(`Tem certeza que deseja excluir "${p.name}"?`, () => {
-          if (!canDelete('professional', id)) return;
-          STATE.professionals = STATE.professionals.filter(x => x.id !== id); persist(KEYS.professionals, STATE.professionals);
+          if (!canDelete('professional', id)) return false;
+          if (!persist(KEYS.professionals, STATE.professionals.filter(x => x.id !== id))) return false;
           showToast('Registro excluído.', 'success'); rerender();
         });
       });
@@ -1322,7 +1339,7 @@
         if (btn.dataset.action === 'edit-fin') openFinModal(a);
         if (btn.dataset.action === 'pay-fin') markPaid(a);
         if (btn.dataset.action === 'delete-fin') confirmModal(`Tem certeza que deseja excluir a conta "${a.description}"?`, () => {
-          STATE.financialAccounts = STATE.financialAccounts.filter(x => x.id !== id); persist(KEYS.financial, STATE.financialAccounts);
+          if (!persist(KEYS.financial, STATE.financialAccounts.filter(x => x.id !== id))) return false;
           showToast('Registro excluído.', 'success'); rerender();
         });
       });
@@ -1339,9 +1356,12 @@
         const btn = e.target.closest('[data-action]'); if (!btn) return;
         const id = btn.dataset.id; const i = STATE.insuranceRecords.find(x => x.id === id);
         if (btn.dataset.action === 'edit-ins') openInsModal(i);
-        if (btn.dataset.action === 'pay-ins') { i.status = 'pago'; persist(KEYS.insurance, STATE.insuranceRecords); showToast('Registro marcado como pago.', 'success'); rerender(); }
+        if (btn.dataset.action === 'pay-ins') {
+          if (!saveRecord(KEYS.insurance, i, { status: 'pago' })) return;
+          showToast('Registro marcado como pago.', 'success'); rerender();
+        }
         if (btn.dataset.action === 'delete-ins') confirmModal(`Tem certeza que deseja excluir este registro de convênio?`, () => {
-          STATE.insuranceRecords = STATE.insuranceRecords.filter(x => x.id !== id); persist(KEYS.insurance, STATE.insuranceRecords);
+          if (!persist(KEYS.insurance, STATE.insuranceRecords.filter(x => x.id !== id))) return false;
           showToast('Registro excluído.', 'success'); rerender();
         });
       });
@@ -1381,10 +1401,10 @@
           $('#settings-whatsapp-error').textContent = 'Informe um número válido com DDD.';
           return;
         }
-        STATE.whatsapp = normalized;
         const settings = loadData(KEYS.settings) || {};
         settings.whatsapp = normalized;
-        persist(KEYS.settings, settings);
+        if (!persist(KEYS.settings, settings)) return;
+        STATE.whatsapp = normalized;
         showToast(normalized ? 'Contato atualizado com sucesso.' : 'Contato removido.', 'success');
         rerender();
       });
@@ -1406,9 +1426,16 @@
       location.replace('login.html' + location.hash);
       return;
     }
-    initializeData();
-    loadAllIntoState();
-    applyTheme(STATE.theme);
+    try {
+      initializeData();
+      loadAllIntoState();
+    } catch (error) {
+      $('#app-shell').hidden = false;
+      $('#view-root').innerHTML = '<div class="card" role="alert"><h1>Não foi possível carregar o painel</h1><p>Verifique o espaço e a permissão de armazenamento do navegador. Seus dados existentes não foram apagados.</p><button class="btn btn-primary" id="retry-load">Tentar novamente</button></div>';
+      $('#retry-load').addEventListener('click', () => location.reload());
+      return;
+    }
+    applyTheme(STATE.theme, false);
     bindGlobalEvents();
     showApp();
   }
