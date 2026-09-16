@@ -193,6 +193,24 @@
   function profName(id) { return (STATE.professionals.find(p => p.id === id) || {}).name || '—'; }
   function whatsappLink(message) { return contact.whatsappUrl(STATE.whatsapp, message); }
 
+  function canDelete(kind, id) {
+    try {
+      const records = {};
+      for (const key of ['professionals', 'schedules', 'financial', 'insurance']) {
+        records[key] = JSON.parse(localStorage.getItem(KEYS[key]));
+        if (!Array.isArray(records[key])) throw new Error('Registros indisponíveis');
+      }
+      if (dataUtils.deletionBlocked(kind, id, records)) {
+        showToast('Este cadastro possui registros vinculados. Inative-o para preservar o histórico.', 'error');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      showToast('Não foi possível verificar os vínculos. Recarregue a página e tente novamente.', 'error');
+      return false;
+    }
+  }
+
   /* ==========================================================================
      TOASTS
      ========================================================================== */
@@ -1263,6 +1281,7 @@
         if (btn.dataset.action === 'view-room') viewRoomModal(room);
         if (btn.dataset.action === 'edit-room') openRoomModal(room);
         if (btn.dataset.action === 'delete-room') confirmModal(`Tem certeza que deseja excluir a sala "${room.name}"?`, () => {
+          if (!canDelete('room', id)) return;
           STATE.rooms = STATE.rooms.filter(r => r.id !== id); persist(KEYS.rooms, STATE.rooms); showToast('Registro excluído.', 'success'); rerender();
         });
       });
@@ -1279,6 +1298,7 @@
         if (btn.dataset.action === 'view-prof') viewProfModal(p);
         if (btn.dataset.action === 'edit-prof') openProfModal(p);
         if (btn.dataset.action === 'delete-prof') confirmModal(`Tem certeza que deseja excluir "${p.name}"?`, () => {
+          if (!canDelete('professional', id)) return;
           STATE.professionals = STATE.professionals.filter(x => x.id !== id); persist(KEYS.professionals, STATE.professionals);
           showToast('Registro excluído.', 'success'); rerender();
         });

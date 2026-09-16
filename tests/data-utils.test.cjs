@@ -8,6 +8,18 @@ const context = { window: {}, Intl, Date };
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../data-utils.js'), 'utf8'), context);
 const data = context.window.AttentoData;
 
+test('exclusão protege todos os vínculos, inclusive históricos e profissionais inativos', () => {
+  const empty = { professionals: [], schedules: [], financial: [], insurance: [] };
+  assert.equal(data.deletionBlocked('room', 'r', empty), false);
+  assert.equal(data.deletionBlocked('professional', 'p', empty), false);
+  assert.equal(data.deletionBlocked('room', 'r', { ...empty, professionals: [{ roomId: 'r', status: 'inativo' }] }), true);
+  assert.equal(data.deletionBlocked('room', 'r', { ...empty, schedules: [{ roomId: 'r', date: '2020-01-01' }] }), true);
+  for (const key of ['schedules', 'financial', 'insurance']) {
+    assert.equal(data.deletionBlocked('professional', 'p', { ...empty, [key]: [{ professionalId: 'p' }] }), true);
+    assert.equal(data.deletionBlocked('professional', 'other', { ...empty, [key]: [{ professionalId: 'p' }] }), false);
+  }
+});
+
 test('disponibilidade bloqueia passado, manutenção, sala inativa e conflito', () => {
   const now = new Date(2026, 8, 16, 12);
   const room = { id: 'r', status: 'disponivel' };

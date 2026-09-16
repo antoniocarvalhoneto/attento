@@ -76,6 +76,16 @@
     return '';
   }
 
+  function deletionBlocked(kind, id, records) {
+    if (kind === 'room') {
+      return records.professionals.some(item => item.roomId === id) || records.schedules.some(item => item.roomId === id);
+    }
+    if (kind === 'professional') {
+      return [records.schedules, records.financial, records.insurance].some(items => items.some(item => item.professionalId === id));
+    }
+    return true;
+  }
+
   function weekRangeLabel(week, now = new Date()) {
     const start = startOfCurrentWeek(now);
     start.setDate(start.getDate() + Number(week || 0) * 7);
@@ -85,5 +95,5 @@
     return `${short(start)} a ${short(end)}`;
   }
 
-  window.AttentoData = { filterAccounts, monthOptions, upcomingSchedules, scheduleDate, weekRangeLabel, dateKey, slotDate, migrateSchedules, inWeek, slotUnavailableReason };
+  window.AttentoData = { filterAccounts, monthOptions, upcomingSchedules, scheduleDate, weekRangeLabel, dateKey, slotDate, migrateSchedules, inWeek, slotUnavailableReason, deletionBlocked };
 })();
