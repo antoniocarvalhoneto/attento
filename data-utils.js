@@ -66,6 +66,16 @@
       .sort((a, b) => scheduleDate(a, now) - scheduleDate(b, now));
   }
 
+  function slotUnavailableReason(room, schedules, date, time, now = new Date()) {
+    if (!room || room.status !== 'disponivel') return 'Esta sala não está disponível para reservas.';
+    const slot = scheduleDate({ date, time });
+    if (!Number.isFinite(slot.getTime()) || slot <= now) return 'Este horário já passou ou é inválido.';
+    if (schedules.some(schedule => schedule.roomId === room.id && schedule.date === date && schedule.time === time && schedule.status !== 'disponivel')) {
+      return 'Este horário já está reservado ou indisponível.';
+    }
+    return '';
+  }
+
   function weekRangeLabel(week, now = new Date()) {
     const start = startOfCurrentWeek(now);
     start.setDate(start.getDate() + Number(week || 0) * 7);
@@ -75,5 +85,5 @@
     return `${short(start)} a ${short(end)}`;
   }
 
-  window.AttentoData = { filterAccounts, monthOptions, upcomingSchedules, scheduleDate, weekRangeLabel, dateKey, slotDate, migrateSchedules, inWeek };
+  window.AttentoData = { filterAccounts, monthOptions, upcomingSchedules, scheduleDate, weekRangeLabel, dateKey, slotDate, migrateSchedules, inWeek, slotUnavailableReason };
 })();

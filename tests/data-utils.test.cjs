@@ -8,6 +8,22 @@ const context = { window: {}, Intl, Date };
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../data-utils.js'), 'utf8'), context);
 const data = context.window.AttentoData;
 
+test('disponibilidade bloqueia passado, manutenção, sala inativa e conflito', () => {
+  const now = new Date(2026, 8, 16, 12);
+  const room = { id: 'r', status: 'disponivel' };
+  assert.equal(data.slotUnavailableReason(room, [], '2026-09-16', '13:00', now), '');
+  assert.ok(data.slotUnavailableReason(room, [], '2026-09-16', '12:00', now));
+  assert.ok(data.slotUnavailableReason(room, [], '2026-09-15', '13:00', now));
+  assert.ok(data.slotUnavailableReason(null, [], '2026-09-17', '13:00', now));
+  for (const status of ['manutencao', 'inativa']) {
+    assert.ok(data.slotUnavailableReason({ ...room, status }, [], '2026-09-17', '13:00', now));
+  }
+  const schedules = [{ roomId: 'r', date: '2026-09-16', time: '13:00', status: 'reservado' }];
+  assert.ok(data.slotUnavailableReason(room, schedules, '2026-09-16', '13:00', now));
+  assert.equal(data.slotUnavailableReason(room, schedules, '2026-09-17', '13:00', now), '');
+  assert.equal(data.slotUnavailableReason({ ...room, id: 'other' }, schedules, '2026-09-16', '13:00', now), '');
+});
+
 test('migração fixa datas legadas uma única vez, inclusive na virada do ano', () => {
   const legacy = [{ id: 'a', week: 1, day: 0, time: '09:00', status: 'reservado' }];
   const migrated = data.migrateSchedules(legacy, new Date(2026, 11, 30));

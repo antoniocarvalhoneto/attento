@@ -629,6 +629,21 @@
   function scheduleFor(week, roomId, day, time) {
     return STATE.schedules.find(s => s.date === dataUtils.slotDate(week, day) && s.roomId === roomId && s.time === time);
   }
+  function checkSlot(roomId, date, time) {
+    try {
+      const schedules = JSON.parse(localStorage.getItem(KEYS.schedules));
+      const rooms = JSON.parse(localStorage.getItem(KEYS.rooms));
+      if (!Array.isArray(schedules) || !Array.isArray(rooms)) throw new Error('Dados da agenda indisponíveis');
+      const reason = dataUtils.slotUnavailableReason(rooms.find(room => room.id === roomId), schedules, date, time);
+      if (reason) { showToast(reason, 'error'); return false; }
+      STATE.schedules = schedules;
+      STATE.rooms = rooms;
+      return true;
+    } catch (error) {
+      showToast('Não foi possível verificar a agenda. Recarregue a página e tente novamente.', 'error');
+      return false;
+    }
+  }
   function renderRoomAgenda(room, week) {
     return `
   <div class="section">
@@ -641,10 +656,11 @@
           <div class="agenda-time">${time}</div>
           ${DAYS.map((d, dayIdx) => {
       const sc = scheduleFor(week, room.id, dayIdx, time);
-      const status = sc ? sc.status : 'disponivel';
-      const clickable = status === 'disponivel';
-      return `<div class="agenda-cell ${status}" ${clickable ? `data-action="slot" data-room="${room.id}" data-day="${dayIdx}" data-time="${time}" data-week="${week}"` : ''} ${!clickable ? `tabindex="0" aria-label="${statusLabelPlain(status)}"` : `tabindex="0" role="button" aria-label="Horário disponível ${room.name} ${DAYS[dayIdx]} ${time}"`}>
-              ${status !== 'disponivel' ? `<span class="agenda-cell-label">${statusLabelPlain(status)}</span>` : ''}
+      const reason = dataUtils.slotUnavailableReason(room, STATE.schedules, dataUtils.slotDate(week, dayIdx), time);
+      const status = sc ? sc.status : (room.status === 'manutencao' ? 'manutencao' : (reason ? 'ocupado' : 'disponivel'));
+      const clickable = !reason;
+      return `<div class="agenda-cell ${status}" ${clickable ? `data-action="slot" data-room="${room.id}" data-day="${dayIdx}" data-time="${time}" data-week="${week}"` : ''} ${!clickable ? `tabindex="0" aria-disabled="true" title="${esc(reason)}" aria-label="${esc(reason)}"` : `tabindex="0" role="button" aria-label="Horário disponível ${room.name} ${DAYS[dayIdx]} ${time}"`}>
+              ${!clickable ? `<span class="agenda-cell-label">${sc ? statusLabelPlain(status) : (room.status === 'manutencao' ? 'Manutenção' : 'Encerrado')}</span>` : ''}
             </div>`;
     }).join('')}
         `).join('')}
@@ -658,6 +674,8 @@
 
   function openAllocateModal(roomId, day, time, week) {
     const room = STATE.rooms.find(r => r.id === roomId);
+    const date = dataUtils.slotDate(week, day);
+    if (!checkSlot(roomId, date, time)) return;
     const activeProfs = STATE.professionals.filter(p => p.status === 'ativo');
     openModal({
       title: 'Alocar profissional',
@@ -695,8 +713,9 @@
         overlay.querySelector('#al-confirm').addEventListener('click', () => {
           const profSel = overlay.querySelector('#al-prof');
           if (!profSel.value) { showToast('Selecione um profissional.', 'error'); return; }
+          if (!checkSlot(roomId, date, time)) return;
           const newSchedule = {
-            id: uid('sch'), date: dataUtils.slotDate(week, day), unitId: room.unitId, roomId, day, time,
+            id: uid('sch'), date, unitId: room.unitId, roomId, day, time,
             shift: overlay.querySelector('#al-shift').value, professionalId: profSel.value,
             value: parseCurrencyInput(valueInput.value), note: overlay.querySelector('#al-note').value.trim(),
             status: 'reservado', userId: null
@@ -712,6 +731,8 @@
   }
   function openSelectSlotModal(roomId, day, time, week) {
     const room = STATE.rooms.find(r => r.id === roomId);
+    const date = dataUtils.slotDate(week, day);
+    if (!checkSlot(roomId, date, time)) return;
     const eligibleProfs = STATE.professionals.filter(p => p.status === 'ativo' && p.roomId === roomId);
     const prof = eligibleProfs[0] || STATE.professionals.find(p => p.status === 'ativo');
     openModal({
@@ -728,8 +749,9 @@
       onMount: (overlay) => {
         overlay.querySelector('#sel-cancel').addEventListener('click', closeModal);
         overlay.querySelector('#sel-confirm').addEventListener('click', () => {
+          if (!checkSlot(roomId, date, time)) return;
           const newSchedule = {
-            id: uid('sch'), date: dataUtils.slotDate(week, day), unitId: room.unitId, roomId, day, time, shift: '', professionalId: prof ? prof.id : null,
+            id: uid('sch'), date, unitId: room.unitId, roomId, day, time, shift: '', professionalId: prof ? prof.id : null,
             value: prof ? prof.value : 0, note: '', status: 'reservado', userId: STATE.currentUser.id
           };
           STATE.schedules.push(newSchedule);
