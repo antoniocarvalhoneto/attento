@@ -14,7 +14,21 @@
 
 **Attento** é uma aplicação web (SPA) para administrar a rotina de um espaço com múltiplas salas e profissionais: disponibilidade de horários, alocação em agenda semanal, controle de contas a pagar/receber, convênios e relatórios — tudo em uma interface única, com dois níveis de acesso (**administrador** e **usuário**).
 
-O projeto é **100% front-end**: não depende de servidor, banco de dados ou build step. Todos os dados são gerados como seed na primeira execução e persistidos no `localStorage` do navegador.
+O projeto é **100% front-end**, com dados de demonstração persistidos no `localStorage`. A versão atual na raiz não exige build. A migração incremental em `react-app/` usa React, TypeScript e Vite, preservando o painel atual durante a transição.
+
+## Migração para React
+
+Etapa 1 concluída: base React, limpeza do template e integração temporária com o painel atual na mesma origem. O formulário React será a próxima etapa; o acesso ainda passa pelo login existente.
+
+```bash
+cd react-app
+npm ci
+npm run dev
+```
+
+Abra **http://127.0.0.1:5173**. O painel atual é servido em `/legacy/index.html`, sem precisar de outro servidor. Use `npm run lint`, `npm run build` e `npm run preview` para verificar e testar o build. Detalhes em [react-app/README.md](react-app/README.md).
+
+O armazenamento é separado por origem: mudar host ou porta não transporta os dados existentes. No mesmo endereço, login e painel compartilham sessão e cadastros. Os arquivos da raiz continuam disponíveis para execução independente.
 
 ## Índice
 
@@ -57,7 +71,7 @@ O projeto é **100% front-end**: não depende de servidor, banco de dados ou bui
 | Tipografia   | Google Fonts — Manrope (display) + Inter (texto)  |
 | Persistência | `localStorage` do navegador                       |
 
-Não há dependências de build (webpack, npm, etc.) nem chamadas a APIs externas além das fontes e ícones (CDN).
+A versão da raiz não tem dependências de build. A versão em `react-app/` usa npm e Vite. Ambas continuam sem backend e carregam fontes e ícones por CDN.
 
 ## Como executar
 
@@ -112,7 +126,7 @@ O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar 
 Para verificar a autenticação, o formulário e os fluxos de entrada das páginas com Node.js:
 
 ```bash
-node --test
+node --test tests/*.test.cjs
 ```
 
 ## Persistência de dados

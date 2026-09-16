@@ -237,7 +237,7 @@ Constatações da leitura do código e busca de referências. Os itens marcados 
 | `reset()` retornado por `AttentoLogin.mount()` | Removido. Nenhum consumidor utilizava esse retorno. |
 | `ROOMS_CACHE` | É usado na criação da agenda, mas repete manualmente vínculos de salas e unidades. Convém obter essas informações da mesma fonte dos cadastros. Não remover sem substituir seu uso. |
 | Resumo semanal e gráfico no dashboard | Apresentam as mesmas contagens por dia em dois lugares. É uma repetição de interface, não cálculo sem uso. Pode ser consolidada. |
-| `react-app/` | Contém o esqueleto separado da migração, com tela de exemplo e contador. Não é carregado por `index.html` ou `login.html` da raiz. Está fora desta documentação de funções do sistema e não precisa ser apagado para limpar a aplicação atual. |
+| `react-app/` | Base da migração ativa. Não é carregada pelas páginas da raiz; possui entrada própria e disponibiliza o painel existente sob `/legacy/`. |
 
 Não considero inúteis `navigate` e `rerender`: representam intenções diferentes. Também devem permanecer a verificação de sessão nas duas páginas, a restauração após histórico e os testes. Os dados de demonstração têm utilidade enquanto este projeto funcionar como demonstração.
 
@@ -275,3 +275,13 @@ Os callbacks passados a `test()` representam cada cenário. Os métodos anônimo
 ## 11. Fundo do login
 
 O efeito de luz não tem função JavaScript. `style.css` cria duas camadas decorativas com `::before` e `::after`, usa gradientes radiais e anima posição, escala e opacidade com `login-light-drift`. O formulário fica acima delas. A preferência `prefers-reduced-motion: reduce` desliga a animação; nesse caso as luzes permanecem estáticas.
+
+## 12. Migração React — etapa 1
+
+`react-app/src/main.tsx` monta a árvore React em `#root`, ativa `StrictMode` e importa o CSS da raiz. `App()` apresenta a marca e o acesso ao login existente. Não executa os eventos DOM de `login.js` dentro de React.
+
+`legacyPanel()` em `tooling/legacy.ts` é uma integração temporária de desenvolvimento/build. `readLegacyFile(name)` lê o arquivo da raiz. O hook `configureServer` atende somente os nomes presentes na lista de arquivos sob `/legacy/`; caminhos desconhecidos retornam 404. O hook `generateBundle` inclui a mesma lista em `dist/legacy/`.
+
+O painel mantém sua navegação relativa, autenticação e persistência. Login e painel ficam na mesma origem; dados de outra porta/host não são importados. O build deve ser servido na raiz da origem. Ao migrar os módulos, essa ponte será retirada.
+
+Referências técnicas: [API de plugins do Vite](https://vite.dev/guide/api-plugin.html) e [StrictMode do React](https://react.dev/reference/react/StrictMode).
