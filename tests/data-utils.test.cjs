@@ -8,6 +8,29 @@ const context = { window: {}, Intl, Date };
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../data-utils.js'), 'utf8'), context);
 const data = context.window.AttentoData;
 
+test('migração fixa datas legadas uma única vez, inclusive na virada do ano', () => {
+  const legacy = [{ id: 'a', week: 1, day: 0, time: '09:00', status: 'reservado' }];
+  const migrated = data.migrateSchedules(legacy, new Date(2026, 11, 30));
+  assert.equal(migrated[0].date, '2027-01-04');
+  assert.equal(legacy[0].date, undefined);
+  const again = data.migrateSchedules(migrated, new Date(2027, 0, 12));
+  assert.equal(again[0].date, '2027-01-04');
+  assert.equal(data.upcomingSchedules(again, new Date(2027, 0, 12)).length, 0);
+});
+
+test('reserva da próxima semana passa para a atual sem mudar sua data', () => {
+  const schedule = { date: '2026-09-21', time: '09:00', status: 'reservado' };
+  assert.equal(data.inWeek(schedule, 1, new Date(2026, 8, 15)), true);
+  assert.equal(data.inWeek(schedule, 0, new Date(2026, 8, 21)), true);
+  assert.equal(data.inWeek(schedule, 0, new Date(2026, 8, 28)), false);
+  assert.equal(data.scheduleDate(schedule, new Date(2026, 8, 28)).getDate(), 21);
+  assert.equal(data.slotDate(1, 0, new Date(2026, 8, 15)), schedule.date);
+});
+
+test('dateKey mantém o dia do calendário local perto da meia-noite', () => {
+  assert.equal(data.dateKey(new Date(2026, 8, 15, 23, 59)), '2026-09-15');
+});
+
 test('gera os meses existentes nos dados em ordem mais recente', () => {
   const options = data.monthOptions([
     { dueDate: '2026-08-10' }, { dueDate: '2026-09-15' }, { dueDate: '2026-08-20' }, { dueDate: '' }

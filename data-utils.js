@@ -34,11 +34,30 @@
   }
 
   function scheduleDate(schedule, now = new Date()) {
-    const date = startOfCurrentWeek(now);
-    date.setDate(date.getDate() + Number(schedule.week || 0) * 7 + Number(schedule.day || 0));
+    const date = schedule.date ? new Date(schedule.date + 'T00:00:00') : startOfCurrentWeek(now);
+    if (!schedule.date) date.setDate(date.getDate() + Number(schedule.week || 0) * 7 + Number(schedule.day || 0));
     const [hour, minute] = String(schedule.time || '00:00').split(':').map(Number);
     date.setHours(hour || 0, minute || 0, 0, 0);
     return date;
+  }
+
+  function dateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function slotDate(week, day, now = new Date()) {
+    return dateKey(scheduleDate({ week, day }, now));
+  }
+
+  function migrateSchedules(schedules, now = new Date()) {
+    return schedules.map(schedule => schedule.date ? schedule : { ...schedule, date: slotDate(schedule.week, schedule.day, now) });
+  }
+
+  function inWeek(schedule, week, now = new Date()) {
+    const start = slotDate(week, 0, now);
+    const end = slotDate(week + 1, 0, now);
+    const date = schedule.date || dateKey(scheduleDate(schedule, now));
+    return date >= start && date < end;
   }
 
   function upcomingSchedules(schedules, now = new Date()) {
@@ -56,5 +75,5 @@
     return `${short(start)} a ${short(end)}`;
   }
 
-  window.AttentoData = { filterAccounts, monthOptions, upcomingSchedules, scheduleDate, weekRangeLabel };
+  window.AttentoData = { filterAccounts, monthOptions, upcomingSchedules, scheduleDate, weekRangeLabel, dateKey, slotDate, migrateSchedules, inWeek };
 })();

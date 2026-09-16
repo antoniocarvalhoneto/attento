@@ -88,7 +88,7 @@ O contrato atual de `onSubmit` é síncrono. Uma futura autenticação por API e
 | `monthOptions(accounts)` | Extrai meses de vencimento sem repetição, ordena do mais recente para o mais antigo e cria opções com rótulos em português. |
 | `filterAccounts(accounts, filtros)` | Combina profissional, status e mês de vencimento. O valor `all` desativa o respectivo filtro. Retorna uma nova lista. |
 | `startOfCurrentWeek(now)` | Calcula a segunda-feira da semana de referência, à meia-noite local, sem alterar `now`. |
-| `scheduleDate(schedule, now)` | Converte `week`, `day` e `time` de um horário em uma data, tomando a segunda-feira atual como referência. |
+| `scheduleDate(schedule, now)` | Usa a data fixa e a hora do registro. Aceita `week` e `day` como alternativa para converter dados legados e posições na grade. |
 | `upcomingSchedules(schedules, now)` | Mantém apenas registros `reservado` cujo horário ainda não passou e ordena pela data calculada. |
 | `weekRangeLabel(week, now)` | Produz o intervalo de segunda a sábado da semana relativa, como `14/09 a 19/09`. |
 | `short(date)` | Função local de `weekRangeLabel`: formata dia e mês. |
@@ -113,7 +113,7 @@ O contrato atual de `onSubmit` é síncrono. Uma futura autenticação por API e
 | `fmtCurrency(n)` | Formata um número como moeda brasileira. Valores convertidos para zero ou inválidos resultam em zero. |
 | `fmtDate(iso)` | Reorganiza `AAAA-MM-DD` para `DD/MM/AAAA`; exibe travessão quando o valor está vazio. |
 | `fmtLongDate(date)` | Formata a data por extenso em português, usando hoje como padrão. |
-| `todayISO()` | Retorna a parte `AAAA-MM-DD` da data atual em UTC. Pode diferir do dia local perto da meia-noite. |
+| `todayISO()` | Retorna o dia atual no calendário local como `AAAA-MM-DD`. |
 | `parseCurrencyInput(str)` | Converte texto monetário brasileiro em número, retirando pontos de milhar e trocando a vírgula decimal. |
 | `maskCurrencyInput(el)` | Conecta um evento de digitação que trata os dígitos como centavos e reapresenta o valor com duas casas decimais. |
 | `downloadCSV(filename, rows)` | Monta CSV separado por ponto e vírgula, escapa aspas e separadores, cria um arquivo temporário no navegador e dispara o download. |
@@ -244,7 +244,7 @@ Não considero inúteis `navigate` e `rerender`: representam intenções diferen
 
 Estes pontos são distintos da limpeza de código. Foram identificados por leitura; não constituem uma auditoria completa nem validação visual.
 
-1. **Semanas relativas nos registros.** `scheduleDate()` recalcula datas a partir da semana atual, mas os registros só guardam `week: 0` ou `week: 1`. Ao passar uma semana, a mesma reserva passa a representar outra data. Reservas reais precisam guardar uma data estável.
+1. **Datas fixas implementadas.** As reservas usam `date` no formato `AAAA-MM-DD`. `migrateSchedules()` converte registros legados uma única vez, tomando a semana do primeiro acesso após a atualização como referência; a data histórica original não pode ser recuperada do formato anterior. `dateKey()` formata o dia local, `slotDate()` converte a posição na grade em data e `inWeek()` verifica a semana da reserva. Dados já datados não são deslocados pela migração.
 2. **Disponibilidade incompleta.** `renderRoomAgenda()` libera células sem registro, sem verificar se a hora passou ou se a sala está em manutenção. Os filtros de horários futuros usados em resumos não bloqueiam novas reservas na grade. Os eventos de confirmação também não revalidam a disponibilidade.
 3. **Exclusões sem tratamento de vínculos.** Excluir uma sala ou profissional remove apenas seu cadastro. Reservas, contas e convênios podem continuar apontando para o ID excluído. É preciso decidir entre impedir a exclusão, inativar ou tratar os vínculos.
 4. **Falha ao salvar pode parecer sucesso.** `saveData()` captura o erro e não sinaliza a falha aos formulários, que podem exibir sucesso mesmo sem persistência. O login já tem uma verificação adicional; os cadastros não.

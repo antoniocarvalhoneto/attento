@@ -15,7 +15,7 @@
   const fmtCurrency = (n) => (Number(n) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmtDate = (iso) => { if (!iso) return '—'; const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
   const fmtLongDate = (date = new Date()) => date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const todayISO = () => new Date().toISOString().slice(0, 10);
+  const todayISO = () => dataUtils.dateKey(new Date());
 
   
   function parseCurrencyInput(str) {
@@ -119,7 +119,7 @@
       // Alguns horários reservados pelo usuário demo, para "Meus horários"
       schedules.push({ id: uid('sch'), week: 0, unitId: 'unit_centro', roomId: 'room_1', day: 1, time: '09:00', shift: 'Manhã', professionalId: 'prof_1', value: 500, note: 'Avaliação inicial', status: 'reservado', userId: 'user_demo' });
       schedules.push({ id: uid('sch'), week: 0, unitId: 'unit_sul', roomId: 'room_5', day: 3, time: '18:00', shift: 'Noite', professionalId: 'prof_4', value: 340, note: '', status: 'reservado', userId: 'user_demo' });
-      saveData(KEYS.schedules, schedules);
+      saveData(KEYS.schedules, dataUtils.migrateSchedules(schedules));
     }
     if (!loadData(KEYS.financial)) {
       const financial = [
@@ -175,6 +175,11 @@
     STATE.rooms = loadData(KEYS.rooms) || [];
     STATE.professionals = loadData(KEYS.professionals) || [];
     STATE.schedules = loadData(KEYS.schedules) || [];
+    if (STATE.schedules.some(schedule => !schedule.date)) {
+      const migrated = dataUtils.migrateSchedules(STATE.schedules);
+      saveData(KEYS.schedules, migrated);
+      STATE.schedules = migrated;
+    }
     STATE.financialAccounts = loadData(KEYS.financial) || [];
     STATE.insuranceRecords = loadData(KEYS.insurance) || [];
     const settings = loadData(KEYS.settings) || {};
@@ -431,7 +436,7 @@
   }
   function renderDashboardAdmin() {
     const s = computeDashboardStats();
-    const weekCounts = DAYS.map((d, i) => STATE.schedules.filter(sc => sc.week === 0 && sc.day === i && sc.status === 'reservado').length);
+    const weekCounts = DAYS.map((d, i) => STATE.schedules.filter(sc => sc.date === dataUtils.slotDate(0, i) && sc.status === 'reservado').length);
     const chartStep = Math.max(1, Math.ceil(Math.max(...weekCounts) / 4));
     const chartMax = chartStep * 4;
     const weekTotal = weekCounts.reduce((total, count) => total + count, 0);
@@ -471,12 +476,12 @@
     <div class="section-head">
       <div>
         <h2>Agenda de reservas</h2>
-        <p>Semana atual e próxima semana · Exibindo ${agendaPreview.length} de ${reservations.length} ${reservations.length === 1 ? 'reserva' : 'reservas'}</p>
+        <p>Próximas reservas · Exibindo ${agendaPreview.length} de ${reservations.length} ${reservations.length === 1 ? 'reserva' : 'reservas'}</p>
       </div>
       <a href="#availability">Abrir agenda completa</a>
     </div>
-    ${tableOrEmpty(agendaPreview, ['Semana', 'Horário', 'Sala', 'Profissional', 'Unidade', 'Status'], agendaPreview.map(sc => [
-      sc.week === 0 ? 'Atual' : 'Próxima', `${DAYS[sc.day]} · ${sc.time}`, roomName(sc.roomId), sc.professionalId ? profName(sc.professionalId) : '—', unitName(sc.unitId), statusBadge(sc.status)
+    ${tableOrEmpty(agendaPreview, ['Data', 'Horário', 'Sala', 'Profissional', 'Unidade', 'Status'], agendaPreview.map(sc => [
+      fmtDate(sc.date), `${DAYS[sc.day]} · ${sc.time}`, roomName(sc.roomId), sc.professionalId ? profName(sc.professionalId) : '—', unitName(sc.unitId), statusBadge(sc.status)
     ]), 'Nenhuma reserva cadastrada. Abra a agenda para reservar um horário.', 'fa-calendar-xmark')}
   </div>
 
@@ -526,7 +531,7 @@
   }
   function renderDashboardUser() {
     const mine = dataUtils.upcomingSchedules(STATE.schedules.filter(sc => sc.userId === STATE.currentUser.id));
-    const weekReservations = mine.filter(sc => sc.week === 0).length;
+    const weekReservations = mine.filter(sc => dataUtils.inWeek(sc, 0)).length;
     const proximo = mine[0];
     const disponiveis = STATE.rooms.filter(r => r.status === 'disponivel').length;
     const helpMessage = 'Olá! Preciso de ajuda com meu acesso ou meus horários no Attento.';
@@ -541,7 +546,7 @@
   </div>
   <div class="section">
     <div class="stat-grid">
-      ${statCard('fa-clock', 'neutral', 'Próximo horário', proximo ? `${DAYS[proximo.day]} ${proximo.time}` : 'Nenhum')}
+      ${statCard('fa-clock', 'neutral', 'Próximo horário', proximo ? `${fmtDate(proximo.date)} ${proximo.time}` : 'Nenhum')}
       ${statCard('fa-calendar-days', 'neutral', 'Reservas nesta semana', weekReservations)}
       ${statCard('fa-door-open', 'neutral', 'Salas disponíveis', disponiveis)}
       ${helpUrl
@@ -551,7 +556,7 @@
   </div>
   <div class="section">
     <div class="section-head"><h2>Meus próximos horários</h2></div>
-    ${tableOrEmpty(mine, ['Dia', 'Horário', 'Sala', 'Unidade', 'Profissional'], mine.map(m => [DAYS[m.day], m.time, roomName(m.roomId), unitName(m.unitId), m.professionalId ? profName(m.professionalId) : '—']),
+    ${tableOrEmpty(mine, ['Data', 'Horário', 'Sala', 'Unidade', 'Profissional'], mine.map(m => [fmtDate(m.date), m.time, roomName(m.roomId), unitName(m.unitId), m.professionalId ? profName(m.professionalId) : '—']),
       'Você ainda não tem horários reservados.', 'fa-calendar-xmark')}
   </div>`;
   }
@@ -622,7 +627,7 @@
   `;
   }
   function scheduleFor(week, roomId, day, time) {
-    return STATE.schedules.find(s => s.week === week && s.roomId === roomId && s.day === day && s.time === time);
+    return STATE.schedules.find(s => s.date === dataUtils.slotDate(week, day) && s.roomId === roomId && s.time === time);
   }
   function renderRoomAgenda(room, week) {
     return `
@@ -691,7 +696,7 @@
           const profSel = overlay.querySelector('#al-prof');
           if (!profSel.value) { showToast('Selecione um profissional.', 'error'); return; }
           const newSchedule = {
-            id: uid('sch'), week, unitId: room.unitId, roomId, day, time,
+            id: uid('sch'), date: dataUtils.slotDate(week, day), unitId: room.unitId, roomId, day, time,
             shift: overlay.querySelector('#al-shift').value, professionalId: profSel.value,
             value: parseCurrencyInput(valueInput.value), note: overlay.querySelector('#al-note').value.trim(),
             status: 'reservado', userId: null
@@ -724,7 +729,7 @@
         overlay.querySelector('#sel-cancel').addEventListener('click', closeModal);
         overlay.querySelector('#sel-confirm').addEventListener('click', () => {
           const newSchedule = {
-            id: uid('sch'), week, unitId: room.unitId, roomId, day, time, shift: '', professionalId: prof ? prof.id : null,
+            id: uid('sch'), date: dataUtils.slotDate(week, day), unitId: room.unitId, roomId, day, time, shift: '', professionalId: prof ? prof.id : null,
             value: prof ? prof.value : 0, note: '', status: 'reservado', userId: STATE.currentUser.id
           };
           STATE.schedules.push(newSchedule);
@@ -1103,7 +1108,7 @@
       const dayLabelFull = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'][m.day];
       const msg = `Olá! Gostaria de confirmar o horário reservado para ${dayLabelFull} às ${m.time} na ${roomName(m.roomId)}.`;
       return [
-        `${m.week === 0 ? 'Esta semana' : 'Próxima semana'} · ${DAYS[m.day]}`, m.time, esc(roomName(m.roomId)), esc(unitName(m.unitId)),
+        `${fmtDate(m.date)} · ${DAYS[m.day]}`, m.time, esc(roomName(m.roomId)), esc(unitName(m.unitId)),
         m.professionalId ? esc(profName(m.professionalId)) : '—', fmtCurrency(m.value),
         whatsappLink(msg)
           ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${whatsappLink(msg)}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> WhatsApp</a>`
