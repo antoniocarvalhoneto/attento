@@ -20,6 +20,8 @@ O projeto é **100% front-end**, com dados de demonstração persistidos no `loc
 
 Etapas 1 e 2 concluídas: base React e formulário de login migrados. O login reutiliza `auth.js`, preserva tema, contas demo e sessão, e abre o painel atual na mesma origem. Próxima etapa: estrutura do painel em React.
 
+A preparação da etapa 3 adiciona uma interface de montagem dos módulos atuais em um contêiner isolado. Ela reaproveita as regras existentes e permite que React assuma o cabeçalho e a navegação sem duplicá-los.
+
 ```bash
 cd react-app
 npm ci

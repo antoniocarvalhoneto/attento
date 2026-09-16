@@ -315,3 +315,20 @@ Os testes React em `LoginPage.test.tsx` cobrem campos obrigatórios, foco, conta
 Próximas etapas: migrar estrutura do painel e navegação; depois dashboard, agenda, cadastros e financeiro por módulo. A ponte `/legacy/` permanece até esses fluxos serem substituídos e validados.
 
 Referências técnicas: [API de plugins do Vite](https://vite.dev/guide/api-plugin.html) e [StrictMode do React](https://react.dev/reference/react/StrictMode).
+
+### Preparação da estrutura React
+
+`loadPanel()` em `react-app/src/services/panel.ts` importa os utilitários e depois `script.js`, sob a opção `AttentoReactHost`. Essa opção desativa apenas a inicialização automática da página antiga. A versão independente continua usando `DOMContentLoaded` normalmente.
+
+`window.AttentoPanel` expõe `navigation`, `titles`, `allowed` e `mount`. A navegação e as permissões continuam com uma única definição no código atual.
+
+| Função | Responsabilidade |
+| --- | --- |
+| `mountPanel(root, onThemeChange)` | Verifica sessão, prepara dados e cria conteúdo, modais e notificações dentro do contêiner fornecido. Não cria cabeçalho nem eventos globais de navegação. |
+| Controlador `show(view)` | Valida perfil, renderiza o módulo e volta ao topo quando muda a rota. |
+| Controlador `setTheme(theme)` | Sincroniza o tema sem gravá-lo novamente; atualiza a tela de configurações quando aberta. |
+| Controlador `destroy()` | Remove conteúdo, eventos do modal e temporizadores da instância. Permite montar novamente sem duplicação. |
+| `scheduleTask(callback, delay)` | Registra os temporizadores de notificações e modais para permitir seu cancelamento. |
+| `clearPanelTransient()` | Cancela esses temporizadores e limpa modais/notificações ao sair ou trocar de módulo. |
+
+Durante a montagem, `$` e `$$` limitam as buscas ao contêiner do módulo. O cabeçalho React fica fora dessa área. O teste `panel.test.ts` verifica montagem, permissões, limpeza e rejeição de sessão ausente.

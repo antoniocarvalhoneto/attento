@@ -5,11 +5,19 @@
 (function () {
   'use strict';
 
+  let panelHost = null;
+  const panelTimers = new Set();
+  function scheduleTask(callback, delay) {
+    const timer = setTimeout(() => { panelTimers.delete(timer); callback(); }, delay);
+    panelTimers.add(timer);
+    return timer;
+  }
+
   /* ==========================================================================
      UTILITIES
      ========================================================================== */
-  const $ = (sel, ctx) => (ctx || document).querySelector(sel);
-  const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
+  const $ = (sel, ctx) => (ctx || (panelHost && panelHost.root) || document).querySelector(sel);
+  const $$ = (sel, ctx) => Array.from((ctx || (panelHost && panelHost.root) || document).querySelectorAll(sel));
   const uid = (p) => (p || 'id') + '_' + Math.random().toString(36).slice(2, 9);
   const esc = (str) => String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmtCurrency = (n) => (Number(n) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -243,7 +251,7 @@
     el.className = 'toast ' + type;
     el.innerHTML = `<i class="fa-solid ${toastIcons[type]}" aria-hidden="true"></i><span>${esc(message)}</span>`;
     root.appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(12px)'; setTimeout(() => el.remove(), 200); }, 3600);
+    scheduleTask(() => { el.style.opacity = '0'; el.style.transform = 'translateX(12px)'; scheduleTask(() => el.remove(), 200); }, 3600);
   }
 
   /* ==========================================================================
@@ -296,7 +304,7 @@
     overlay.classList.remove('show');
     root.setAttribute('aria-hidden', 'true');
     if (activeModalCleanup) activeModalCleanup();
-    setTimeout(() => overlay.remove(), 160);
+    scheduleTask(() => overlay.remove(), 160);
   }
   function confirmModal(message, onConfirm) {
     openModal({
@@ -322,6 +330,7 @@
     document.documentElement.setAttribute('data-theme', theme);
     const icon = $('#theme-toggle i');
     if (icon) icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    if (panelHost && save) panelHost.onThemeChange(theme);
     return true;
   }
   function toggleTheme() { applyTheme(STATE.theme === 'dark' ? 'light' : 'dark'); }
@@ -406,6 +415,7 @@
      setRoute()/hashchange, isto aqui só desenha a tela. */
   function renderCurrentView() {
     const view = STATE.currentView;
+    if (!panelHost) {
     $('#view-title').textContent = VIEW_TITLES[view] || 'Attento';
     $$('.nav-item').forEach(b => {
       const active = b.dataset.view === view;
@@ -424,6 +434,7 @@
         b.removeAttribute('aria-current');
       }
     });
+    }
     const root = $('#view-root');
     const renderer = RENDERERS[view];
     // Mantém os atributos do contêiner e descarta os eventos da tela anterior.
@@ -799,7 +810,7 @@
           showToast('Horário selecionado com sucesso.', 'success');
           const dayLabelFull = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'][day];
           const msg = `Olá! Gostaria de confirmar o horário reservado para ${dayLabelFull} às ${time} na ${room.name}.`;
-          setTimeout(() => {
+          scheduleTask(() => {
             openModal({
               title: 'Horário confirmado',
               bodyHTML: `<p>${whatsappLink(msg) ? 'Seu horário foi reservado. Você pode confirmar diretamente pelo WhatsApp com a unidade.' : 'Seu horário foi reservado. O contato da unidade ainda não foi configurado.'}</p>`,
@@ -1440,8 +1451,58 @@
     showApp();
   }
 
-  document.addEventListener('DOMContentLoaded', init);
-  window.addEventListener('pageshow', event => {
-    if (event.persisted) location.reload();
-  });
+  function clearPanelTransient() {
+    panelTimers.forEach(timer => clearTimeout(timer));
+    panelTimers.clear();
+    if (activeModalCleanup) activeModalCleanup();
+    activeModalCleanup = null;
+    if (panelHost) {
+      $('#modal-root').replaceChildren();
+      $('#modal-root').setAttribute('aria-hidden', 'true');
+      $('#toast-root').replaceChildren();
+    }
+  }
+
+  function mountPanel(root, onThemeChange) {
+    const user = auth.restoreSession();
+    if (!user) throw new Error('Sessão inválida. Entre novamente.');
+    if (panelHost) throw new Error('O painel já está aberto.');
+    initializeData();
+    loadAllIntoState();
+    STATE.currentUser = user;
+    root.innerHTML = '<main class="content" id="view-root" tabindex="-1"></main><div id="modal-root" class="modal-root" aria-hidden="true"></div><div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>';
+    const host = { root, onThemeChange };
+    panelHost = host;
+    let renderedView = null;
+    return {
+      show(view) {
+        if (panelHost !== host) return;
+        STATE.currentView = viewAllowedForRole(view, user.role) ? view : 'dashboard';
+        if (renderedView !== STATE.currentView) clearPanelTransient();
+        renderCurrentView();
+        if (renderedView !== STATE.currentView) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        renderedView = STATE.currentView;
+      },
+      setTheme(theme) {
+        if (panelHost !== host) return;
+        applyTheme(theme, false);
+        if (renderedView === 'settings') renderCurrentView();
+      },
+      destroy() {
+        if (panelHost !== host) return;
+        clearPanelTransient();
+        root.replaceChildren();
+        panelHost = null;
+        STATE.currentUser = null;
+      }
+    };
+  }
+
+  window.AttentoPanel = { mount: mountPanel, navigation: NAV_ITEMS, titles: VIEW_TITLES, allowed: viewAllowedForRole };
+  if (!window.AttentoReactHost) {
+    document.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('pageshow', event => {
+      if (event.persisted) location.reload();
+    });
+  }
 })();

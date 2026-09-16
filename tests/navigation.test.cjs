@@ -18,6 +18,7 @@ function startNavigation() {
     parentNode: { replaceChild() {} }
   };
   const context = vm.createContext({
+    panelHost: null,
     $: selector => selector === '#view-root' ? root : {},
     $$: () => items,
     STATE: { currentUser: { role: 'admin' }, currentView: 'dashboard' },
