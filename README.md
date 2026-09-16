@@ -18,7 +18,7 @@ O projeto é **100% front-end**, com dados de demonstração persistidos no `loc
 
 ## Migração para React
 
-Etapa 1 concluída: base React, limpeza do template e integração temporária com o painel atual na mesma origem. O formulário React será a próxima etapa; o acesso ainda passa pelo login existente.
+Etapas 1 e 2 concluídas: base React e formulário de login migrados. O login reutiliza `auth.js`, preserva tema, contas demo e sessão, e abre o painel atual na mesma origem. Próxima etapa: estrutura do painel em React.
 
 ```bash
 cd react-app
@@ -26,7 +26,7 @@ npm ci
 npm run dev
 ```
 
-Abra **http://127.0.0.1:5173**. O painel atual é servido em `/legacy/index.html`, sem precisar de outro servidor. Use `npm run lint`, `npm run build` e `npm run preview` para verificar e testar o build. Detalhes em [react-app/README.md](react-app/README.md).
+Abra **http://127.0.0.1:5173**. O painel atual é servido em `/legacy/index.html`, sem precisar de outro servidor. Ao sair ou acessar o painel sem sessão, o fluxo retorna ao login React. Use `npm test`, `npm run lint`, `npm run build` e `npm run preview` para verificar e testar o build. Detalhes em [react-app/README.md](react-app/README.md).
 
 O armazenamento é separado por origem: mudar host ou porta não transporta os dados existentes. No mesmo endereço, login e painel compartilham sessão e cadastros. Os arquivos da raiz continuam disponíveis para execução independente.
 

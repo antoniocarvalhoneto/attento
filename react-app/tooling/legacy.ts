@@ -7,8 +7,6 @@ const files: Record<string, string> = {
   'login.html': 'text/html; charset=utf-8',
   'auth.js': 'text/javascript; charset=utf-8',
   'script.js': 'text/javascript; charset=utf-8',
-  'login.js': 'text/javascript; charset=utf-8',
-  'login-page.js': 'text/javascript; charset=utf-8',
   'data-utils.js': 'text/javascript; charset=utf-8',
   'contact.js': 'text/javascript; charset=utf-8',
   'style.css': 'text/css; charset=utf-8',
@@ -16,6 +14,9 @@ const files: Record<string, string> = {
 }
 
 function readLegacyFile(name: string) {
+  if (name === 'login.html') return Buffer.from(`<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Entrar | Attento</title></head>
+<body><p><a href="../">Abrir login</a></p><script>location.replace('../' + location.hash)</script></body></html>`)
   return readFileSync(fileURLToPath(new URL(`../../${name}`, import.meta.url)))
 }
 

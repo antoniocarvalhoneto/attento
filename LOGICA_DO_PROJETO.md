@@ -276,12 +276,42 @@ Os callbacks passados a `test()` representam cada cenário. Os métodos anônimo
 
 O efeito de luz não tem função JavaScript. `style.css` cria duas camadas decorativas com `::before` e `::after`, usa gradientes radiais e anima posição, escala e opacidade com `login-light-drift`. O formulário fica acima delas. A preferência `prefers-reduced-motion: reduce` desliga a animação; nesse caso as luzes permanecem estáticas.
 
-## 12. Migração React — etapa 1
+## 12. Migração React — base e login
 
-`react-app/src/main.tsx` monta a árvore React em `#root`, ativa `StrictMode` e importa o CSS da raiz. `App()` apresenta a marca e o acesso ao login existente. Não executa os eventos DOM de `login.js` dentro de React.
+`react-app/src/main.tsx` monta a árvore React em `#root`, ativa `StrictMode` e importa o CSS da raiz. `App()` integra o login React com a autenticação existente. Não executa os eventos DOM de `login.js` dentro de React.
 
 `legacyPanel()` em `tooling/legacy.ts` é uma integração temporária de desenvolvimento/build. `readLegacyFile(name)` lê o arquivo da raiz. O hook `configureServer` atende somente os nomes presentes na lista de arquivos sob `/legacy/`; caminhos desconhecidos retornam 404. O hook `generateBundle` inclui a mesma lista em `dist/legacy/`.
 
 O painel mantém sua navegação relativa, autenticação e persistência. Login e painel ficam na mesma origem; dados de outra porta/host não são importados. O build deve ser servido na raiz da origem. Ao migrar os módulos, essa ponte será retirada.
+
+Na etapa 2, `readLegacyFile('login.html')` passou a gerar uma página mínima que volta ao login React preservando o hash. Isso atende tanto ao logout quanto ao acesso ao painel sem sessão. `login.js` e `login-page.js` não fazem parte dessa ponte; continuam disponíveis na versão independente da raiz.
+
+### Funções e componentes React
+
+| Arquivo / função | Responsabilidade |
+| --- | --- |
+| `App()` | Monta a página de login e conecta serviço, tema e navegação. |
+| `App: restoreAccess()` | Reaplica o tema salvo e abre o painel quando a sessão é válida. Executada ao montar e em eventos pertinentes. |
+| `App: handlePageShow(event)` | Revalida o acesso quando o navegador restaura a página do cache do histórico. |
+| `App: handleStorage(event)` | Revalida sessão/tema quando outra aba altera usuários, sessão ou configurações, ou limpa o armazenamento. |
+| Callback de limpeza do efeito de `App` | Remove os dois eventos ao desmontar, inclusive no ciclo adicional de verificação de `StrictMode`. |
+| `App: signIn(email, password)` | Chama o adaptador; se aceitar as credenciais e persistir a sessão, abre o painel. |
+| `AuthLayout({ children })` | Apresenta marca, fundo e cartão reutilizando o CSS atual; recebe o conteúdo como filhos React. |
+| `LoginPage({ onSignIn })` | Controla campos, mensagens, visibilidade de senha e estado de envio com estado React. |
+| `LoginPage: handleSubmit(event)` | Valida campos obrigatórios, foca o primeiro inválido, impede envios duplicados, aguarda `onSignIn`, apresenta falhas e libera o formulário. Não usa atraso artificial. |
+| `LoginPage: fillDemo(role)` | Preenche a conta escolhida e limpa erros sem enviar o formulário. |
+| Callbacks de campos e senha | Atualizam os respectivos estados; o botão de senha alterna tipo, ícone e descrição acessível. |
+| `services/auth: createAuth(storage)` | Cria um adaptador tipado para `window.AttentoAuth`, carregado por importação do `auth.js` original. Aceita armazenamento alternativo para testes. |
+| `services/auth: restoreSession()` | Delega ao serviço existente. |
+| `services/auth: signIn(email, password)` | Delega a validação e confirma o ID persistido antes de aceitar o acesso. |
+| `browserStorage.getItem/setItem/removeItem` | Acessam o armazenamento somente ao executar a operação, permitindo tratar falhas sem interromper a importação do módulo. |
+| `openDashboard()` | Abre `/legacy/index.html` com o hash solicitado ou `#dashboard`. O painel valida a permissão da rota. |
+| `applySavedTheme()` | Aplica o tema de `app_settings`; usa claro se ausente ou ilegível. |
+
+O formulário recebe uma função de autenticação e aceita resultado síncrono ou uma Promise. Isso permite testar a interface sem acoplá-la ao armazenamento. Senhas permanecem no estado do formulário, sem criar uma nova chave de persistência. A autenticação continua de demonstração.
+
+Os testes React em `LoginPage.test.tsx` cobrem campos obrigatórios, foco, contas demo, exibição de senha, duplicidade de envio e falha assíncrona. `App.test.tsx` cobre os dois perfis, sessão existente/corrompida, tema, falha ao gravar, eventos de outra aba e histórico. `test/setup.ts` limpa o DOM, o armazenamento e os mocks entre cenários. Rodar `npm test` dentro de `react-app`; a suíte anterior permanece em `node --test tests/*.test.cjs` na raiz.
+
+Próximas etapas: migrar estrutura do painel e navegação; depois dashboard, agenda, cadastros e financeiro por módulo. A ponte `/legacy/` permanece até esses fluxos serem substituídos e validados.
 
 Referências técnicas: [API de plugins do Vite](https://vite.dev/guide/api-plugin.html) e [StrictMode do React](https://react.dev/reference/react/StrictMode).
