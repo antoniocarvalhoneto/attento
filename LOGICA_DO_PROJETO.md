@@ -394,6 +394,12 @@ Validação desta etapa: 26 testes React, build e lint aprovados. A conferência
 
 ## 13. Serviços independentes para os módulos React
 
+### Financeiro, convênios e relatórios
+
+`FinancialPage` carrega a tela de contas ou relatórios. `Financial` mantém filtros, edição e exclusão; `pay` marca pagamento; `total` soma os valores filtrados; `exportReport` exporta somente as linhas visíveis. `AccountEditor` mantém o rascunho e salva descrição, profissional, valor, vencimento e status. A data de pagamento é gerida pelo repositório.
+
+`InsurancePage` carrega `InsuranceList`, que filtra por convênio e controla as ações. `InsuranceEditor` recalcula quantidade × valor unitário enquanto os campos mudam. `finance.filterAccounts` combina os três filtros; `monthOptions` lista meses presentes; `buildCSV` escapa separadores, aspas e fórmulas; `downloadCSV` cria e libera o arquivo temporário. Os testes cobrem cadastro/pagamento, filtros, falha com nova tentativa, totais e conteúdo exportado.
+
 ### Cadastros de salas e profissionais
 
 `CatalogPage` carrega a coleção para `Catalog`, que controla consulta, edição e exclusão. `create` prepara valores iniciais sem salvar. `CatalogEditor` mantém o rascunho, atualiza campos com `update` e só fecha após `saveRecord` ter sucesso. A seleção de unidade restringe as salas do profissional. `RecordActions` apresenta botões acessíveis por linha. `DeleteDialog` exige confirmação e mantém erros no próprio diálogo. Os testes exercitam criação, edição, remoção, vínculos e seleção de unidade/sala.

@@ -165,6 +165,8 @@ Disponibilidade e Meus Horários também estão em React: filtros, grade semanal
 
 Salas e profissionais usam tabelas e formulários React para consultar, criar, editar e excluir, mantendo a proteção dos registros vinculados.
 
+Financeiro, convênios e relatórios também estão migrados, incluindo filtros combinados, pagamentos, cálculo de totais e exportação CSV da seleção.
+
 - Integração com uma API/backend real (autenticação, banco de dados).
 - Testes end-to-end no navegador.
 
