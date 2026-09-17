@@ -394,6 +394,10 @@ Validação desta etapa: 26 testes React, build e lint aprovados. A conferência
 
 ## 13. Serviços independentes para os módulos React
 
+### Configurações
+
+`SettingsPage` carrega a tela. `Settings` mantém o telefone e mensagens; `changeTheme` grava antes de avisar o cabeçalho; `saveContact` valida sessão e telefone, preserva outras preferências e permite remover o contato com campo vazio. Falhas mantêm o campo preenchido. Tema e contato continuam globais no navegador, como na versão anterior.
+
 ### Financeiro, convênios e relatórios
 
 `FinancialPage` carrega a tela de contas ou relatórios. `Financial` mantém filtros, edição e exclusão; `pay` marca pagamento; `total` soma os valores filtrados; `exportReport` exporta somente as linhas visíveis. `AccountEditor` mantém o rascunho e salva descrição, profissional, valor, vencimento e status. A data de pagamento é gerida pelo repositório.

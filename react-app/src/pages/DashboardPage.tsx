@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { DashboardLayout } from '../components/DashboardLayout'
-import { LegacyModule } from '../components/LegacyModule'
 import { DashboardHome } from './DashboardHome'
 import { AvailabilityPage } from './AvailabilityPage'
 import { MySchedulePage } from './MySchedulePage'
 import { CatalogPage } from './CatalogPage'
 import { FinancialPage } from './FinancialPage'
 import { InsurancePage } from './InsurancePage'
+import { SettingsPage } from './SettingsPage'
 import type { User } from '../services/auth'
 import { loadPanel } from '../services/panel'
 import type { PanelApi, Theme } from '../services/panel'
@@ -71,6 +71,6 @@ export function DashboardPage({ user, theme, onThemeChange, onSignOut, error }: 
       : view === 'rooms' || view === 'professionals' ? <CatalogPage key={view} kind={view} />
       : view === 'financial' || view === 'reports' ? <FinancialPage key={view} reports={view === 'reports'} />
       : view === 'insurance' ? <InsurancePage />
-      : <LegacyModule api={api} user={user} view={view} theme={theme} onThemeChange={onThemeChange} />}
+      : <SettingsPage user={user} theme={theme} onThemeChange={onThemeChange} />}
   </DashboardLayout>
 }

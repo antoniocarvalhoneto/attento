@@ -167,6 +167,8 @@ Salas e profissionais usam tabelas e formulários React para consultar, criar, e
 
 Financeiro, convênios e relatórios também estão migrados, incluindo filtros combinados, pagamentos, cálculo de totais e exportação CSV da seleção.
 
+Configurações conclui a migração das telas: tema, conta e contato agora são React. A retirada da ponte e dos serviços globais é a etapa final.
+
 - Integração com uma API/backend real (autenticação, banco de dados).
 - Testes end-to-end no navegador.
 
