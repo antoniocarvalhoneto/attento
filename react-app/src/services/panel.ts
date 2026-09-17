@@ -1,4 +1,6 @@
 import './auth'
+import '../../../data-utils.js'
+import '../../../contact.js'
 import type { User } from './auth'
 import type { DashboardSnapshot } from './dashboard'
 
@@ -29,8 +31,7 @@ let loading: Promise<PanelApi> | undefined
 export function loadPanel() {
   if (!loading) {
     window.AttentoReactHost = true
-    loading = Promise.all([import('../../../data-utils.js'), import('../../../contact.js')])
-      .then(() => import('../../../script.js'))
+    loading = import('../../../script.js')
       .then(() => window.AttentoPanel)
       .catch((error: unknown) => { loading = undefined; throw error })
   }

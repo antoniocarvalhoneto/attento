@@ -18,9 +18,9 @@ O projeto é **100% front-end**, com dados de demonstração persistidos no `loc
 
 ## Migração para React
 
-Etapas 1 a 3 concluídas: base, login e estrutura do painel em React. Cabeçalho, menu horizontal, navegação por perfil, tema e logout são controlados pelo React. Os módulos atuais são montados em uma área isolada, reutilizando as regras existentes. Próxima etapa: migrar o conteúdo do dashboard para componentes React.
+Etapas 1 a 4 concluídas: base, login, estrutura do painel e dashboard em React. Indicadores, próximas reservas, gráfico semanal e resumo financeiro usam componentes React, respeitando os dois perfis. Os demais módulos continuam em uma área isolada, reutilizando as regras existentes. Próxima etapa: migrar a disponibilidade e a agenda.
 
-A preparação do dashboard está em `react-app/src/services/dashboard.ts`: organiza os dados, aplica as regras compartilhadas de datas e separa as informações de cada perfil antes da apresentação.
+`react-app/src/services/dashboard.ts` organiza os dados, aplica as regras compartilhadas de datas e separa as informações por perfil. `DashboardHome.tsx` apresenta o resultado e atualiza os indicadores ao entrar na página, voltar à aba, receber alterações de outra aba e a cada minuto.
 
 ```bash
 cd react-app

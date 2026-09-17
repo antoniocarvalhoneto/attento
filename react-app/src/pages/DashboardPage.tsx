@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DashboardLayout } from '../components/DashboardLayout'
 import { LegacyModule } from '../components/LegacyModule'
+import { DashboardHome } from './DashboardHome'
 import type { User } from '../services/auth'
 import { loadPanel } from '../services/panel'
 import type { PanelApi, Theme } from '../services/panel'
@@ -59,6 +60,7 @@ export function DashboardPage({ user, theme, onThemeChange, onSignOut, error }: 
 
   return <DashboardLayout user={user} theme={theme} view={view} title={api.titles[view]} items={api.navigation[user.role] || []} onNavigate={navigate} onToggleTheme={toggleTheme} onSignOut={onSignOut}>
     {(error || themeError) && <p className="content" role="alert">{error || themeError}</p>}
-    <LegacyModule api={api} user={user} view={view} theme={theme} onThemeChange={onThemeChange} />
+    {view === 'dashboard' ? <DashboardHome key={`${user.id}:${user.role}`} api={api} />
+      : <LegacyModule api={api} user={user} view={view} theme={theme} onThemeChange={onThemeChange} />}
   </DashboardLayout>
 }

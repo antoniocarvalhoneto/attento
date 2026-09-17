@@ -25,3 +25,14 @@ test('sem sessão, não monta módulos nem inicializa dados', async () => {
   expect(() => api.mount(document.createElement('div'), vi.fn())).toThrow('Sessão inválida')
   expect(localStorage.getItem('app_rooms')).toBeNull()
 })
+
+test('snapshot do usuário não expõe contas, senha ou reservas de terceiros', async () => {
+  createAuth().signIn('usuario@demo.com', '123456')
+  const api = await loadPanel()
+  const snapshot = api.readDashboard()
+  expect(snapshot.user).not.toHaveProperty('password')
+  expect(snapshot.accounts).toEqual([])
+  expect(snapshot.schedules.every(item => item.userId === 'user_demo')).toBe(true)
+  snapshot.rooms[0].name = 'Alterado fora do estado'
+  expect(api.readDashboard().rooms[0].name).not.toBe('Alterado fora do estado')
+})

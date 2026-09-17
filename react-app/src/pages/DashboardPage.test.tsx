@@ -75,10 +75,15 @@ test('tema sincroniza cabeçalho e configurações e preserva outras preferênci
 
 test('cadastro continua funcional dentro do painel React e sair limpa modais', async () => {
   await start('admin', '#rooms')
-  await userEvent.click(screen.getByRole('button', { name: 'Nova sala' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Nova sala' }))
   await userEvent.type(screen.getByLabelText('Nome da sala'), 'Sala React')
   await userEvent.click(screen.getByRole('button', { name: 'Salvar' }))
   expect(JSON.parse(localStorage.getItem('app_rooms')!).some((room: { name: string }) => room.name === 'Sala React')).toBe(true)
+  await userEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
+  expect(await screen.findByRole('heading', { name: 'Agenda de reservas' })).toBeVisible()
+  const available = JSON.parse(localStorage.getItem('app_rooms')!).filter((room: { status: string }) => room.status === 'disponivel').length
+  expect(screen.getByText('Salas disponíveis').closest('.stat-card')?.querySelector('.stat-value')).toHaveTextContent(String(available))
+  expect(document.querySelector('#view-root')).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Sair' }))
   expect(screen.getByRole('button', { name: 'Entrar' })).toBeVisible()
   expect(localStorage.getItem('app_session')).toBeNull()
@@ -101,7 +106,7 @@ test('remoção da sessão em outra aba desmonta o painel; falha de logout prese
 
 test('trocar de módulo cancela diálogo aberto e permite novo diálogo', async () => {
   const nav = await start('admin', '#rooms')
-  await userEvent.click(screen.getByRole('button', { name: 'Nova sala' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Nova sala' }))
   expect(screen.getByRole('dialog')).toBeVisible()
   fireEvent.click(within(nav).getByRole('button', { name: 'Profissionais' }))
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

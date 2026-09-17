@@ -314,15 +314,15 @@ O formulário recebe uma função de autenticação e aceita resultado síncrono
 
 Os testes React em `LoginPage.test.tsx` cobrem campos obrigatórios, foco, contas demo, exibição de senha, duplicidade de envio e falha assíncrona. `App.test.tsx` cobre os dois perfis, sessão existente/corrompida, tema, falha ao gravar, eventos de outra aba e histórico. `test/setup.ts` limpa o DOM, o armazenamento e os mocks entre cenários. Rodar `npm test` dentro de `react-app`; a suíte anterior permanece em `node --test tests/*.test.cjs` na raiz.
 
-Estrutura e navegação já migradas. Próximas etapas: dashboard, agenda, cadastros e financeiro por módulo. A versão `/legacy/` permanece disponível durante a transição, mas o login React não redireciona mais para ela.
+Estrutura, navegação e dashboard já migrados. Próximas etapas: disponibilidade, agenda e demais módulos, um por vez. A versão `/legacy/` permanece disponível durante a transição, mas o login React não redireciona mais para ela.
 
 Referências técnicas: [API de plugins do Vite](https://vite.dev/guide/api-plugin.html) e [StrictMode do React](https://react.dev/reference/react/StrictMode).
 
 ### Preparação da estrutura React
 
-`loadPanel()` em `react-app/src/services/panel.ts` importa os utilitários e depois `script.js`, sob a opção `AttentoReactHost`. Essa opção desativa apenas a inicialização automática da página antiga. A versão independente continua usando `DOMContentLoaded` normalmente.
+`loadPanel()` em `react-app/src/services/panel.ts` importa `script.js` sob demanda, após ativar a opção `AttentoReactHost`. Os utilitários de dados e contato são importados estaticamente pelo adaptador, pois também são usados pelo dashboard React. Essa opção desativa apenas a inicialização automática da página antiga. A versão independente continua usando `DOMContentLoaded` normalmente.
 
-`window.AttentoPanel` expõe `navigation`, `titles`, `allowed` e `mount`. A navegação e as permissões continuam com uma única definição no código atual.
+`window.AttentoPanel` expõe `navigation`, `titles`, `allowed`, `mount` e `readDashboard`. A navegação e as permissões continuam com uma única definição no código atual.
 
 | Função | Responsabilidade |
 | --- | --- |
@@ -337,7 +337,7 @@ Durante a montagem, `$` e `$$` limitam as buscas ao contêiner do módulo. O cab
 
 ### Estrutura React em funcionamento — etapa 3
 
-O fluxo agora é `App → DashboardPage → DashboardLayout + LegacyModule`. React controla cabeçalho, identificação do usuário, menu horizontal, tema, logout e hash. O conteúdo de cada módulo continua temporariamente no renderizador existente; não há iframe nem dois cabeçalhos. As permissões usam a mesma definição tanto no React quanto na montagem do módulo.
+Na etapa 3, o fluxo passou a ser `App → DashboardPage → DashboardLayout + LegacyModule`. Na etapa 4, a rota dashboard passou a usar `DashboardHome` no lugar de `LegacyModule`. React controla cabeçalho, identificação do usuário, menu horizontal, tema, logout e hash. Os módulos ainda não migrados usam o renderizador existente; não há iframe nem dois cabeçalhos. As permissões usam a mesma definição tanto no React quanto na montagem do módulo.
 
 | Componente ou função | Responsabilidade |
 | --- | --- |
@@ -368,3 +368,26 @@ Mudanças de tema na tela de configurações notificam React por `onThemeChange`
 `displayDate(date)` apresenta datas fixas como dia/mês/ano. `nameOf(items, id)`, função local de `buildDashboard`, resolve nomes ou retorna travessão para vínculos ausentes. `WEEK_DAYS` contém os rótulos de segunda a sábado. `DashboardSnapshot` descreve os dados recebidos e `DashboardModel` distingue os resultados de administrador e usuário por `role`.
 
 `dashboard.test.ts` verifica o cálculo semanal, a virada de semana, a separação de perfis, a ordem dos horários, listas vazias e vínculos ausentes.
+
+### Componentes do dashboard — etapa 4 concluída
+
+A rota `#dashboard` monta `DashboardHome` com identidade e perfil do usuário. Ao entrar nessa rota, o módulo legado anterior é desmontado, incluindo seus modais e eventos. As demais rotas continuam usando `LegacyModule`. Os renderizadores de dashboard da raiz permanecem necessários para a versão independente.
+
+| Componente ou função | Responsabilidade |
+| --- | --- |
+| `DashboardHome({ api })` | Mantém modelo, erro e tentativa de carga. Apresenta carregamento, conteúdo ou mensagem com botão de nova tentativa. |
+| `DashboardHome: refresh()` | Lê `api.readDashboard()` e aplica `buildDashboard` em uma Promise para capturar falhas. Atualiza ao montar, receber `storage`, recuperar foco da janela e a cada minuto. |
+| Limpeza do efeito de atualização | Remove eventos e intervalo; impede que trabalho agendado atualize uma instância desmontada. |
+| Efeito de foco | Foca o conteúdo sem rolagem automática e volta ao topo na primeira carga bem-sucedida. Atualizações periódicas não deslocam foco nem rolagem. |
+| Botão de nova tentativa | Incrementa `attempt`, reiniciando o efeito de leitura depois de uma falha. |
+| `DashboardContent({ model })` | Escolhe a apresentação por perfil. O administrador vê indicadores gerais, até seis próximas reservas, semana e financeiro. O usuário vê seus horários e contato configurado. |
+| `StatCard()` | Apresenta ícone, valor e rótulo do indicador; destaca pendências quando solicitado. |
+| `ReservationTable()` | Apresenta reservas ou mensagem vazia. Exibe status na visão administrativa. Nomes são texto JSX, sem interpretar HTML salvo. |
+| `ReservationChart()` | Desenha barras e escala da semana, destaca o dia atual e fornece descrição acessível com as contagens de cada dia. |
+| `FinanceSummary()` | Calcula proporções das quantidades de contas pagas, pendentes e vencidas. Evita divisão por zero e mostra estado vazio; não representa valores monetários. |
+
+Ao voltar de um cadastro, o dashboard é montado novamente e lê os registros persistidos. As atualizações também recalculam datas para que reservas passadas deixem a lista futura. A separação de dados por perfil é aplicada na leitura e no modelo; continua sendo uma aplicação local de demonstração.
+
+`DashboardHome.test.tsx` cobre os dois perfis, limite de seis reservas, texto salvo sem interpretação de HTML, contato, estados vazios, atualização por eventos, manutenção de foco/rolagem e recuperação de erro. `DashboardPage.test.tsx` verifica que uma sala criada no módulo existente aparece nos indicadores ao voltar ao dashboard e que essa rota não monta o renderizador legado. `panel.test.ts` verifica que a leitura do usuário não retorna senha, contas ou reservas de terceiros e que suas cópias não alteram os registros persistidos.
+
+Validação desta etapa: 26 testes React, build e lint aprovados. A conferência visual em navegador permanece pendente.

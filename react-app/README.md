@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra http://127.0.0.1:5173. Login, cabeçalho e navegação já são React; os módulos atuais aparecem dentro dessa estrutura. A versão independente continua em `/legacy/index.html`, na mesma origem. Não é necessário outro servidor.
+Abra http://127.0.0.1:5173. Login, cabeçalho, navegação e dashboard já são React; os demais módulos aparecem dentro dessa estrutura pela integração temporária. A versão independente continua em `/legacy/index.html`, na mesma origem. Não é necessário outro servidor.
 
 ```bash
 npm run lint
@@ -29,7 +29,8 @@ O armazenamento depende de protocolo, host e porta. Dados de `localhost:8080`, `
 - [x] Base React, identidade visual e acesso ao painel existente.
 - [x] Formulário de login React, tema, sessão e contas demo.
 - [x] Estrutura do painel React: cabeçalho, menu, perfil, tema, logout e navegação.
-- [ ] Modulos do painel, um por vez.
+- [x] Dashboard dos dois perfis: indicadores, reservas e gráficos em componentes React.
+- [ ] Demais módulos do painel, começando pela disponibilidade e agenda.
 - [ ] Validacao final e retirada da ponte temporaria.
 
 ## Organizacao
@@ -41,6 +42,9 @@ O armazenamento depende de protocolo, host e porta. Dados de `localhost:8080`, `
 - `src/services/auth.ts`: adaptador tipado do `auth.js` existente, com verificação de persistência.
 - `src/components/DashboardLayout.tsx`: cabeçalho e menu horizontal por perfil.
 - `src/pages/DashboardPage.tsx`: carregamento dos módulos, hash, permissões e tema.
+- `src/pages/DashboardHome.tsx`: leitura, atualização e apresentação do dashboard por perfil.
+- `src/components/dashboard/`: indicadores, tabela de reservas, gráfico semanal e resumo financeiro.
+- `src/services/dashboard.ts`: modelo tipado do dashboard e cálculos com utilitários compartilhados.
 - `src/components/LegacyModule.tsx`: montagem/limpeza do conteúdo atual em uma área isolada, com recuperação de erros.
 - `src/services/panel.ts`: importação sob demanda dos módulos e tipos da interface temporária.
 - `src/services/navigation.ts`: restauração e salvamento do tema.
@@ -56,11 +60,11 @@ O formulário React não usa `login.js` nem `login-page.js`. A autenticação re
 
 ## Validação desta etapa
 
-- 18 testes React aprovados: autenticação, estrutura, perfis, histórico, sincronização de tema, cadastro real em módulo integrado e limpeza de modais. Os 43 testes da versão atual também passaram.
+- 26 testes React aprovados: autenticação, estrutura, perfis, histórico, sincronização de tema, cadastro real em módulo integrado, limpeza de modais, atualização dos indicadores, isolamento dos dados por perfil, cálculos semanais, estados vazios e recuperação de erros. Os 43 testes da versão atual também passaram.
 - Build TypeScript/Vite e lint aprovados.
-- Arquivos e ponte para o painel conferidos via HTTP em desenvolvimento e no preview do build.
+- Arquivos e ponte para o painel conferidos via HTTP em desenvolvimento e no preview do build na etapa anterior.
 - Conferência visual e fluxo completo em navegador ainda pendentes: o navegador integrado não estava disponível.
 
-O Vitest usa um worker para limitar o consumo de memória. O conteúdo de dashboard, agenda, cadastros e financeiro ainda usa os renderizadores originais; cada módulo será migrado em uma etapa própria.
+O Vitest usa um worker para limitar o consumo de memória. O dashboard já usa componentes React. Disponibilidade, agenda pessoal, cadastros, financeiro, convênios, relatórios e configurações ainda usam os renderizadores originais; cada módulo será migrado em uma etapa própria.
 
 Consulte [o README principal](../README.md) e [a logica do projeto](../LOGICA_DO_PROJETO.md).
