@@ -159,6 +159,8 @@ Interface testada e ajustada para três faixas principais:
 
 ## Roadmap sugerido
 
+A migração dos módulos restantes começou pela camada TypeScript de dados (`repository.ts`, `storage.ts`, `dates.ts` e `seed.ts`), mantendo as chaves existentes e as verificações de reserva, vínculos e gravação.
+
 - Integração com uma API/backend real (autenticação, banco de dados).
 - Testes end-to-end no navegador.
 

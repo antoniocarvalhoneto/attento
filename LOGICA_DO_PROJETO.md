@@ -391,3 +391,11 @@ Ao voltar de um cadastro, o dashboard é montado novamente e lê os registros pe
 `DashboardHome.test.tsx` cobre os dois perfis, limite de seis reservas, texto salvo sem interpretação de HTML, contato, estados vazios, atualização por eventos, manutenção de foco/rolagem e recuperação de erro. `DashboardPage.test.tsx` verifica que uma sala criada no módulo existente aparece nos indicadores ao voltar ao dashboard e que essa rota não monta o renderizador legado. `panel.test.ts` verifica que a leitura do usuário não retorna senha, contas ou reservas de terceiros e que suas cópias não alteram os registros persistidos.
 
 Validação desta etapa: 26 testes React, build e lint aprovados. A conferência visual em navegador permanece pendente.
+
+## 13. Serviços independentes para os módulos React
+
+`models.ts` define os registros, horários, convênios, formatação monetária (`money`) e resolução de nomes (`nameOf`). `storage.ts` mantém as chaves existentes: `loadData` lê JSON sem substituir dados corrompidos; `saveData` propaga falhas de gravação; `uid` cria identificadores. `seed.initializeData` preenche somente coleções ausentes, preservando os dados de demonstração anteriores.
+
+`dates.ts` contém as regras de datas em TypeScript: `dateKey` formata o dia local; `scheduleDate` calcula o instante; `slotDate` resolve a posição semanal; `migrateSchedules` fixa datas antigas; `inWeek` verifica a semana; `upcomingSchedules` filtra e ordena reservas futuras; `weekRangeLabel` apresenta o intervalo; `slotUnavailableReason` verifica sala, passado e conflitos.
+
+`repository.ts` concentra operações: `requireUser` verifica sessão e perfil; `readCollection` exige uma coleção válida; `readData` inicializa, migra e lê os registros; `readSettings` lê preferências; `saveRecord` valida e cria/edita usando os dados atuais; `deleteRecord` verifica vínculos antes da remoção; `markPaid` atualiza status e data; `reserveSlot` relê disponibilidade na confirmação e associa o usuário autenticado. As operações só retornam sucesso após persistir. Os testes cobrem migração, conflitos, vínculos, falhas e permissões.
