@@ -394,6 +394,12 @@ Validação desta etapa: 26 testes React, build e lint aprovados. A conferência
 
 ## 13. Serviços independentes para os módulos React
 
+### Disponibilidade, agenda e componentes compartilhados
+
+`Page` carrega dados com recuperação de erro, atualiza por foco/armazenamento/intervalo e posiciona o conteúdo no topo somente ao entrar na rota. Sua limpeza remove os eventos e temporizador. `Modal` usa portal React, contém o foco, fecha com Escape ou clique externo, bloqueia o fundo e restaura foco/rolagem ao desmontar. `Fields` reúne campos com rótulos, seletores, opções, ações de formulário, badges, tabelas e cabeçalhos.
+
+`AvailabilityPage` conecta os dados à tela. `Availability` mantém filtros e horário selecionado, monta a grade e abre a confirmação. `ReserveDialog` mantém os campos, chama `reserveSlot` e preserva o formulário se houver falha. A data escolhida fica fixa enquanto o modal está aberto. `MySchedulePage` lista somente reservas futuras do usuário e gera contato com a data da reserva. `contact.normalizeWhatsApp` normaliza o telefone e `whatsappUrl` monta o link quando válido.
+
 `models.ts` define os registros, horários, convênios, formatação monetária (`money`) e resolução de nomes (`nameOf`). `storage.ts` mantém as chaves existentes: `loadData` lê JSON sem substituir dados corrompidos; `saveData` propaga falhas de gravação; `uid` cria identificadores. `seed.initializeData` preenche somente coleções ausentes, preservando os dados de demonstração anteriores.
 
 `dates.ts` contém as regras de datas em TypeScript: `dateKey` formata o dia local; `scheduleDate` calcula o instante; `slotDate` resolve a posição semanal; `migrateSchedules` fixa datas antigas; `inWeek` verifica a semana; `upcomingSchedules` filtra e ordena reservas futuras; `weekRangeLabel` apresenta o intervalo; `slotUnavailableReason` verifica sala, passado e conflitos.
