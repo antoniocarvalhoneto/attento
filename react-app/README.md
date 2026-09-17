@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra http://127.0.0.1:5173. O painel atual fica em `/legacy/index.html`, na mesma origem. Nao e necessario outro servidor.
+Abra http://127.0.0.1:5173. Login, cabeçalho e navegação já são React; os módulos atuais aparecem dentro dessa estrutura. A versão independente continua em `/legacy/index.html`, na mesma origem. Não é necessário outro servidor.
 
 ```bash
 npm run lint
@@ -28,7 +28,7 @@ O armazenamento depende de protocolo, host e porta. Dados de `localhost:8080`, `
 
 - [x] Base React, identidade visual e acesso ao painel existente.
 - [x] Formulário de login React, tema, sessão e contas demo.
-- [ ] Estrutura do painel React.
+- [x] Estrutura do painel React: cabeçalho, menu, perfil, tema, logout e navegação.
 - [ ] Modulos do painel, um por vez.
 - [ ] Validacao final e retirada da ponte temporaria.
 
@@ -39,22 +39,28 @@ O armazenamento depende de protocolo, host e porta. Dados de `localhost:8080`, `
 - `src/components/AuthLayout.tsx`: marca e estrutura visual do login.
 - `src/pages/LoginPage.tsx`: formulário, erros, senha visível e contas demo.
 - `src/services/auth.ts`: adaptador tipado do `auth.js` existente, com verificação de persistência.
-- `src/services/navigation.ts`: abertura do painel e restauração do tema salvo.
+- `src/components/DashboardLayout.tsx`: cabeçalho e menu horizontal por perfil.
+- `src/pages/DashboardPage.tsx`: carregamento dos módulos, hash, permissões e tema.
+- `src/components/LegacyModule.tsx`: montagem/limpeza do conteúdo atual em uma área isolada, com recuperação de erros.
+- `src/services/panel.ts`: importação sob demanda dos módulos e tipos da interface temporária.
+- `src/services/navigation.ts`: restauração e salvamento do tema.
 - `src/**/*.test.tsx`: testes de componentes e integração com autenticação local.
 - `tooling/legacy.ts`: serve apenas os arquivos listados do painel atual em desenvolvimento e inclui esses mesmos arquivos no build.
 - `vite.config.ts`: integracao React e painel atual.
 
 O CSS e a marca continuam com uma unica fonte na raiz do repositorio. Os arquivos da raiz continuam executaveis de forma independente.
 
-Após entrar, o navegador abre `/legacy/index.html`, mantendo o destino do hash. As permissões de cada rota continuam sendo verificadas pelo painel. `/legacy/login.html` é uma página de retorno ao login React, usada ao sair ou quando a sessão está ausente. Essa página é gerada pela ponte; o `login.html` original não é alterado.
+Após entrar, React mostra o painel no mesmo documento, mantendo o destino permitido do hash. Rotas desconhecidas ou proibidas voltam ao dashboard. Sair remove a sessão e desmonta os módulos; mudanças de sessão em outra aba também são observadas. `/legacy/login.html` permanece como retorno ao React para quem usa a versão de compatibilidade. O `login.html` original não é alterado.
 
 O formulário React não usa `login.js` nem `login-page.js`. A autenticação reutiliza o `auth.js` original, sem copiar regras ou redefinir as chaves `app_users` e `app_session`. O build inclui esse serviço no bundle React e fornece o mesmo arquivo ao painel temporário.
 
 ## Validação desta etapa
 
-- 9 testes React e 43 testes da versão atual aprovados.
+- 18 testes React aprovados: autenticação, estrutura, perfis, histórico, sincronização de tema, cadastro real em módulo integrado e limpeza de modais. Os 43 testes da versão atual também passaram.
 - Build TypeScript/Vite e lint aprovados.
 - Arquivos e ponte para o painel conferidos via HTTP em desenvolvimento e no preview do build.
 - Conferência visual e fluxo completo em navegador ainda pendentes: o navegador integrado não estava disponível.
+
+O Vitest usa um worker para limitar o consumo de memória. O conteúdo de dashboard, agenda, cadastros e financeiro ainda usa os renderizadores originais; cada módulo será migrado em uma etapa própria.
 
 Consulte [o README principal](../README.md) e [a logica do projeto](../LOGICA_DO_PROJETO.md).

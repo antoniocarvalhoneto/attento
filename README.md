@@ -18,9 +18,7 @@ O projeto é **100% front-end**, com dados de demonstração persistidos no `loc
 
 ## Migração para React
 
-Etapas 1 e 2 concluídas: base React e formulário de login migrados. O login reutiliza `auth.js`, preserva tema, contas demo e sessão, e abre o painel atual na mesma origem. Próxima etapa: estrutura do painel em React.
-
-A preparação da etapa 3 adiciona uma interface de montagem dos módulos atuais em um contêiner isolado. Ela reaproveita as regras existentes e permite que React assuma o cabeçalho e a navegação sem duplicá-los.
+Etapas 1 a 3 concluídas: base, login e estrutura do painel em React. Cabeçalho, menu horizontal, navegação por perfil, tema e logout são controlados pelo React. Os módulos atuais são montados em uma área isolada, reutilizando as regras existentes. Próxima etapa: migrar o conteúdo do dashboard para componentes React.
 
 ```bash
 cd react-app
@@ -28,7 +26,7 @@ npm ci
 npm run dev
 ```
 
-Abra **http://127.0.0.1:5173**. O painel atual é servido em `/legacy/index.html`, sem precisar de outro servidor. Ao sair ou acessar o painel sem sessão, o fluxo retorna ao login React. Use `npm test`, `npm run lint`, `npm run build` e `npm run preview` para verificar e testar o build. Detalhes em [react-app/README.md](react-app/README.md).
+Abra **http://127.0.0.1:5173**. Login e painel permanecem na aplicação React, sem redirecionar após entrar. Os destinos usam hash (`#dashboard`, `#availability`, etc.), incluindo histórico e links diretos. A versão de compatibilidade continua em `/legacy/index.html`. Use `npm test`, `npm run lint`, `npm run build` e `npm run preview` para verificar e testar o build. Detalhes em [react-app/README.md](react-app/README.md).
 
 O armazenamento é separado por origem: mudar host ou porta não transporta os dados existentes. No mesmo endereço, login e painel compartilham sessão e cadastros. Os arquivos da raiz continuam disponíveis para execução independente.
 

@@ -24,6 +24,10 @@ export function createAuth(storage: AuthStorage = browserStorage) {
   const auth = window.AttentoAuth.create({ storage })
   return {
     restoreSession: () => auth.restoreSession(),
+    signOut() {
+      auth.signOut()
+      if (auth.restoreSession()) throw new Error('Não foi possível encerrar a sessão.')
+    },
     signIn(email: string, password: string) {
       const user = auth.signIn(email, password)
       if (!user) return false

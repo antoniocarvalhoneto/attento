@@ -1,6 +1,6 @@
 # Lógica do Attento
 
-Guia da aplicação atual em HTML, CSS e JavaScript, atualizado em 16/09/2026 após a limpeza e as correções de reservas, vínculos e persistência. As explicações ficam neste arquivo. Os nomes das funções permitem encontrá-las pela busca do editor.
+Guia da aplicação e da migração para React, atualizado em 17/09/2026. Inclui as correções de reservas, vínculos e persistência e a estrutura React do painel. As explicações ficam neste arquivo. Os nomes das funções permitem encontrá-las pela busca do editor.
 
 ## 1. Como as partes se conectam
 
@@ -276,7 +276,7 @@ Os callbacks passados a `test()` representam cada cenário. Os métodos anônimo
 
 O efeito de luz não tem função JavaScript. `style.css` cria duas camadas decorativas com `::before` e `::after`, usa gradientes radiais e anima posição, escala e opacidade com `login-light-drift`. O formulário fica acima delas. A preferência `prefers-reduced-motion: reduce` desliga a animação; nesse caso as luzes permanecem estáticas.
 
-## 12. Migração React — base e login
+## 12. Migração React — base, login e estrutura do painel
 
 `react-app/src/main.tsx` monta a árvore React em `#root`, ativa `StrictMode` e importa o CSS da raiz. `App()` integra o login React com a autenticação existente. Não executa os eventos DOM de `login.js` dentro de React.
 
@@ -290,12 +290,13 @@ Na etapa 2, `readLegacyFile('login.html')` passou a gerar uma página mínima qu
 
 | Arquivo / função | Responsabilidade |
 | --- | --- |
-| `App()` | Monta a página de login e conecta serviço, tema e navegação. |
-| `App: restoreAccess()` | Reaplica o tema salvo e abre o painel quando a sessão é válida. Executada ao montar e em eventos pertinentes. |
+| `App()` | Mantém usuário e tema no estado React; mostra login ou painel no mesmo documento. |
+| `App: restoreAccess()` | Reaplica o tema salvo e atualiza o usuário a partir da sessão. Executada ao montar e em eventos pertinentes. Se a sessão desaparecer, desmonta o painel. |
 | `App: handlePageShow(event)` | Revalida o acesso quando o navegador restaura a página do cache do histórico. |
 | `App: handleStorage(event)` | Revalida sessão/tema quando outra aba altera usuários, sessão ou configurações, ou limpa o armazenamento. |
 | Callback de limpeza do efeito de `App` | Remove os dois eventos ao desmontar, inclusive no ciclo adicional de verificação de `StrictMode`. |
 | `App: signIn(email, password)` | Chama o adaptador; se aceitar as credenciais e persistir a sessão, abre o painel. |
+| `App: signOut()` | Tenta remover a sessão, desmonta o painel após sucesso e apresenta erro se a operação falhar. |
 | `AuthLayout({ children })` | Apresenta marca, fundo e cartão reutilizando o CSS atual; recebe o conteúdo como filhos React. |
 | `LoginPage({ onSignIn })` | Controla campos, mensagens, visibilidade de senha e estado de envio com estado React. |
 | `LoginPage: handleSubmit(event)` | Valida campos obrigatórios, foca o primeiro inválido, impede envios duplicados, aguarda `onSignIn`, apresenta falhas e libera o formulário. Não usa atraso artificial. |
@@ -304,15 +305,16 @@ Na etapa 2, `readLegacyFile('login.html')` passou a gerar uma página mínima qu
 | `services/auth: createAuth(storage)` | Cria um adaptador tipado para `window.AttentoAuth`, carregado por importação do `auth.js` original. Aceita armazenamento alternativo para testes. |
 | `services/auth: restoreSession()` | Delega ao serviço existente. |
 | `services/auth: signIn(email, password)` | Delega a validação e confirma o ID persistido antes de aceitar o acesso. |
+| `services/auth: signOut()` | Delega a remoção e verifica se a sessão realmente deixou de existir. |
 | `browserStorage.getItem/setItem/removeItem` | Acessam o armazenamento somente ao executar a operação, permitindo tratar falhas sem interromper a importação do módulo. |
-| `openDashboard()` | Abre `/legacy/index.html` com o hash solicitado ou `#dashboard`. O painel valida a permissão da rota. |
 | `applySavedTheme()` | Aplica o tema de `app_settings`; usa claro se ausente ou ilegível. |
+| `saveTheme(theme)` | Preserva as demais configurações, grava o tema e só depois o aplica ao documento. Propaga falhas ao componente. |
 
 O formulário recebe uma função de autenticação e aceita resultado síncrono ou uma Promise. Isso permite testar a interface sem acoplá-la ao armazenamento. Senhas permanecem no estado do formulário, sem criar uma nova chave de persistência. A autenticação continua de demonstração.
 
 Os testes React em `LoginPage.test.tsx` cobrem campos obrigatórios, foco, contas demo, exibição de senha, duplicidade de envio e falha assíncrona. `App.test.tsx` cobre os dois perfis, sessão existente/corrompida, tema, falha ao gravar, eventos de outra aba e histórico. `test/setup.ts` limpa o DOM, o armazenamento e os mocks entre cenários. Rodar `npm test` dentro de `react-app`; a suíte anterior permanece em `node --test tests/*.test.cjs` na raiz.
 
-Próximas etapas: migrar estrutura do painel e navegação; depois dashboard, agenda, cadastros e financeiro por módulo. A ponte `/legacy/` permanece até esses fluxos serem substituídos e validados.
+Estrutura e navegação já migradas. Próximas etapas: dashboard, agenda, cadastros e financeiro por módulo. A versão `/legacy/` permanece disponível durante a transição, mas o login React não redireciona mais para ela.
 
 Referências técnicas: [API de plugins do Vite](https://vite.dev/guide/api-plugin.html) e [StrictMode do React](https://react.dev/reference/react/StrictMode).
 
@@ -332,3 +334,27 @@ Referências técnicas: [API de plugins do Vite](https://vite.dev/guide/api-plug
 | `clearPanelTransient()` | Cancela esses temporizadores e limpa modais/notificações ao sair ou trocar de módulo. |
 
 Durante a montagem, `$` e `$$` limitam as buscas ao contêiner do módulo. O cabeçalho React fica fora dessa área. O teste `panel.test.ts` verifica montagem, permissões, limpeza e rejeição de sessão ausente.
+
+### Estrutura React em funcionamento — etapa 3
+
+O fluxo agora é `App → DashboardPage → DashboardLayout + LegacyModule`. React controla cabeçalho, identificação do usuário, menu horizontal, tema, logout e hash. O conteúdo de cada módulo continua temporariamente no renderizador existente; não há iframe nem dois cabeçalhos. As permissões usam a mesma definição tanto no React quanto na montagem do módulo.
+
+| Componente ou função | Responsabilidade |
+| --- | --- |
+| `DashboardPage()` | Carrega a interface dos módulos sob demanda, escolhe a rota permitida e conecta tema, saída e conteúdo. Mostra erro com nova tentativa se o carregamento falhar. |
+| Efeito de carregamento e sua limpeza | Usa `loadPanel()` e ignora respostas quando a página foi desmontada. O estado `attempt` permite tentar novamente. |
+| `handleHash()` | Atualiza a rota solicitada em alterações do hash, inclusive links internos e histórico. O evento é removido ao desmontar. |
+| Efeito de normalização da rota | Corrige destinos desconhecidos/proibidos para `#dashboard` sem acrescentar outra entrada ao histórico e atualiza o título da página. |
+| `DashboardPage: navigate(next)` | Atualiza hash e estado da rota e volta ao topo, inclusive quando o usuário clica na aba já ativa. |
+| `DashboardPage: toggleTheme()` | Usa `saveTheme`, atualiza o estado React após sucesso e mostra erro em caso de falha. |
+| `DashboardLayout()` | Renderiza marca, título, perfil, botões e navegação permitida. Seu efeito revela a aba ativa deslocando apenas a rolagem horizontal. |
+| `LegacyModule()` | Envolve o módulo numa barreira de erro vinculada à identidade e ao perfil do usuário. |
+| `ModuleBoundary.getDerivedStateFromError()` | Marca uma falha de montagem/renderização do módulo sem derrubar o cabeçalho React. |
+| `ModuleBoundary.render()` | Mostra o conteúdo ou mensagem de erro com botão para limpar a falha e montar novamente. |
+| `MountedModule()` | Reserva um contêiner sem filhos React, monta o controlador por efeito e chama `destroy` na limpeza. Outro efeito sincroniza página e tema. |
+
+O contêiner de `MountedModule` é intencionalmente vazio do ponto de vista do React: somente o controlador legado altera seus filhos. Isso evita disputas de DOM e permite preservar os eventos e formulários atuais até a migração individual.
+
+Mudanças de tema na tela de configurações notificam React por `onThemeChange`. Mudanças no cabeçalho fluem para o controlador por `setTheme`, sem uma segunda gravação. Ao sair ou perder a sessão em outra aba, a limpeza remove modais, temporizadores e eventos de teclado.
+
+`DashboardPage.test.tsx` executa os módulos reais em DOM simulado: verifica perfil, hash, navegação, sincronização de tema, criação de sala, logout, falha de montagem com recuperação e fechamento de modais ao trocar de módulo. Usa `StrictMode` para exercitar montagem e limpeza repetidas. A configuração do Vitest limita os workers a um para reduzir consumo de memória. Esses testes não substituem a conferência visual em navegador.

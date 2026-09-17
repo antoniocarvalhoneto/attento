@@ -2,11 +2,10 @@ import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, test, vi } from 'vitest'
 import App from './App'
-import { openDashboard } from './services/navigation'
+import type { User } from './services/auth'
 
-vi.mock('./services/navigation', async importOriginal => ({
-  ...await importOriginal<typeof import('./services/navigation')>(),
-  openDashboard: vi.fn(),
+vi.mock('./pages/DashboardPage', () => ({
+  DashboardPage: ({ user, onSignOut, error }: { user: User; onSignOut(): void; error: string }) => <div data-testid="panel">{user.name}<button onClick={onSignOut}>Sair</button>{error && <p role="alert">{error}</p>}</div>,
 }))
 
 test.each(['Administrador', 'Usuário'])('login %s persiste a sessão antes de abrir o painel', async role => {
@@ -15,7 +14,7 @@ test.each(['Administrador', 'Usuário'])('login %s persiste a sessão antes de a
   await userEvent.click(screen.getByRole('button', { name: new RegExp(role) }))
   await userEvent.click(screen.getByRole('button', { name: 'Entrar' }))
   expect(JSON.parse(localStorage.getItem('app_session')!)).toEqual({ userId: role === 'Administrador' ? 'admin_demo' : 'user_demo' })
-  expect(openDashboard).toHaveBeenCalled()
+  expect(screen.getByTestId('panel')).toBeVisible()
   expect(localStorage.getItem('app_rooms')).toBeNull()
 })
 
@@ -25,7 +24,7 @@ test('restaura usuário existente e tema sem substituir cadastros', () => {
   localStorage.setItem('app_session', JSON.stringify({ userId: 'custom' }))
   localStorage.setItem('app_settings', JSON.stringify({ theme: 'dark' }))
   render(<App />)
-  expect(openDashboard).toHaveBeenCalled()
+  expect(screen.getByTestId('panel')).toBeVisible()
   expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
   expect(JSON.parse(localStorage.getItem('app_users')!)).toEqual(users)
 })
@@ -33,10 +32,10 @@ test('restaura usuário existente e tema sem substituir cadastros', () => {
 test('sessão corrompida mantém o login e nova sessão de outra aba abre o painel', () => {
   localStorage.setItem('app_session', '{')
   render(<App />)
-  expect(openDashboard).not.toHaveBeenCalled()
+  expect(screen.queryByTestId('panel')).not.toBeInTheDocument()
   localStorage.setItem('app_session', JSON.stringify({ userId: 'admin_demo' }))
   act(() => window.dispatchEvent(new StorageEvent('storage', { key: 'app_session' })))
-  expect(openDashboard).toHaveBeenCalledTimes(1)
+  expect(screen.getByTestId('panel')).toBeVisible()
 })
 
 test('falha ao persistir mostra erro e não abre o painel', async () => {
@@ -47,15 +46,15 @@ test('falha ao persistir mostra erro e não abre o painel', async () => {
   await userEvent.type(screen.getByLabelText('Senha'), '123456')
   await userEvent.click(screen.getByRole('button', { name: 'Entrar' }))
   expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível concluir o acesso.')
-  expect(openDashboard).not.toHaveBeenCalled()
+  expect(screen.queryByTestId('panel')).not.toBeInTheDocument()
 })
 
 test('histórico revalida sessão e a desmontagem remove os eventos', () => {
   const { unmount } = render(<App />)
   localStorage.setItem('app_session', JSON.stringify({ userId: 'admin_demo' }))
   act(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })))
-  expect(openDashboard).toHaveBeenCalledTimes(1)
+  expect(screen.getByTestId('panel')).toBeVisible()
   unmount()
   act(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })))
-  expect(openDashboard).toHaveBeenCalledTimes(1)
+  expect(screen.queryByTestId('panel')).not.toBeInTheDocument()
 })
