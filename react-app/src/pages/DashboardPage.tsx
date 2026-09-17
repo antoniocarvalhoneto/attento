@@ -4,6 +4,7 @@ import { LegacyModule } from '../components/LegacyModule'
 import { DashboardHome } from './DashboardHome'
 import { AvailabilityPage } from './AvailabilityPage'
 import { MySchedulePage } from './MySchedulePage'
+import { CatalogPage } from './CatalogPage'
 import type { User } from '../services/auth'
 import { loadPanel } from '../services/panel'
 import type { PanelApi, Theme } from '../services/panel'
@@ -65,6 +66,7 @@ export function DashboardPage({ user, theme, onThemeChange, onSignOut, error }: 
     {view === 'dashboard' ? <DashboardHome key={`${user.id}:${user.role}`} api={api} />
       : view === 'availability' ? <AvailabilityPage user={user} />
       : view === 'myschedule' ? <MySchedulePage user={user} />
+      : view === 'rooms' || view === 'professionals' ? <CatalogPage key={view} kind={view} />
       : <LegacyModule api={api} user={user} view={view} theme={theme} onThemeChange={onThemeChange} />}
   </DashboardLayout>
 }

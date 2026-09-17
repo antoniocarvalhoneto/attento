@@ -163,6 +163,8 @@ A migração dos módulos restantes começou pela camada TypeScript de dados (`r
 
 Disponibilidade e Meus Horários também estão em React: filtros, grade semanal, confirmação de reserva e contato são componentes próprios.
 
+Salas e profissionais usam tabelas e formulários React para consultar, criar, editar e excluir, mantendo a proteção dos registros vinculados.
+
 - Integração com uma API/backend real (autenticação, banco de dados).
 - Testes end-to-end no navegador.
 

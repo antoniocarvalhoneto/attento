@@ -394,6 +394,10 @@ Validação desta etapa: 26 testes React, build e lint aprovados. A conferência
 
 ## 13. Serviços independentes para os módulos React
 
+### Cadastros de salas e profissionais
+
+`CatalogPage` carrega a coleção para `Catalog`, que controla consulta, edição e exclusão. `create` prepara valores iniciais sem salvar. `CatalogEditor` mantém o rascunho, atualiza campos com `update` e só fecha após `saveRecord` ter sucesso. A seleção de unidade restringe as salas do profissional. `RecordActions` apresenta botões acessíveis por linha. `DeleteDialog` exige confirmação e mantém erros no próprio diálogo. Os testes exercitam criação, edição, remoção, vínculos e seleção de unidade/sala.
+
 ### Disponibilidade, agenda e componentes compartilhados
 
 `Page` carrega dados com recuperação de erro, atualiza por foco/armazenamento/intervalo e posiciona o conteúdo no topo somente ao entrar na rota. Sua limpeza remove os eventos e temporizador. `Modal` usa portal React, contém o foco, fecha com Escape ou clique externo, bloqueia o fundo e restaura foco/rolagem ao desmontar. `Fields` reúne campos com rótulos, seletores, opções, ações de formulário, badges, tabelas e cabeçalhos.
