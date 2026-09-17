@@ -1,5 +1,6 @@
 import './auth'
 import type { User } from './auth'
+import type { DashboardSnapshot } from './dashboard'
 
 export type Theme = 'light' | 'dark'
 export type NavItem = { key: string; label: string; icon: string }
@@ -9,6 +10,7 @@ export type PanelController = {
   destroy(): void
 }
 export type PanelApi = {
+  readDashboard(): DashboardSnapshot
   mount(root: HTMLElement, onThemeChange: (theme: Theme) => void): PanelController
   navigation: Record<User['role'], NavItem[]>
   titles: Record<string, string>

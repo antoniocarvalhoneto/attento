@@ -1498,7 +1498,23 @@
     };
   }
 
-  window.AttentoPanel = { mount: mountPanel, navigation: NAV_ITEMS, titles: VIEW_TITLES, allowed: viewAllowedForRole };
+  function readDashboard() {
+    const user = auth.restoreSession();
+    if (!user) throw new Error('Sessão inválida. Entre novamente.');
+    initializeData();
+    loadAllIntoState();
+    return {
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      rooms: STATE.rooms.map(item => ({ ...item })),
+      professionals: STATE.professionals.map(item => ({ ...item })),
+      units: STATE.units.map(item => ({ ...item })),
+      schedules: STATE.schedules.filter(item => user.role === 'admin' || item.userId === user.id).map(item => ({ ...item })),
+      accounts: user.role === 'admin' ? STATE.financialAccounts.map(item => ({ ...item })) : [],
+      whatsapp: STATE.whatsapp
+    };
+  }
+
+  window.AttentoPanel = { mount: mountPanel, readDashboard, navigation: NAV_ITEMS, titles: VIEW_TITLES, allowed: viewAllowedForRole };
   if (!window.AttentoReactHost) {
     document.addEventListener('DOMContentLoaded', init);
     window.addEventListener('pageshow', event => {

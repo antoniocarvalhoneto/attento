@@ -358,3 +358,13 @@ O contêiner de `MountedModule` é intencionalmente vazio do ponto de vista do R
 Mudanças de tema na tela de configurações notificam React por `onThemeChange`. Mudanças no cabeçalho fluem para o controlador por `setTheme`, sem uma segunda gravação. Ao sair ou perder a sessão em outra aba, a limpeza remove modais, temporizadores e eventos de teclado.
 
 `DashboardPage.test.tsx` executa os módulos reais em DOM simulado: verifica perfil, hash, navegação, sincronização de tema, criação de sala, logout, falha de montagem com recuperação e fechamento de modais ao trocar de módulo. Usa `StrictMode` para exercitar montagem e limpeza repetidas. A configuração do Vitest limita os workers a um para reduzir consumo de memória. Esses testes não substituem a conferência visual em navegador.
+
+### Dados do dashboard React — preparação da etapa 4
+
+`readDashboard()` na interface `AttentoPanel` verifica a sessão, inicializa/migra dados pelo caminho já existente e devolve cópias das coleções. Retorna somente as reservas do próprio usuário e nenhuma conta financeira para o perfil comum. O objeto de usuário retornado não contém senha. A leitura não monta HTML nem eventos do painel.
+
+`buildDashboard(snapshot, now)` em `services/dashboard.ts` transforma essas coleções num modelo de apresentação. Reutiliza `upcomingSchedules`, `inWeek`, `slotDate` e `whatsappUrl` dos módulos existentes. Para administrador, calcula indicadores, contagens semanais e distribuição de contas por status; para usuário, prepara apenas seus próximos horários e contato. O gráfico semanal inclui reservas passadas dentro da semana, enquanto a agenda lista somente horários futuros.
+
+`displayDate(date)` apresenta datas fixas como dia/mês/ano. `nameOf(items, id)`, função local de `buildDashboard`, resolve nomes ou retorna travessão para vínculos ausentes. `WEEK_DAYS` contém os rótulos de segunda a sábado. `DashboardSnapshot` descreve os dados recebidos e `DashboardModel` distingue os resultados de administrador e usuário por `role`.
+
+`dashboard.test.ts` verifica o cálculo semanal, a virada de semana, a separação de perfis, a ordem dos horários, listas vazias e vínculos ausentes.
