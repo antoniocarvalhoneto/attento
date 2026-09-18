@@ -82,6 +82,8 @@ O armazenamento depende de **protocolo, host e porta**: mudar de `localhost:8080
 
 Na revisão posterior à migração, falhas de atualização em segundo plano passaram a preservar formulários abertos. Trocas de identidade/perfil em outra aba agora descartam o estado da conta anterior. Os dois cenários têm testes de regressão.
 
+Também foram ajustados contraste de badges/links, quebra de textos longos, filtros flexíveis, tamanho de controles no celular e rolagem pelo teclado nas tabelas e agendas. As correções de layout ainda precisam ser conferidas em navegador real.
+
 Os testes em `react-app/src/` cobrem componentes, integração entre telas, autenticação, datas, persistência, permissões, reservas, cadastros, pagamentos, filtros, CSV e foco dos modais. Build e lint complementam a verificação.
 
 Na conclusão da migração: **52 testes aprovados**, build aprovado e lint sem avisos. HTML, JavaScript, CSS e logo foram conferidos via HTTP no preview; `dist/` não contém a ponte antiga.

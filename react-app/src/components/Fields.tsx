@@ -16,6 +16,6 @@ export function Status({ value }: { value: string }) {
   return <span className={`badge badge-${['pago', 'ativo', 'reservado'].includes(value) ? 'green' : ['pendente', 'manutencao'].includes(value) ? 'amber' : value === 'vencido' ? 'red' : value === 'disponivel' ? 'blue' : 'gray'}`}>{labels[value] || value}</span>
 }
 export function DataTable({ headers, rows, empty = 'Nenhum registro encontrado.' }: { headers: string[]; rows: { id: string; cells: ReactNode[] }[]; empty?: string }) {
-  return <div className="table-wrap">{rows.length ? <table><thead><tr>{headers.map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{rows.map(row => <tr key={row.id}>{row.cells.map((cell, index) => <td key={headers[index]}>{cell}</td>)}</tr>)}</tbody></table> : <div className="empty-state"><p>{empty}</p></div>}</div>
+  return <div className="table-wrap" role="region" aria-label="Tabela de registros" tabIndex={0}>{rows.length ? <table><thead><tr>{headers.map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{rows.map(row => <tr key={row.id}>{row.cells.map((cell, index) => <td key={headers[index]}>{cell}</td>)}</tr>)}</tbody></table> : <div className="empty-state"><p>{empty}</p></div>}</div>
 }
 export function PageHead({ title, description, children }: { title: string; description: string; children?: ReactNode }) { return <div className="page-head"><div className="page-head-text"><h1>{title}</h1><p>{description}</p></div>{children}</div> }

@@ -163,6 +163,8 @@ Os callbacks de campos alteram rascunhos; callbacks de envio chamam serviços; c
 
 `src/style.css` contém os estilos preservados, menu horizontal, temas e responsividade. O login usa camadas de gradiente com animação CSS; `prefers-reduced-motion` desativa o movimento. Modais possuem sobreposição própria e formulários com rolagem interna.
 
+A revisão separou cores de texto (`accent-text`, `success-text`, `warning-text`, `danger-text`) das cores dos gráficos. Isso melhora o contraste dos badges e dos links no tema escuro sem mudar as séries dos gráficos. Filtros usam largura flexível, nomes e valores longos podem quebrar linha e modais em celular respeitam a altura dinâmica da tela. Tabelas e agendas possuem regiões focáveis para rolagem pelo teclado. Essas alterações foram revisadas no código; a conferência visual real continua pendente.
+
 Vite usa apenas o plugin React. O logo e o CSS estão dentro da aplicação. Não há mais `LegacyModule`, plugin de publicação de arquivos antigos ou serviços em `window.Attento*`. A pasta `conveniencias2/` é material anterior fora do build.
 
 ## 12. Testes e limites
