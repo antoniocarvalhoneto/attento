@@ -2,16 +2,15 @@ import type { DashboardModel } from '../../services/dashboard'
 
 export function FinanceSummary({ finance }: { finance: Extract<DashboardModel, { role: 'admin' }>['finance'] }) {
   const items = [
-    { label: 'Pago', count: finance.paid, color: 'var(--success)' },
-    { label: 'Pendente', count: finance.pending, color: 'var(--warning)' },
-    { label: 'Vencido', count: finance.overdue, color: 'var(--danger)' },
+    { label: 'Pagas', count: finance.paid, className: '' },
+    { label: 'Pendentes', count: finance.pending, className: finance.pending ? 'is-pending' : '' },
+    { label: 'Vencidas', count: finance.overdue, className: finance.overdue ? 'is-overdue' : '' },
   ]
   const total = items.reduce((sum, item) => sum + item.count, 0)
-  return <div className="card">
-    <h3>Situação financeira</h3><p className="text-muted mt-8">Distribuição das contas cadastradas</p>
-    <div className="split-bar mt-16" aria-hidden="true">{items.map(item => <span key={item.label} style={{ width: `${item.count / (total || 1) * 100}%`, background: item.color }} />)}</div>
-    <div className="legend-row">{items.map(item => <span className="legend-item" key={item.label}><span className="legend-dot" style={{ background: item.color }} aria-hidden="true" />{item.label} ({item.count})</span>)}</div>
+  return <section className="dashboard-analysis">
+    <h2>Contas a acompanhar</h2><p className="text-muted mt-8">Quantidade de contas por situação</p>
+    <dl className="finance-summary">{items.map(item => <div key={item.label} className={item.className}><dt>{item.label}</dt><dd>{item.count}</dd></div>)}</dl>
     {!total && <p className="text-muted mt-8">Nenhuma conta cadastrada.</p>}
     <a className="summary-link" href="#financial">Ver financeiro</a>
-  </div>
+  </section>
 }

@@ -41,7 +41,7 @@ test('usuário vê apenas sua agenda e trata contato ausente ou configurado', as
   render(<DashboardHome api={api} />)
   expect(await screen.findByRole('heading', { name: 'Meus próximos horários' })).toBeVisible()
   expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(2)
-  expect(screen.queryByText('Situação financeira')).not.toBeInTheDocument()
+  expect(screen.queryByText('Contas a acompanhar')).not.toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Ver financeiro' })).not.toBeInTheDocument()
   expect(screen.getByText('O WhatsApp da unidade ainda não foi informado.')).toBeVisible()
   snapshot.whatsapp = '11999999999'

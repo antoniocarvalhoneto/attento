@@ -57,8 +57,8 @@ function DashboardContent({ model }: { model: DashboardModel }) {
       </div><a className="btn btn-primary" href="#availability">Reservar horário</a></div>
       <section className="section reservation-priority"><div className="section-head"><h2>Meus próximos horários</h2><a href="#myschedule">Ver minha agenda</a></div><ReservationTable rows={model.reservations} /></section>
       <div className="section"><div className="stat-grid">
-        <StatCard icon="fa-calendar-days" label="Reservas restantes nesta semana" value={model.weekReservations} />
-        <StatCard icon="fa-door-open" label="Salas disponíveis" value={model.availableRooms} />
+        <StatCard label="Reservas restantes nesta semana" value={model.weekReservations} />
+        <StatCard label="Salas disponíveis" value={model.availableRooms} />
       </div></div>
       <aside className="contact-note"><h2>Precisa ajustar uma reserva?</h2>{model.helpUrl ? <a href={model.helpUrl} target="_blank" rel="noopener noreferrer">Fale com a unidade pelo WhatsApp</a> : <p>O WhatsApp da unidade ainda não foi informado.</p>}</aside>
     </>
@@ -71,10 +71,10 @@ function DashboardContent({ model }: { model: DashboardModel }) {
     </div><a className="btn btn-primary" href="#availability">Alocar horário</a></div>
     <section className="section reservation-priority"><div className="section-head"><div><h2>Agenda de reservas</h2><p>Próximas reservas · Exibindo {preview.length} de {model.reservations.length} {model.reservations.length === 1 ? 'reserva' : 'reservas'}</p></div><a href="#availability">Abrir agenda completa</a></div><ReservationTable rows={preview} admin /></section>
     <div className="section"><div className="stat-grid">
-      <StatCard icon="fa-door-open" label="Salas disponíveis" value={model.availableRooms} />
-      <StatCard icon="fa-users" label="Profissionais ativos" value={model.activeProfessionals} />
-      <StatCard icon="fa-calendar-check" label="Horários agendados" value={model.reservations.length} />
-      <StatCard icon="fa-hourglass-half" label="Contas pendentes" value={pending} warning={pending > 0} />
+      <StatCard label="Salas disponíveis" value={model.availableRooms} />
+      <StatCard label="Profissionais ativos" value={model.activeProfessionals} />
+      <StatCard label="Horários agendados" value={model.reservations.length} />
+      <StatCard label="Contas pendentes" value={pending} warning={pending > 0} />
     </div></div>
     <div className="section two-col"><ReservationChart model={model} /><FinanceSummary finance={model.finance} /></div>
   </>

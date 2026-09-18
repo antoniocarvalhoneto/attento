@@ -117,10 +117,10 @@ O dashboard prioriza a agenda: data e reservas restantes de hoje, ação de rese
 | Limpeza do efeito | Cancela eventos/intervalo e ignora trabalho agendado após desmontagem. |
 | Efeito de foco | Foca e volta ao topo na primeira carga; atualizações não movem a página. |
 | `DashboardContent` | Apresenta cada perfil; administrador tem prévia de seis próximas reservas. |
-| `StatCard` | Exibe ícone, valor, rótulo e destaque de pendência. |
+| `StatCard` | Exibe rótulo e valor como lista de definição, sem ícone ou cartão individual; destaca pendências. |
 | `ReservationTable` | Renderiza tabela ou estado vazio; valores são texto JSX. |
 | `ReservationChart` | Desenha barras, escala e dia atual, com descrição acessível por dia. |
-| `FinanceSummary` | Mostra proporções da quantidade de contas, não valores monetários; trata total zero. |
+| `FinanceSummary` | Lista quantidades de contas pagas, pendentes e vencidas, com acesso ao financeiro. Destaca pendências e vencimentos somente quando existem. |
 
 ## 7. Disponibilidade e agenda pessoal
 
@@ -166,6 +166,8 @@ Sem edição em andamento, o telefone acompanha a leitura atual após alteraçõ
 Os callbacks de campos alteram rascunhos; callbacks de envio chamam serviços; callbacks de map/filter/find/reduce transformam coleções. A explicação fica neste documento em vez de comentários adicionados ao código.
 
 ## 11. Estilos e build
+
+A identidade usa Inter em títulos e textos, pesos mais contidos e uma escala de espaçamento consistente. O azul identifica ações e navegação; os fundos são neutros. Indicadores ficam em uma faixa com divisórias, sem caixas ou ícones repetidos. Gráfico e resumo financeiro são seções abertas. Os estilos do resumo semanal e da barra financeira removidos não permanecem no CSS.
 
 `src/style.css` contém os estilos preservados, menu horizontal, temas e responsividade. O login usa camadas de gradiente com animação CSS; `prefers-reduced-motion` desativa o movimento. Modais possuem sobreposição própria e formulários com rolagem interna.
 

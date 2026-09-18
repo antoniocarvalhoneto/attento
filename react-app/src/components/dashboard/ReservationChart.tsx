@@ -3,8 +3,8 @@ import type { DashboardModel } from '../../services/dashboard'
 
 export function ReservationChart({ model }: { model: Extract<DashboardModel, { role: 'admin' }> }) {
   const { weekCounts, weekTotal, chartStep, chartMax, todayIndex } = model
-  return <div className="card">
-    <div className="reservation-chart-head"><h3>Reservas por dia</h3><span className="reservation-chart-total">{weekTotal} {weekTotal === 1 ? 'reserva' : 'reservas'}</span></div>
+  return <section className="dashboard-analysis">
+    <div className="reservation-chart-head"><h2>Reservas por dia</h2><span className="reservation-chart-total">{weekTotal} {weekTotal === 1 ? 'reserva' : 'reservas'}</span></div>
     <p className="text-muted mt-8">Semana atual · Todas as unidades</p>
     <div className="reservation-chart" role="img" aria-label={`Reservas por dia, semana atual. ${weekCounts.map((count, i) => `${WEEK_DAYS[i]}: ${count} ${count === 1 ? 'reserva' : 'reservas'}`).join('; ')}`}>
       <div className="chart-axis" aria-hidden="true">{[4, 3, 2, 1, 0].map(tick => <span key={tick}>{tick * chartStep}</span>)}</div>
@@ -14,5 +14,5 @@ export function ReservationChart({ model }: { model: Extract<DashboardModel, { r
       </div>)}</div>
     </div>
     {weekTotal === 0 && <p className="text-muted mt-8">Nenhuma reserva nesta semana.</p>}
-  </div>
+  </section>
 }
