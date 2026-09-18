@@ -29,6 +29,21 @@ async function start(role: 'admin' | 'user' = 'admin', hash = '#dashboard') {
   return screen.findByRole('navigation', { name: 'Navegação principal' })
 }
 
+test('troca de identidade em outra aba descarta formulário da conta anterior', async () => {
+  await start('admin', '#rooms')
+  await userEvent.click(screen.getByRole('button', { name: 'Nova sala' }))
+  await userEvent.type(screen.getByLabelText('Nome da sala'), 'Rascunho da primeira conta')
+  const users = JSON.parse(localStorage.getItem('app_users')!)
+  users.push({ id: 'second', name: 'Outra conta', email: 'second@example.com', password: '123456', role: 'admin' })
+  localStorage.setItem('app_users', JSON.stringify(users))
+  localStorage.setItem('app_session', JSON.stringify({ userId: 'second' }))
+  act(() => window.dispatchEvent(new StorageEvent('storage', { key: 'app_session' })))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(screen.getByText('Outra conta')).toBeVisible()
+  await userEvent.click(screen.getByRole('button', { name: 'Nova sala' }))
+  expect(screen.getByLabelText('Nome da sala')).toHaveValue('')
+})
+
 test('estrutura React monta uma vez, navega pelos módulos e acompanha histórico', async () => {
   const nav = await start()
   expect(screen.getAllByRole('navigation')).toHaveLength(1)

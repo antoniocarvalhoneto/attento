@@ -48,7 +48,7 @@ export default function App() {
     }
   }
 
-  if (user) return <DashboardPage user={user} theme={theme} onThemeChange={setTheme} onSignOut={signOut} error={error} />
+  if (user) return <DashboardPage key={`${user.id}:${user.role}`} user={user} theme={theme} onThemeChange={setTheme} onSignOut={signOut} error={error} />
 
   return <LoginPage onSignIn={signIn} />
 }

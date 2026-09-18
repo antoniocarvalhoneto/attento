@@ -60,6 +60,8 @@ A autenticação continua local e de demonstração. Não há servidor, senha pr
 
 Ao mudar de módulo, os formulários e modais são desmontados. Cadastros reaparecem atualizados ao retornar. Atualizações periódicas não reposicionam foco ou rolagem.
 
+Uma falha de atualização em segundo plano conserva os dados anteriores e os rascunhos abertos, apresentando aviso de desatualização. A recuperação limpa o aviso sem remontar o formulário. Ao mudar a identidade ou o perfil da sessão em outra aba, `App` remonta o painel para descartar estado pertencente à conta anterior.
+
 ## 4. Tipos, armazenamento e dados iniciais
 
 `models.ts` define `Unit`, `Room`, `Professional`, `Schedule`, `Account`, `Insurance`, `Collections` e `Settings`. `HOURS` contém os horários de 08h a 20h; `INSURANCE_TYPES` contém os convênios existentes. `money` formata reais e `nameOf` resolve nomes por ID, usando travessão quando o vínculo não existe.
