@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PanelApi } from '../services/panel'
-import { buildDashboard, WEEK_DAYS } from '../services/dashboard'
+import { buildDashboard } from '../services/dashboard'
 import type { DashboardModel } from '../services/dashboard'
 import { StatCard } from '../components/dashboard/StatCard'
 import { ReservationTable } from '../components/dashboard/ReservationTable'
@@ -43,7 +43,7 @@ export function DashboardHome({ api }: { api: PanelApi }) {
     focused.current = true
   }, [model, error])
 
-  return <main className="content" ref={main} tabIndex={-1}>
+  return <main className="content dashboard-home" ref={main} tabIndex={-1}>
     {error ? <div role="alert"><p>{error}</p><button className="btn btn-primary" onClick={() => setAttempt(value => value + 1)}>Tentar novamente</button></div>
       : model ? <DashboardContent model={model} /> : <p role="status">Carregando dashboard…</p>}
   </main>
@@ -51,35 +51,31 @@ export function DashboardHome({ api }: { api: PanelApi }) {
 
 function DashboardContent({ model }: { model: DashboardModel }) {
   if (model.role === 'user') {
-    const next = model.reservations[0]
     return <>
-      <div className="page-head"><div className="page-head-text"><h1>Olá, {model.name}</h1><p>{model.dateLabel}</p>
-        <p>{model.weekReservations ? `Você tem ${model.weekReservations} ${model.weekReservations === 1 ? 'reserva' : 'reservas'} nesta semana.` : 'Você ainda não tem reservas nesta semana.'}</p>
-      </div></div>
+      <div className="page-head"><div className="page-head-text"><p className="page-context">{model.dateLabel}</p><h1>Minha agenda</h1>
+        <p>{model.remainingToday ? `${model.remainingToday} ${model.remainingToday === 1 ? 'horário reservado' : 'horários reservados'} ainda hoje.` : 'Você não tem mais reservas para hoje.'}</p>
+      </div><a className="btn btn-primary" href="#availability">Reservar horário</a></div>
+      <section className="section reservation-priority"><div className="section-head"><h2>Meus próximos horários</h2><a href="#myschedule">Ver minha agenda</a></div><ReservationTable rows={model.reservations} /></section>
       <div className="section"><div className="stat-grid">
-        <StatCard icon="fa-clock" label="Próximo horário" value={next ? `${next.date} ${next.time}` : 'Nenhum'} />
-        <StatCard icon="fa-calendar-days" label="Reservas nesta semana" value={model.weekReservations} />
+        <StatCard icon="fa-calendar-days" label="Reservas restantes nesta semana" value={model.weekReservations} />
         <StatCard icon="fa-door-open" label="Salas disponíveis" value={model.availableRooms} />
-        {model.helpUrl ? <a className="stat-card stat-card-link" href={model.helpUrl} target="_blank" rel="noopener"><div className="stat-icon neutral"><i className="fa-brands fa-whatsapp" aria-hidden="true" /></div><div className="stat-info"><span className="stat-value stat-value-action">Fale conosco</span><span className="stat-label">Atendimento pelo WhatsApp</span></div></a>
-          : <StatCard icon="fa-comments" label="Contato da unidade" value="Não configurado" />}
       </div></div>
-      <div className="section"><div className="section-head"><h2>Meus próximos horários</h2></div><ReservationTable rows={model.reservations} /></div>
+      <aside className="contact-note"><h2>Precisa ajustar uma reserva?</h2>{model.helpUrl ? <a href={model.helpUrl} target="_blank" rel="noopener noreferrer">Fale com a unidade pelo WhatsApp</a> : <p>O WhatsApp da unidade ainda não foi informado.</p>}</aside>
     </>
   }
   const preview = model.reservations.slice(0, 6)
-  const { pending, overdue } = model.finance
+  const { pending } = model.finance
   return <>
-    <div className="page-head"><div className="page-head-text"><h1>Olá, {model.name}</h1><p>{model.dateLabel} · Todas as unidades</p>
-      <p>{!pending && !overdue ? 'Nenhuma conta pendente ou vencida.' : `${pending} ${pending === 1 ? 'conta pendente' : 'contas pendentes'} · ${overdue} ${overdue === 1 ? 'conta vencida' : 'contas vencidas'}`}</p>
-    </div><a href="#financial">Ver financeiro</a></div>
+    <div className="page-head"><div className="page-head-text"><p className="page-context">{model.dateLabel} · Todas as unidades</p><h1>Agenda da unidade</h1>
+      <p>{model.remainingToday ? `${model.remainingToday} ${model.remainingToday === 1 ? 'reserva prevista' : 'reservas previstas'} para o restante do dia.` : 'Nenhuma reserva prevista para o restante do dia.'}</p>
+    </div><a className="btn btn-primary" href="#availability">Alocar horário</a></div>
+    <section className="section reservation-priority"><div className="section-head"><div><h2>Agenda de reservas</h2><p>Próximas reservas · Exibindo {preview.length} de {model.reservations.length} {model.reservations.length === 1 ? 'reserva' : 'reservas'}</p></div><a href="#availability">Abrir agenda completa</a></div><ReservationTable rows={preview} admin /></section>
     <div className="section"><div className="stat-grid">
       <StatCard icon="fa-door-open" label="Salas disponíveis" value={model.availableRooms} />
       <StatCard icon="fa-users" label="Profissionais ativos" value={model.activeProfessionals} />
       <StatCard icon="fa-calendar-check" label="Horários agendados" value={model.reservations.length} />
       <StatCard icon="fa-hourglass-half" label="Contas pendentes" value={pending} warning={pending > 0} />
     </div></div>
-    <div className="section"><div className="section-head"><div><h2>Agenda de reservas</h2><p>Próximas reservas · Exibindo {preview.length} de {model.reservations.length} {model.reservations.length === 1 ? 'reserva' : 'reservas'}</p></div><a href="#availability">Abrir agenda completa</a></div><ReservationTable rows={preview} admin /></div>
-    <div className="section"><div className="section-head"><h2>Reservas nesta semana</h2></div><div className="week-strip">{model.weekCounts.map((count, index) => <div className="week-day" key={WEEK_DAYS[index]}><div className="wd-label">{WEEK_DAYS[index]}</div><div className="wd-count">{count}</div><div className="wd-sub">{count === 1 ? 'reserva' : 'reservas'}</div></div>)}</div></div>
     <div className="section two-col"><ReservationChart model={model} /><FinanceSummary finance={model.finance} /></div>
   </>
 }

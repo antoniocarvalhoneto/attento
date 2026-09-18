@@ -45,3 +45,10 @@ test('coleções vazias e referências ausentes têm valores seguros', () => {
   const missing = buildDashboard({ ...snapshot, rooms: [], professionals: [], units: [] }, now)
   expect(missing.reservations[0]).toMatchObject({ room: '—', professional: '—', unit: '—' })
 })
+
+test('resumo do dia exclui horários encerrados, amanhã e reservas de terceiros no perfil comum', () => {
+  const data = { ...snapshot, schedules: [reservation('future', '2026-09-17'), { ...reservation('past', '2026-09-17'), time: '09:00' }, reservation('other', '2026-09-17', 'other'), reservation('tomorrow', '2026-09-18')] }
+  expect(buildDashboard(data, now).remainingToday).toBe(2)
+  expect(buildDashboard({ ...data, user: { ...data.user, role: 'user' } }, now).remainingToday).toBe(1)
+  expect(buildDashboard(data, new Date(2026, 8, 17, 15)).remainingToday).toBe(0)
+})

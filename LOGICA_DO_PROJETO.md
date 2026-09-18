@@ -104,6 +104,8 @@ O armazenamento é separado por origem (protocolo, host e porta). A leitura e a 
 
 ## 6. Dashboard
 
+O dashboard prioriza a agenda: data e reservas restantes de hoje, ação de reservar/alocar e tabela de próximos horários vêm antes dos indicadores. `remainingToday` conta somente reservas futuras na data local, respeitando o perfil. O resumo semanal repetido foi retirado; o gráfico é a única apresentação das contagens por dia. O contato do usuário aparece como ajuda contextual, separado dos indicadores.
+
 `readDashboard` prepara a leitura para o perfil: usuário sem senha, reservas próprias para usuário comum e financeiro apenas para administrador. Cada leitura vem de novos objetos do armazenamento.
 
 `buildDashboard(snapshot, now)` calcula indicadores e apresentação. Resolve nomes, seleciona próximas reservas e separa modelos por perfil. O administrador recebe contagens semanais, escala do gráfico e quantidades de contas por status. O usuário recebe somente seus horários e contato. O gráfico semanal inclui reservas passadas da semana; a lista de próximas reservas exclui horários passados.

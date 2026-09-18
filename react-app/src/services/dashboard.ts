@@ -28,10 +28,10 @@ export function buildDashboard(snapshot: DashboardSnapshot, now = new Date()) {
     professional: nameOf(snapshot.professionals, item.professionalId),
   }))
   const common = {
-    name: snapshot.user.name.split(' ')[0],
     dateLabel: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
     availableRooms: snapshot.rooms.filter(item => item.status === 'disponivel').length,
     reservations,
+    remainingToday: data.upcomingSchedules(schedules, now).filter(item => item.date === data.dateKey(now)).length,
   }
   if (!isAdmin) return {
     ...common, role: 'user' as const,

@@ -26,11 +26,11 @@ function fixture(role: 'admin' | 'user' = 'admin') {
 test('admin usa componentes React, limita prévia e mantém gráfico e links', async () => {
   const { api } = fixture()
   render(<DashboardHome api={api} />)
-  expect(await screen.findByRole('heading', { name: 'Olá, Teste' })).toBeVisible()
+  expect(await screen.findByRole('heading', { name: 'Agenda da unidade' })).toBeVisible()
   expect(screen.getByText('Próximas reservas · Exibindo 6 de 7 reservas')).toBeVisible()
   expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(7)
   expect(screen.getByRole('img', { name: /Reservas por dia.*Sex: 7 reservas/ })).toBeVisible()
-  expect(screen.getByRole('link', { name: 'Ver financeiro' })).toHaveAttribute('href', '#financial')
+  expect(screen.getByRole('link', { name: 'Alocar horário' })).toHaveAttribute('href', '#availability')
   expect(screen.getByRole('link', { name: 'Abrir agenda completa' })).toHaveAttribute('href', '#availability')
   expect(screen.getAllByText('<img src=x onerror=alert(1)>')).toHaveLength(6)
   expect(document.querySelector('td img')).toBeNull()
@@ -43,10 +43,10 @@ test('usuário vê apenas sua agenda e trata contato ausente ou configurado', as
   expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(2)
   expect(screen.queryByText('Situação financeira')).not.toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Ver financeiro' })).not.toBeInTheDocument()
-  expect(screen.getByText('Não configurado')).toBeVisible()
+  expect(screen.getByText('O WhatsApp da unidade ainda não foi informado.')).toBeVisible()
   snapshot.whatsapp = '11999999999'
   act(() => window.dispatchEvent(new StorageEvent('storage', { key: 'app_settings' })))
-  expect(await screen.findByRole('link', { name: /Fale conosco/ })).toHaveAttribute('href', expect.stringContaining('https://wa.me/5511999999999'))
+  expect(await screen.findByRole('link', { name: /Fale com a unidade/ })).toHaveAttribute('href', expect.stringContaining('https://wa.me/5511999999999'))
 })
 
 test('listas vazias não geram barras inválidas e atualização externa não refaz o foco', async () => {
@@ -72,6 +72,6 @@ test('erro de leitura mostra nova tentativa e recupera o dashboard', async () =>
   render(<DashboardHome api={api} />)
   expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível carregar esta página.')
   fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }))
-  expect(await screen.findByRole('heading', { name: 'Olá, Teste' })).toBeVisible()
+  expect(await screen.findByRole('heading', { name: 'Agenda da unidade' })).toBeVisible()
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })

@@ -36,6 +36,8 @@ O administrador acessa todos os módulos administrativos. O usuário acessa dash
 
 ## Funcionalidades
 
+O dashboard dá prioridade às próximas reservas e à ação de reservar/alocar. A semana aparece em um único gráfico, e o resumo do dia considera somente horários que ainda não passaram.
+
 - Dashboard por perfil, com indicadores, próximas reservas e gráficos.
 - Disponibilidade semanal por unidade e sala; alocação administrativa e reserva pelo usuário.
 - Agenda pessoal com contato pelo WhatsApp quando configurado.

@@ -12,5 +12,6 @@ export function FinanceSummary({ finance }: { finance: Extract<DashboardModel, {
     <div className="split-bar mt-16" aria-hidden="true">{items.map(item => <span key={item.label} style={{ width: `${item.count / (total || 1) * 100}%`, background: item.color }} />)}</div>
     <div className="legend-row">{items.map(item => <span className="legend-item" key={item.label}><span className="legend-dot" style={{ background: item.color }} aria-hidden="true" />{item.label} ({item.count})</span>)}</div>
     {!total && <p className="text-muted mt-8">Nenhuma conta cadastrada.</p>}
+    <a className="summary-link" href="#financial">Ver financeiro</a>
   </div>
 }
