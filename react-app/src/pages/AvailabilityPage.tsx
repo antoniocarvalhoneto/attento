@@ -4,20 +4,21 @@ import type { Collections } from '../services/models'
 import { HOURS, money, nameOf } from '../services/models'
 import { slotDate, slotUnavailableReason, weekRangeLabel } from '../services/dates'
 import { WEEK_DAYS, displayDate } from '../services/dashboard'
-import { readSettings, reserveSlot } from '../services/repository'
+import { reserveSlot } from '../services/repository'
 import { whatsappUrl } from '../services/contact'
 import { Page } from '../components/Page'
+import type { PageData } from '../components/Page'
 import { Modal } from '../components/Modal'
 import { Field, FormActions, Options, PageHead, Select } from '../components/Fields'
 
 type Slot = { roomId: string; date: string; time: string }
 export function AvailabilityPage({ user }: { user: User }) { return <Page>{(data, refresh) => <Availability data={data} refresh={refresh} user={user} />}</Page> }
-function Availability({ data, refresh, user }: { data: Collections; refresh(): void; user: User }) {
+function Availability({ data, refresh, user }: { data: PageData; refresh(): void; user: User }) {
   const [unit, setUnit] = useState('all'), [roomId, setRoom] = useState('all'), [week, setWeek] = useState('0')
   const [slot, setSlot] = useState<Slot | null>(null)
   const [confirmed, setConfirmed] = useState<Slot | null>(null)
   const rooms = data.rooms.filter(room => room.status !== 'inativa' && (unit === 'all' || room.unitId === unit) && (roomId === 'all' || room.id === roomId))
-  const link = confirmed ? whatsappUrl(readSettings().whatsapp || '', `Olá! Gostaria de confirmar o horário de ${displayDate(confirmed.date)} às ${confirmed.time} na ${nameOf(data.rooms, confirmed.roomId)}.`) : ''
+  const link = confirmed ? whatsappUrl(data.settings.whatsapp || '', `Olá! Gostaria de confirmar o horário de ${displayDate(confirmed.date)} às ${confirmed.time} na ${nameOf(data.rooms, confirmed.roomId)}.`) : ''
   return <>
     <PageHead title="Disponibilidade das Salas" description={user.role === 'admin' ? 'Clique em um horário disponível para alocar um profissional.' : 'Clique em um horário disponível para reservar.'} />
     <div className="filter-bar"><Select id="f-unit" label="Unidade" value={unit} onChange={setUnit}><option value="all">Todas</option><Options items={data.units} /></Select><Select label="Sala" value={roomId} onChange={setRoom}><option value="all">Todas</option><Options items={data.rooms} /></Select><Select label="Semana" value={week} onChange={setWeek}><option value="0">Semana atual</option><option value="1">Próxima semana</option></Select><p className="filter-context">{weekRangeLabel(Number(week))}</p><button className="btn btn-ghost btn-sm" onClick={() => { setUnit('all'); setRoom('all'); setWeek('0') }}>Limpar</button></div>

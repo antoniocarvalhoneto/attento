@@ -84,6 +84,8 @@ Na revisão posterior à migração, falhas de atualização em segundo plano pa
 
 Também foram ajustados contraste de badges/links, quebra de textos longos, filtros flexíveis, tamanho de controles no celular e rolagem pelo teclado nas tabelas e agendas. As correções de layout ainda precisam ser conferidas em navegador real.
 
+O contato acompanha atualizações entre abas sem substituir edições em andamento. O resultado e os limites da revisão estão em [REVISAO_INTERFACE.md](REVISAO_INTERFACE.md).
+
 Os testes em `react-app/src/` cobrem componentes, integração entre telas, autenticação, datas, persistência, permissões, reservas, cadastros, pagamentos, filtros, CSV e foco dos modais. Build e lint complementam a verificação.
 
 Na conclusão da migração: **52 testes aprovados**, build aprovado e lint sem avisos. HTML, JavaScript, CSS e logo foram conferidos via HTTP no preview; `dist/` não contém a ponte antiga.

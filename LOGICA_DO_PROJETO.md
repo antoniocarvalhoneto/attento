@@ -153,6 +153,10 @@ O armazenamento é separado por origem (protocolo, host e porta). A leitura e a 
 
 `SettingsPage` carrega `Settings`. O componente mantém telefone e mensagens. `changeTheme` grava antes de avisar o cabeçalho. `saveContact` revalida sessão, normaliza o telefone e preserva outras preferências; campo vazio remove o contato. Falhas mantêm o texto digitado.
 
+Sem edição em andamento, o telefone acompanha a leitura atual após alterações em outra aba. Ao começar a digitar, o rascunho local tem prioridade e não é substituído por atualizações de fundo. Salvar com sucesso encerra o rascunho e retoma a sincronização.
+
+`PageData` reúne coleções e configurações numa leitura protegida por `Page`. Configurações, confirmação de reserva e agenda pessoal usam essa leitura em vez de acessar o armazenamento durante a renderização. Se uma atualização falhar, conservam a última leitura válida e mostram o aviso, inclusive quando o JSON de configurações estiver corrompido.
+
 `Modal` usa portal React fora da raiz da aplicação. Seu efeito foca o primeiro campo, bloqueia rolagem e torna o fundo inerte. O evento de teclado mantém Tab dentro do diálogo e fecha com Escape. Clique no fundo também fecha. A limpeza restaura o estado anterior e o foco se o elemento ainda existir.
 
 `Field` e `Select` associam rótulos aos controles. `Options` apresenta registros como opções. `FormActions` apresenta cancelar/enviar. `Status` traduz status em badges. `DataTable` apresenta cabeçalhos, linhas ou estado vazio. `PageHead` apresenta título, descrição e ação.

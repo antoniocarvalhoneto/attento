@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { readData } from '../services/repository'
-import type { Collections } from '../services/models'
+import { readData, readSettings } from '../services/repository'
+import type { Collections, Settings } from '../services/models'
 
-export function Page({ children }: { children(data: Collections, refresh: () => void): ReactNode }) {
-  const read = () => { try { return { data: readData(), error: '' } } catch { return { data: null, error: 'Não foi possível carregar esta página. Verifique o armazenamento e tente novamente.' } } }
+export type PageData = Collections & { settings: Settings }
+
+export function Page({ children }: { children(data: PageData, refresh: () => void): ReactNode }) {
+  const read = () => { try { return { data: { ...readData(), settings: readSettings() }, error: '' } } catch { return { data: null, error: 'Não foi possível carregar esta página. Verifique o armazenamento e tente novamente.' } } }
   const [state, setState] = useState(read)
   const main = useRef<HTMLElement>(null)
   const refresh = useCallback(() => {
     try {
-      const data = readData()
+      const data = { ...readData(), settings: readSettings() }
       setState({ data, error: '' })
     } catch {
       setState(previous => ({ ...previous, error: 'Não foi possível atualizar esta página. Os dados exibidos podem estar desatualizados. Tente novamente.' }))
