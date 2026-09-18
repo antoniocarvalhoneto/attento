@@ -40,6 +40,8 @@ O dashboard dá prioridade às próximas reservas e à ação de reservar/alocar
 
 A interface usa tipografia única, fundos neutros e azul nas ações. Indicadores são compactos e o financeiro aparece como uma lista de contas por situação, reduzindo cartões e ícones decorativos.
 
+Os textos e estados vazios indicam a próxima ação: criar um cadastro, rever filtros ou escolher um horário. Mensagens sobre reservas futuras não confundem ausência de próximos horários com ausência de histórico.
+
 - Dashboard por perfil, com indicadores, próximas reservas e gráficos.
 - Disponibilidade semanal por unidade e sala; alocação administrativa e reserva pelo usuário.
 - Agenda pessoal com contato pelo WhatsApp quando configurado.

@@ -165,6 +165,8 @@ Sem edição em andamento, o telefone acompanha a leitura atual após alteraçõ
 
 Os callbacks de campos alteram rascunhos; callbacks de envio chamam serviços; callbacks de map/filter/find/reduce transformam coleções. A explicação fica neste documento em vez de comentários adicionados ao código.
 
+Os estados vazios orientam a próxima ação. Agenda distingue ausência de reservas futuras de ausência de histórico; financeiro e convênios distinguem coleção vazia de filtros sem resultados. Descrições de páginas citam a operação concreta (vencimento, repasse, sala ou turno). A agenda pessoal oferece acesso direto a reservar.
+
 ## 11. Estilos e build
 
 A identidade usa Inter em títulos e textos, pesos mais contidos e uma escala de espaçamento consistente. O azul identifica ações e navegação; os fundos são neutros. Indicadores ficam em uma faixa com divisórias, sem caixas ou ícones repetidos. Gráfico e resumo financeiro são seções abertas. Os estilos do resumo semanal e da barra financeira removidos não permanecem no CSS.

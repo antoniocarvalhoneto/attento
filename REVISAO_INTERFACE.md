@@ -34,3 +34,11 @@ Quando um navegador estiver disponível, conferir nos temas claro e escuro:
 - Fluxos completos: entrar, reservar, consultar horários, cadastrar/editar, marcar pagamento, exportar e sair.
 
 As regras de negócio existentes foram preservadas. Nenhum servidor, banco de dados ou integração externa foi acrescentado.
+
+## Refinamento de identidade e hierarquia
+
+Após a revisão funcional, o dashboard passou a abrir com agenda, próximas reservas e ação de reservar/alocar. O resumo semanal duplicado foi removido. Indicadores perderam os cartões e ícones decorativos, e o financeiro passou a usar uma lista compacta de quantidades. Títulos e textos usam Inter; superfícies são mais neutras e o azul fica concentrado nas ações e na navegação.
+
+Descrições e estados vazios agora orientam a próxima ação e distinguem filtros sem resultados, ausência de registros e ausência de reservas futuras. A contagem do restante do dia tem teste próprio para horários passados e separação por perfil.
+
+Validação dessa etapa: 56 testes aprovados. A conferência visual dessas mudanças em desktop/celular e nos dois temas continua pendente; não foi possível avaliar capturas de um navegador real.
