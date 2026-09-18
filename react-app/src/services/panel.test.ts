@@ -1,38 +1,24 @@
-import { expect, test, vi } from 'vitest'
+import { expect, test } from 'vitest'
 import { createAuth } from './auth'
-import { loadPanel } from './panel'
+import { panel } from './panel'
 
-test('monta módulos sem cabeçalho duplicado, aplica permissões e limpa eventos ao sair', async () => {
-  createAuth().signIn('usuario@demo.com', '123456')
-  const api = await loadPanel()
-  const root = document.createElement('div')
-  document.body.append(root)
-  vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
-  const controller = api.mount(root, vi.fn())
-  controller.show('rooms')
-  expect(root.querySelector('.page-head h1')).toHaveTextContent('Olá')
-  expect(root.querySelector('.app-header')).toBeNull()
-  controller.show('settings')
-  expect(root.querySelector('#contact-settings')).not.toBeNull()
-  controller.destroy()
-  expect(root).toBeEmptyDOMElement()
-  expect(() => api.mount(root, vi.fn()).destroy()).not.toThrow()
-  root.remove()
+test('permissões cobrem as rotas sem montar HTML nem depender de globais', () => {
+  expect(panel.allowed('rooms', 'user')).toBe(false)
+  expect(panel.allowed('rooms', 'admin')).toBe(true)
+  expect(panel.allowed('myschedule', 'user')).toBe(true)
+  expect(panel.allowed('unknown', 'admin')).toBe(false)
+  expect(window).not.toHaveProperty('AttentoPanel')
 })
-
-test('sem sessão, não monta módulos nem inicializa dados', async () => {
-  const api = await loadPanel()
-  expect(() => api.mount(document.createElement('div'), vi.fn())).toThrow('Sessão inválida')
+test('sem sessão não inicializa dados', () => {
+  expect(() => panel.readDashboard()).toThrow('Acesso não permitido')
   expect(localStorage.getItem('app_rooms')).toBeNull()
 })
-
-test('snapshot do usuário não expõe contas, senha ou reservas de terceiros', async () => {
+test('snapshot do usuário não expõe contas, senha ou reservas de terceiros', () => {
   createAuth().signIn('usuario@demo.com', '123456')
-  const api = await loadPanel()
-  const snapshot = api.readDashboard()
+  const snapshot = panel.readDashboard()
   expect(snapshot.user).not.toHaveProperty('password')
   expect(snapshot.accounts).toEqual([])
   expect(snapshot.schedules.every(item => item.userId === 'user_demo')).toBe(true)
   snapshot.rooms[0].name = 'Alterado fora do estado'
-  expect(api.readDashboard().rooms[0].name).not.toBe('Alterado fora do estado')
+  expect(panel.readDashboard().rooms[0].name).not.toBe('Alterado fora do estado')
 })

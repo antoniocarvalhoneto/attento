@@ -19,7 +19,7 @@ function fixture(role: 'admin' | 'user' = 'admin') {
     schedules: Array.from({ length: 7 }, (_, index) => ({ id: String(index), date: '2026-09-18', time: `${String(index + 8).padStart(2, '0')}:00`, status: 'reservado', roomId: 'r', professionalId: 'p', unitId: 'unit', userId: index === 0 ? 'u' : 'other' })),
     accounts: [{ id: 'a', status: 'pendente' }], whatsapp: '',
   }
-  const api: PanelApi = { readDashboard: vi.fn(() => snapshot), allowed: () => true, navigation: { admin: [], user: [] }, titles: {}, mount: vi.fn() }
+  const api: PanelApi = { readDashboard: vi.fn(() => snapshot), allowed: () => true, navigation: { admin: [], user: [] }, titles: {} }
   return { api, snapshot }
 }
 
@@ -32,7 +32,6 @@ test('admin usa componentes React, limita prévia e mantém gráfico e links', a
   expect(screen.getByRole('img', { name: /Reservas por dia.*Sex: 7 reservas/ })).toBeVisible()
   expect(screen.getByRole('link', { name: 'Ver financeiro' })).toHaveAttribute('href', '#financial')
   expect(screen.getByRole('link', { name: 'Abrir agenda completa' })).toHaveAttribute('href', '#availability')
-  expect(api.mount).not.toHaveBeenCalled()
   expect(screen.getAllByText('<img src=x onerror=alert(1)>')).toHaveLength(6)
   expect(document.querySelector('td img')).toBeNull()
 })

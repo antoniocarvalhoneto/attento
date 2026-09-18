@@ -1,26 +1,12 @@
-<p align="center">
-  <img src="logo.png" alt="Attento" width="96">
-</p>
+# Attento
 
-<h1 align="center">Attento</h1>
+Aplicação de gestão de salas, reservas e financeiro, com interface inteiramente em **React + TypeScript**.
 
-<p align="center">
-  Sistema de gestão de salas, agenda e financeiro para clínicas e espaços compartilhados.
-</p>
+A migração foi concluída: login, dashboard, disponibilidade, agenda pessoal, salas, profissionais, financeiro, convênios, relatórios e configurações usam componentes React. A aplicação não carrega o antigo renderizador JavaScript nem publica uma versão paralela em `/legacy/`.
 
----
+## Executar
 
-## Sobre o projeto
-
-**Attento** é uma aplicação web (SPA) para administrar a rotina de um espaço com múltiplas salas e profissionais: disponibilidade de horários, alocação em agenda semanal, controle de contas a pagar/receber, convênios e relatórios — tudo em uma interface única, com dois níveis de acesso (**administrador** e **usuário**).
-
-O projeto é **100% front-end**, com dados de demonstração persistidos no `localStorage`. A versão atual na raiz não exige build. A migração incremental em `react-app/` usa React, TypeScript e Vite, preservando o painel atual durante a transição.
-
-## Migração para React
-
-Etapas 1 a 4 concluídas: base, login, estrutura do painel e dashboard em React. Indicadores, próximas reservas, gráfico semanal e resumo financeiro usam componentes React, respeitando os dois perfis. Os demais módulos continuam em uma área isolada, reutilizando as regras existentes. Próxima etapa: migrar a disponibilidade e a agenda.
-
-`react-app/src/services/dashboard.ts` organiza os dados, aplica as regras compartilhadas de datas e separa as informações por perfil. `DashboardHome.tsx` apresenta o resultado e atualiza os indicadores ao entrar na página, voltar à aba, receber alterações de outra aba e a cada minuto.
+Use Node.js 24 e, na raiz do repositório:
 
 ```bash
 cd react-app
@@ -28,150 +14,80 @@ npm ci
 npm run dev
 ```
 
-Abra **http://127.0.0.1:5173**. Login e painel permanecem na aplicação React, sem redirecionar após entrar. Os destinos usam hash (`#dashboard`, `#availability`, etc.), incluindo histórico e links diretos. A versão de compatibilidade continua em `/legacy/index.html`. Use `npm test`, `npm run lint`, `npm run build` e `npm run preview` para verificar e testar o build. Detalhes em [react-app/README.md](react-app/README.md).
+Abra **http://127.0.0.1:5173**. No PowerShell, use `npm.cmd` caso a política de execução bloqueie `npm.ps1`.
 
-O armazenamento é separado por origem: mudar host ou porta não transporta os dados existentes. No mesmo endereço, login e painel compartilham sessão e cadastros. Os arquivos da raiz continuam disponíveis para execução independente.
-
-## Índice
-
-- [Funcionalidades](#funcionalidades)
-- [Stack técnica](#stack-técnica)
-- [Como executar](#como-executar)
-- [Acesso de demonstração](#acesso-de-demonstração)
-- [Perfis de acesso](#perfis-de-acesso)
-- [Estrutura de arquivos](#estrutura-de-arquivos)
-- [Persistência de dados](#persistência-de-dados)
-- [Responsividade](#responsividade)
-- [Acessibilidade](#acessibilidade)
-- [Limitações conhecidas](#limitações-conhecidas)
-- [Roadmap sugerido](#roadmap-sugerido)
-
-## Funcionalidades
-
-- **Dashboard** com indicadores gerais, gráfico de ocupação semanal e resumo financeiro (visão diferente para admin e usuário).
-- **Disponibilidade das salas** — grade semanal de horários com seleção de slot e alocação.
-- **Agenda semanal** por sala/profissional, com legenda de status (disponível, reservado, ocupado, manutenção).
-- **Salas** (CRUD completo) — cadastro, edição, exclusão e status (disponível, manutenção, inativa).
-- **Profissionais** (CRUD completo) — vínculo com sala, status ativo/inativo.
-- **Financeiro** — contas a pagar/receber, marcação de pagamento, filtros por profissional/status/período.
-- **Convênios** — controle de repasses e status de pagamento.
-- **Relatórios** — exportação de dados em **CSV**.
-- **Meus Horários** (perfil usuário) — agenda pessoal com link direto para **WhatsApp**.
-- **Configurações** — tema claro/escuro, dados da conta e WhatsApp da unidade.
-- **Autenticação** com sessão persistida, controle de permissões por perfil e roteamento por hash (suporta voltar/avançar do navegador e links diretos).
-- **Modo escuro** completo, com tokens de cor dedicados.
-- Login e navegação local sem espera artificial, com estados vazios e mensagens de erro.
-
-## Stack técnica
-
-| Camada       | Tecnologia                                      |
-|--------------|--------------------------------------------------|
-| Estrutura    | HTML5 semântico                                   |
-| Estilo       | CSS3 puro (custom properties / design tokens)     |
-| Lógica       | JavaScript (Vanilla, ES6+, sem frameworks)        |
-| Ícones       | [Font Awesome 6](https://fontawesome.com)         |
-| Tipografia   | Google Fonts — Manrope (display) + Inter (texto)  |
-| Persistência | `localStorage` do navegador                       |
-
-A versão da raiz não tem dependências de build. A versão em `react-app/` usa npm e Vite. Ambas continuam sem backend e carregam fontes e ícones por CDN.
-
-## Como executar
-
-Execute a aplicação com um servidor estático local para que `login.html` e `index.html` compartilhem a sessão na mesma origem. O comportamento de `localStorage` entre arquivos abertos diretamente com duplo clique varia entre navegadores.
 ```bash
-# Python 3
-python3 -m http.server 8080
-
-# Node (http-server)
-npx http-server -p 8080
+npm test
+npm run lint
+npm run build
+npm run preview
 ```
-Depois acesse `http://localhost:8080`.
 
-> Mantenha `index.html`, `login.html`, `style.css`, `auth.js`, `data-utils.js`, `login.js`, `login-page.js`, `script.js` e `logo.png` na mesma pasta — scripts, estilos, logo e redirecionamentos usam caminhos relativos.
-
-`login.html` contém apenas a tela de acesso; `index.html` contém o painel. Sem sessão, o painel redireciona para o login e preserva a seção solicitada no hash da URL. Ao entrar, a aplicação retorna a essa seção, respeitando as permissões do perfil. Ao sair, a sessão é removida e o navegador retorna ao login.
+O preview abre em **http://127.0.0.1:4173**. Para publicar, sirva o conteúdo de `react-app/dist/` na raiz da origem. O roteamento usa hash, como `#dashboard` e `#availability`.
 
 ## Acesso de demonstração
 
-A tela de login tem atalhos que já preenchem essas credenciais automaticamente:
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Administrador | admin@demo.com | 123456 |
+| Usuário | usuario@demo.com | 123456 |
 
-| Perfil        | E-mail             | Senha    |
-|---------------|---------------------|----------|
-| Administrador | `admin@demo.com`    | `123456` |
-| Usuário       | `usuario@demo.com`  | `123456` |
+O administrador acessa todos os módulos administrativos. O usuário acessa dashboard, disponibilidade, seus horários e configurações. Destinos desconhecidos ou proibidos retornam ao dashboard.
 
-## Perfis de acesso
+## Funcionalidades
 
-**Administrador** — acesso completo: Dashboard, Disponibilidade, Salas, Profissionais, Financeiro, Convênios, Relatórios e Configurações.
+- Dashboard por perfil, com indicadores, próximas reservas e gráficos.
+- Disponibilidade semanal por unidade e sala; alocação administrativa e reserva pelo usuário.
+- Agenda pessoal com contato pelo WhatsApp quando configurado.
+- Consulta, cadastro, edição e exclusão de salas e profissionais.
+- Financeiro com filtros por profissional, status e mês, totais e pagamentos.
+- Convênios com quantidades, valores, total calculado e pagamento.
+- Relatórios financeiros com exportação CSV da seleção filtrada.
+- Tema claro/escuro, conta e contato da unidade.
+- Navegação por hash, histórico e links diretos.
+- Modais React com teclado, contenção de foco e restauração ao fechar.
+- Tratamento de falhas de armazenamento sem fechar formulários nem confirmar gravações malsucedidas.
 
-**Usuário** — acesso operacional: Dashboard, Disponibilidade, Meus Horários e Configurações. Telas administrativas são bloqueadas mesmo por navegação manual de URL (verificação de permissão na camada de rotas).
+## Estrutura
 
-## Estrutura de arquivos
-
+```text
+react-app/
+  index.html              Entrada única
+  src/
+    App.tsx               Sessão, login e painel
+    main.tsx              Inicialização React
+    assets/logo.png       Identidade visual
+    style.css             Estilos e temas
+    components/           Layout, campos, modais, tabelas e gráficos
+    pages/                Telas da aplicação
+    services/             Tipos, autenticação, dados e regras
+    test/                 Preparação dos testes
+  vite.config.ts          Desenvolvimento e build
+  vitest.config.ts        Testes
+README.md
+LOGICA_DO_PROJETO.md
 ```
-.
-├── index.html     # marcação e templates do painel
-├── login.html     # página de acesso independente
-├── style.css      # design tokens, layout e temas (claro/escuro)
-├── script.js      # estado, roteamento, renderização e regras de negócio
-├── auth.js        # validação de acesso e persistência da sessão de demonstração
-├── data-utils.js  # filtros financeiros e cálculos de datas da agenda
-├── contact.js     # validação do número e criação dos links de WhatsApp
-├── login.js       # eventos e validação dos campos do formulário de login
-├── login-page.js  # inicialização do login, tema e redirecionamento para o painel
-├── logo.png       # identidade visual (fundo transparente)
-└── README.md
-```
 
-O `auth.js` expõe o serviço `AttentoAuth`, responsável por entrar, restaurar a sessão e sair. Ele usa os usuários já salvos e cria as contas de demonstração no primeiro acesso quando necessário, sem depender das telas. O `login.js` gerencia o formulário e suas mensagens; o `login-page.js` conecta o formulário à autenticação e abre o painel após o acesso. O `script.js` verifica a sessão antes de inicializar o painel e controla seu estado, permissões, renderização, modais e utilitários. A autenticação permanece simulada e usa as mesmas credenciais e chaves de armazenamento já existentes.
+A pasta `conveniencias2/` permanece como material anterior fora da aplicação e do build. Os arquivos do painel antigo e sua ponte foram retirados; o histórico Git preserva as versões anteriores.
 
-Para verificar a autenticação, o formulário e os fluxos de entrada das páginas com Node.js:
+## Dados existentes
 
-```bash
-node --test tests/*.test.cjs
-```
+As chaves de `localStorage` foram preservadas: `app_users`, `app_session`, `app_units`, `app_rooms`, `app_professionals`, `app_schedules`, `app_financial_accounts`, `app_insurance` e `app_settings`.
 
-## Persistência de dados
+A migração não limpa cadastros. Coleções ausentes recebem dados de demonstração. Reservas antigas que usam semana/dia são convertidas uma vez para uma data fixa, tomando a semana do primeiro acesso como referência. Dados corrompidos causam erro de leitura e não são substituídos silenciosamente.
 
-Todos os dados (usuários, salas, profissionais, agenda, contas, convênios) são gerados como seed na primeira execução e salvos no `localStorage` do navegador. Isso significa que:
+O armazenamento depende de **protocolo, host e porta**: mudar de `localhost:8080` para `127.0.0.1:5173` não transporta os dados. Para reutilizar os dados anteriores, a aplicação precisa ser servida na mesma origem. Nenhuma cópia entre origens é automática.
 
-- As alterações feitas (cadastros, exclusões, pagamentos) persistem entre sessões **no mesmo navegador**.
-- Limpar o `localStorage` do site restaura os dados de demonstração originais.
-- Não há sincronização entre dispositivos ou usuários — é um ambiente de demonstração/single-tenant local.
+## Validação e limites
 
-## Responsividade
+Os testes em `react-app/src/` cobrem componentes, integração entre telas, autenticação, datas, persistência, permissões, reservas, cadastros, pagamentos, filtros, CSV e foco dos modais. Build e lint complementam a verificação.
 
-Interface testada e ajustada para três faixas principais:
-- **Mobile** (~375px): menu horizontal no topo com rolagem, tabelas e agenda com rolagem horizontal, formulários empilhados.
-- **Tablet** (~768px): painel de login em coluna única, grade de indicadores adaptada.
-- **Desktop**: layout com menu horizontal fixo no topo.
+Na conclusão da migração: **52 testes aprovados**, build aprovado e lint sem avisos. HTML, JavaScript, CSS e logo foram conferidos via HTTP no preview; `dist/` não contém a ponte antiga.
 
-## Acessibilidade
+A conferência visual em navegador real ainda está pendente: o navegador integrado não estava disponível na conclusão da migração. Os testes usam DOM simulado e não comprovam aparência ou responsividade.
 
-- Navegação por teclado nos modais, com *focus trap* e fechamento via `Esc`.
-- Contraste de texto ajustado para atender WCAG AA nos temas claro e escuro.
-- Elementos interativos com `aria-label` e feedback visual de foco (`:focus-visible`).
+O sistema continua sendo uma demonstração local, sem backend. A autenticação compara credenciais locais; a migração para React não a transforma em autenticação de produção. Fontes e ícones usam CDN.
 
-## Limitações conhecidas
+Regras preservadas para decisão futura: status financeiro manual, contato global editável pelos dois perfis e escolha de outro profissional ativo quando a sala não tem profissional ativo associado.
 
-- Autenticação é simulada (comparação de senha em texto plano no client) — **não deve ser usada em produção** sem um backend real.
-- Sem multiusuário simultâneo: dados vivem no `localStorage` do navegador local.
-
-## Roadmap sugerido
-
-A migração dos módulos restantes começou pela camada TypeScript de dados (`repository.ts`, `storage.ts`, `dates.ts` e `seed.ts`), mantendo as chaves existentes e as verificações de reserva, vínculos e gravação.
-
-Disponibilidade e Meus Horários também estão em React: filtros, grade semanal, confirmação de reserva e contato são componentes próprios.
-
-Salas e profissionais usam tabelas e formulários React para consultar, criar, editar e excluir, mantendo a proteção dos registros vinculados.
-
-Financeiro, convênios e relatórios também estão migrados, incluindo filtros combinados, pagamentos, cálculo de totais e exportação CSV da seleção.
-
-Configurações conclui a migração das telas: tema, conta e contato agora são React. A retirada da ponte e dos serviços globais é a etapa final.
-
-- Integração com uma API/backend real (autenticação, banco de dados).
-- Testes end-to-end no navegador.
-
----
-
-<p align="center">Feito com foco em uma experiência administrativa limpa, rápida e consistente.</p>
+A explicação das funções está em [LOGICA_DO_PROJETO.md](LOGICA_DO_PROJETO.md). Instruções da aplicação em [react-app/README.md](react-app/README.md).

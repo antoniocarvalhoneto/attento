@@ -23,7 +23,7 @@ test('usuário reserva pela grade e encontra somente sua reserva na agenda pesso
   expect(screen.getByRole('table')).toHaveTextContent('Sala 01')
   expect(screen.getAllByRole('row')).toHaveLength(2)
 })
-test('falha ao salvar mantém formulário; conflito surgido com modal aberto impede reserva', async () => {
+test('falha ao salvar mantém formulário e permite nova tentativa', async () => {
   const auth = createAuth(); auth.signIn('admin@demo.com', '123456')
   readData(); localStorage.setItem('app_schedules', '[]')
   render(<AvailabilityPage user={auth.restoreSession()!} />)
@@ -38,5 +38,19 @@ test('falha ao salvar mantém formulário; conflito surgido com modal aberto imp
   write.mockRestore()
   await userEvent.click(screen.getByRole('button', { name: 'Confirmar alocação' }))
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(readData().schedules).toHaveLength(1)
+})
+
+test('conflito surgido com modal aberto impede reserva na confirmação', async () => {
+  const auth = createAuth(); auth.signIn('usuario@demo.com', '123456')
+  readData(); localStorage.setItem('app_schedules', '[]')
+  render(<AvailabilityPage user={auth.restoreSession()!} />)
+  await userEvent.selectOptions(screen.getByLabelText('Semana'), '1')
+  await userEvent.selectOptions(screen.getByLabelText('Sala'), 'room_1')
+  await userEvent.click(screen.getAllByRole('button', { name: /Horário disponível/ })[0])
+  const { slotDate } = await import('../services/dates')
+  localStorage.setItem('app_schedules', JSON.stringify([{ id: 'other', roomId: 'room_1', date: slotDate(1, 0), time: '08:00', status: 'reservado' }]))
+  await userEvent.click(screen.getByRole('button', { name: 'Confirmar horário' }))
+  expect(screen.getByRole('alert')).toHaveTextContent('indisponível')
   expect(readData().schedules).toHaveLength(1)
 })

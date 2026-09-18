@@ -1,5 +1,5 @@
-import '../../../data-utils.js'
-import '../../../contact.js'
+import * as data from './dates'
+import { whatsappUrl } from './contact'
 import type { User } from './auth'
 
 type NamedRecord = { id: string; name: string; status?: string }
@@ -12,18 +12,6 @@ export type DashboardSnapshot = {
   schedules: Reservation[]; accounts: { id: string; status: string }[]; whatsapp: string
 }
 
-type DataUtilities = {
-  upcomingSchedules(schedules: Reservation[], now: Date): Reservation[]
-  inWeek(schedule: Reservation, week: number, now: Date): boolean
-  slotDate(week: number, day: number, now: Date): string
-}
-declare global {
-  interface Window {
-    AttentoData: DataUtilities
-    AttentoContact: { whatsappUrl(number: string, message: string): string }
-  }
-}
-
 export const WEEK_DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
 export function displayDate(date: string) {
@@ -31,7 +19,6 @@ export function displayDate(date: string) {
 }
 
 export function buildDashboard(snapshot: DashboardSnapshot, now = new Date()) {
-  const data = window.AttentoData
   const isAdmin = snapshot.user.role === 'admin'
   const schedules = isAdmin ? snapshot.schedules : snapshot.schedules.filter(item => item.userId === snapshot.user.id)
   const nameOf = (items: NamedRecord[], id: string | null) => items.find(item => item.id === id)?.name || '—'
@@ -49,7 +36,7 @@ export function buildDashboard(snapshot: DashboardSnapshot, now = new Date()) {
   if (!isAdmin) return {
     ...common, role: 'user' as const,
     weekReservations: data.upcomingSchedules(schedules, now).filter(item => data.inWeek(item, 0, now)).length,
-    helpUrl: window.AttentoContact.whatsappUrl(snapshot.whatsapp, 'Olá! Preciso de ajuda com meu acesso ou meus horários no Attento.'),
+    helpUrl: whatsappUrl(snapshot.whatsapp, 'Olá! Preciso de ajuda com meu acesso ou meus horários no Attento.'),
   }
   const weekCounts = WEEK_DAYS.map((_, day) => schedules.filter(item => item.status === 'reservado' && item.date === data.slotDate(0, day, now)).length)
   const chartStep = Math.max(1, Math.ceil(Math.max(...weekCounts) / 4))

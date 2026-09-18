@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { User } from '../services/auth'
 import type { NavItem, Theme } from '../services/panel'
-import logo from '../../../logo.png'
+import logo from '../assets/logo.png'
 
 type Props = {
   user: User; theme: Theme; view: string; title: string; items: NavItem[]

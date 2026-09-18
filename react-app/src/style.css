@@ -410,6 +410,7 @@ tbody tr:hover{background:var(--surface-alt);}
   border-right:1px solid var(--border);background:var(--surface-alt);
 }
 .agenda-cell{
+  border-top:0;border-left:0;color:var(--text);font:inherit;border-radius:0;
   border-bottom:1px solid var(--border);border-right:1px solid var(--border);min-height:44px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   transition:filter var(--transition),box-shadow var(--transition);
@@ -428,10 +429,13 @@ tbody tr:hover{background:var(--surface-alt);}
    ========================================================================== */
 .modal-root{position:fixed;inset:0;z-index:100;pointer-events:none;}
 .modal-overlay{
+  z-index:100;
   position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;
   padding:20px;opacity:0;transition:opacity var(--transition);pointer-events:auto;
 }
 .modal-overlay.show{opacity:1;}
+.modal-box > form{display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+.modal-box > form > .modal-foot{flex-shrink:0;}
 .modal-box{
   background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:90vh;
   display:flex;flex-direction:column;overflow:hidden;
