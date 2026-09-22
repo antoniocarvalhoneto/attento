@@ -3,6 +3,7 @@ import { initializeData } from './seed'
 import { KEYS, loadData, saveData, uid } from './storage'
 import { dateKey, migrateSchedules, slotUnavailableReason } from './dates'
 import type { Collections, Schedule, Settings } from './models'
+import { CONVENIENCE_PRODUCTS } from './models'
 
 export function requireUser(admin = false) {
   const user = createAuth().restoreSession()
@@ -19,14 +20,15 @@ export function readData(): Collections {
   initializeData()
   const schedules = readCollection('schedules')
   if (schedules.some(item => !item.date)) saveData(KEYS.schedules, migrateSchedules(schedules))
-  return { units: readCollection('units'), rooms: readCollection('rooms'), professionals: readCollection('professionals'), schedules: readCollection('schedules'), financial: requireUser().role === 'admin' ? readCollection('financial') : [], insurance: requireUser().role === 'admin' ? readCollection('insurance') : [] }
+  return { units: readCollection('units'), rooms: readCollection('rooms'), professionals: readCollection('professionals'), schedules: readCollection('schedules'), financial: requireUser().role === 'admin' ? readCollection('financial') : [], conveniences: requireUser().role === 'admin' ? readCollection('conveniences') : [] }
 }
 export function readSettings() { return loadData<Settings>(KEYS.settings) || {} }
-type Editable = 'rooms' | 'professionals' | 'financial' | 'insurance'
+type Editable = 'rooms' | 'professionals' | 'financial' | 'conveniences'
 export function saveRecord<K extends Editable>(key: K, record: Collections[K][number]) {
   requireUser(true)
   const current = readCollection(key) as Collections[K][number][]
   const data = readData()
+  if ('productId' in record && (!CONVENIENCE_PRODUCTS.some(item => item.id === record.productId) || !/^\d{4}-\d{2}-\d{2}$/.test(record.date) || !Number.isInteger(record.quantity))) throw new Error('Informe conveniência, data e quantidade inteira válidas.')
   if ('name' in record && !record.name.trim()) throw new Error('Informe o nome.')
   if ('professionalId' in record && !data.professionals.some(item => item.id === record.professionalId)) throw new Error('Selecione um profissional válido.')
   if ('unitId' in record && !data.units.some(item => item.id === record.unitId)) throw new Error('Selecione uma unidade válida.')
@@ -47,11 +49,11 @@ export function deleteRecord(key: Editable, id: string) {
   requireUser(true)
   const data = readData()
   const linked = key === 'rooms' ? data.professionals.some(item => item.roomId === id) || data.schedules.some(item => item.roomId === id)
-    : key === 'professionals' && [...data.schedules, ...data.financial, ...data.insurance].some(item => item.professionalId === id)
+    : key === 'professionals' && [...data.schedules, ...data.financial, ...data.conveniences].some(item => item.professionalId === id)
   if (linked) throw new Error('Este cadastro possui registros vinculados. Inative-o para preservar o histórico.')
   saveData(KEYS[key], data[key].filter(item => item.id !== id))
 }
-export function markPaid(key: 'financial' | 'insurance', id: string) {
+export function markPaid(key: 'financial' | 'conveniences', id: string) {
   requireUser(true)
   if (key === 'financial') {
     const item = readCollection(key).find(item => item.id === id)

@@ -11,7 +11,7 @@ export const navigation: Record<User['role'], NavItem[]> = {
     { key: 'rooms', label: 'Salas', icon: 'fa-door-open' },
     { key: 'professionals', label: 'Profissionais', icon: 'fa-users' },
     { key: 'financial', label: 'Contas / Financeiro', icon: 'fa-wallet' },
-    { key: 'insurance', label: 'Convênios', icon: 'fa-handshake' },
+    { key: 'conveniences', label: 'Conveniências', icon: 'fa-mug-hot' },
     { key: 'reports', label: 'Relatórios', icon: 'fa-chart-line' },
     { key: 'settings', label: 'Configurações', icon: 'fa-gear' },
   ],

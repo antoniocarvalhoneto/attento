@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { FinancialPage } from './FinancialPage'
-import { InsurancePage } from './InsurancePage'
+import { ConveniencesPage } from './ConveniencesPage'
 import { createAuth } from '../services/auth'
 import { readData } from '../services/repository'
 import { buildCSV } from '../services/finance'
@@ -26,9 +26,11 @@ test('cria conta, registra pagamento e combina filtros financeiros', async () =>
   await userEvent.selectOptions(screen.getByLabelText('Status'), 'pendente')
   expect(screen.queryByText('Conta React')).not.toBeInTheDocument()
 })
-test('convênio calcula total, preserva formulário em falha e salva na nova tentativa', async () => {
-  render(<InsurancePage />)
-  await userEvent.click(screen.getByRole('button', { name: 'Adicionar registro' }))
+test('conveniência calcula total, preserva formulário em falha e salva na nova tentativa', async () => {
+  render(<ConveniencesPage />)
+  await userEvent.click(screen.getByRole('button', { name: 'Registrar consumo' }))
+  await userEvent.selectOptions(within(screen.getByRole('dialog')).getByLabelText('Conveniência'), 'cappuccino')
+  expect(screen.getByLabelText('Valor unitário (R$)')).toHaveValue(5)
   await userEvent.clear(screen.getByLabelText('Quantidade'))
   await userEvent.type(screen.getByLabelText('Quantidade'), '3')
   await userEvent.clear(screen.getByLabelText('Valor unitário (R$)'))
@@ -39,7 +41,7 @@ test('convênio calcula total, preserva formulário em falha e salva na nova ten
   expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível salvar')
   write.mockRestore()
   await userEvent.click(screen.getByRole('button', { name: 'Salvar' }))
-  expect(readData().insurance.at(-1)).toMatchObject({ quantity: 3, unitValue: 25 })
+  expect(readData().conveniences.at(-1)).toMatchObject({ quantity: 3, unitValue: 25 })
 })
 test('relatório exporta apenas linhas filtradas e escapa CSV', async () => {
   const create = vi.fn().mockReturnValue('blob:report'), revoke = vi.fn()

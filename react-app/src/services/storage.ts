@@ -1,4 +1,4 @@
-export const KEYS = { units: 'app_units', rooms: 'app_rooms', professionals: 'app_professionals', schedules: 'app_schedules', financial: 'app_financial_accounts', insurance: 'app_insurance', settings: 'app_settings' }
+export const KEYS = { units: 'app_units', rooms: 'app_rooms', professionals: 'app_professionals', schedules: 'app_schedules', financial: 'app_financial_accounts', conveniences: 'app_conveniences', settings: 'app_settings' }
 export function loadData<T>(key: string): T | null {
   const raw = localStorage.getItem(key)
   return raw === null ? null : JSON.parse(raw) as T

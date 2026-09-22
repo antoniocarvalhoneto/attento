@@ -105,3 +105,7 @@ O sistema continua sendo uma demonstração local, sem backend. A autenticação
 Regras preservadas para decisão futura: status financeiro manual, contato global editável pelos dois perfis e escolha de outro profissional ativo quando a sala não tem profissional ativo associado.
 
 A explicação das funções está em [LOGICA_DO_PROJETO.md](LOGICA_DO_PROJETO.md). Instruções da aplicação em [react-app/README.md](react-app/README.md).
+
+## Referências operacionais Attento
+
+Conveniências substitui Convênios: cadastro de consumo por profissional, catálogo com preços, quantidades e pagamento. Cappuccino: R$ 5/unidade. A referência é UNIT Attento e a planilha de conveniências fornecida. Não há backend; dados continuam no navegador.

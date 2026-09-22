@@ -200,3 +200,9 @@ Build TypeScript/Vite e lint verificam a aplicação. A conferência visual real
 Resultado final da migração: 52 testes aprovados, build aprovado e lint sem avisos. O preview respondeu corretamente para HTML e assets; o diretório de build contém somente a entrada React, JavaScript, CSS e logo.
 
 Regras de negócio preservadas para decisão futura: vencimento não altera status financeiro automaticamente; contato é global e editável por ambos os perfis; reserva do usuário pode recorrer a profissional ativo de outra sala. React não modifica essas regras nem acrescenta backend.
+
+## Conveniências — referência UNIT Attento
+
+A aba Conveniências substitui Convênios. Registra produto, profissional, data, quantidade, preço unitário e pagamento. Cappuccino custa R$ 5 por unidade, conforme confirmação do usuário. O catálogo inclui café, alimentos e impressões. Os lançamentos históricos da planilha sem ano ou situação de pagamento não são importados automaticamente.
+
+`ConveniencesList` filtra consumos e coordena edição, exclusão e pagamento. `ConvenienceEditor` aplica o preço do catálogo ao escolher o produto, calcula quantidade × preço e preserva o formulário se a gravação falhar. `saveRecord` valida produto, data e quantidade inteira. A coleção `app_conveniences` é independente: registros antigos de `app_insurance` permanecem armazenados, sem conversão.

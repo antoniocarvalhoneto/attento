@@ -76,16 +76,7 @@ export function initializeData() {
       ];
       saveData(KEYS.financial, financial);
     }
-    if (!loadData(KEYS.insurance)) {
-      const insurance = [
-        { id: uid('ins'), insuranceType: 'Unimed', professionalId: 'prof_1', quantity: 15, unitValue: 40, status: 'pendente' },
-        { id: uid('ins'), insuranceType: 'Bradesco Saúde', professionalId: 'prof_2', quantity: 10, unitValue: 55, status: 'pago' },
-        { id: uid('ins'), insuranceType: 'Amil', professionalId: 'prof_3', quantity: 8, unitValue: 48, status: 'pendente' },
-        { id: uid('ins'), insuranceType: 'SulAmérica', professionalId: 'prof_4', quantity: 12, unitValue: 50, status: 'pago' },
-        { id: uid('ins'), insuranceType: 'Particular', professionalId: 'prof_1', quantity: 6, unitValue: 150, status: 'pago' }
-      ];
-      saveData(KEYS.insurance, insurance);
-    }
+    if (!loadData(KEYS.conveniences)) saveData(KEYS.conveniences, []);
     if (!loadData(KEYS.settings)) {
       saveData(KEYS.settings, { theme: 'light' });
     }
