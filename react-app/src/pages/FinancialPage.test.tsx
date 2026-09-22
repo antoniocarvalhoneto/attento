@@ -5,7 +5,7 @@ import { FinancialPage } from './FinancialPage'
 import { ConveniencesPage } from './ConveniencesPage'
 import { createAuth } from '../services/auth'
 import { readData, saveRecord } from '../services/repository'
-import { buildCSV } from '../services/finance'
+import { accountTotals, buildCSV } from '../services/finance'
 
 beforeEach(() => { vi.spyOn(window, 'scrollTo').mockImplementation(() => {}); createAuth().signIn('admin@demo.com', '123456') })
 test('cria conta, registra pagamento e combina filtros financeiros', async () => {
@@ -59,4 +59,22 @@ test('relatório exporta apenas linhas filtradas e escapa CSV', async () => {
   expect(csv).not.toContain(data.professionals.find(item => item.id === 'reference_beatriz')!.name)
   expect(revoke).toHaveBeenCalledWith('blob:report')
   expect(buildCSV([['a;"b', '=SUM(A1)', 12]])).toContain('"a;""b";\'=SUM(A1);12')
+})
+
+test('despesa por unidade dispensa profissional e não soma como recebimento', async () => {
+  render(<FinancialPage />)
+  await userEvent.click(screen.getByRole('button', { name: 'Nova conta' }))
+  const dialog = within(screen.getByRole('dialog'))
+  await userEvent.selectOptions(dialog.getByLabelText('Tipo'), 'payable')
+  await userEvent.selectOptions(dialog.getByLabelText('Unidade'), 'europa')
+  await userEvent.type(dialog.getByLabelText('Descrição'), 'Energia Europa')
+  await userEvent.clear(dialog.getByLabelText('Valor (R$)'))
+  await userEvent.type(dialog.getByLabelText('Valor (R$)'), '677.01')
+  await userEvent.click(dialog.getByRole('button', { name: 'Salvar' }))
+  const row = within(screen.getByText('Energia Europa').closest('tr')!)
+  await userEvent.click(row.getByRole('button', { name: 'Marcar como pago' }))
+  expect(readData().financial[0]).toMatchObject({ kind: 'payable', professionalId: '', unitId: 'europa', status: 'pago' })
+  expect(accountTotals(readData().financial)).toMatchObject({ received: 0, paid: 677.01, balance: -677.01, toPay: 0 })
+  await userEvent.selectOptions(screen.getByLabelText('Tipo'), 'receivable')
+  expect(screen.queryByText('Energia Europa')).not.toBeInTheDocument()
 })

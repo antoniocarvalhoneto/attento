@@ -31,8 +31,9 @@ export function saveRecord<K extends Editable>(key: K, record: Collections[K][nu
   const data = readData()
   if ('productId' in record && (!CONVENIENCE_PRODUCTS.some(item => item.id === record.productId) || !/^\d{4}-\d{2}-\d{2}$/.test(record.date) || !Number.isInteger(record.quantity))) throw new Error('Informe conveniência, data e quantidade inteira válidas.')
   if ('name' in record && !record.name.trim()) throw new Error('Informe o nome.')
-  if ('professionalId' in record && !data.professionals.some(item => item.id === record.professionalId)) throw new Error('Selecione um profissional válido.')
-  if ('unitId' in record && !data.units.some(item => item.id === record.unitId)) throw new Error('Selecione uma unidade válida.')
+  if ('professionalId' in record && !('kind' in record && record.kind === 'payable' && !record.professionalId) && !data.professionals.some(item => item.id === record.professionalId)) throw new Error('Selecione um profissional válido.')
+  if ('unitId' in record && !(key === 'financial' && !record.unitId) && !data.units.some(item => item.id === record.unitId)) throw new Error('Selecione uma unidade válida.')
+  if ('dueDate' in record && (!/^\d{4}-\d{2}-\d{2}$/.test(record.dueDate) || dateKey(new Date(record.dueDate + 'T00:00:00')) !== record.dueDate || (record.kind && !['payable', 'receivable'].includes(record.kind)))) throw new Error('Informe tipo e vencimento válidos.')
   if ('roomId' in record && !data.rooms.some(item => item.id === record.roomId)) throw new Error('Selecione uma sala válida.')
   if ('description' in record && key === 'financial' && !record.description.trim()) throw new Error('Informe a descrição da conta.')
   for (const field of ['value', 'unitValue', 'quantity', 'capacity'] as const) {

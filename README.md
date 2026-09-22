@@ -115,3 +115,5 @@ As oito salas e os profissionais das grades de Horizonte (julho/2026) e Europa (
 Disponibilidade permite escolher mês e semana e reservar por hora ou turno. Os turnos fixos, extras e a sala exclusiva bloqueiam reservas conflitantes. Horário adotado: segunda a sexta 08–22h, sábado 08–12h. A grade importada é uma referência recorrente de leitura; reservas avulsas continuam editadas pelo fluxo de alocação. Nomes de terceiros ficam ocultos na grade do usuário comum.
 
 Relatórios foi incorporado a Contas / Financeiro. O botão Exportar CSV usa os mesmos filtros da tabela, ao lado de Nova conta. Links antigos continuam direcionando à tela unificada.
+
+O financeiro inclui contas a pagar (despesas) e a receber, unidade, descrição de turnos/horas, filtros combinados e saldo realizado. Contas antigas sem tipo continuam recebimentos. Os exemplos de despesas da planilha orientam o cadastro; valores históricos/pessoais não foram importados automaticamente. Os relatórios consideram mês de vencimento. Consumos de conveniências não geram cobrança duplicada no financeiro.

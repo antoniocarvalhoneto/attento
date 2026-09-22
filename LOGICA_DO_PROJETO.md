@@ -226,3 +226,11 @@ Administradores veem os profissionais e observações dos fixos; usuários veem 
 ## Financeiro e relatórios unificados
 
 FinancialPage reúne cadastro, edição, exclusão, pagamento, filtros, indicadores e exportação CSV. exportReport usa exatamente a lista filtrada que alimenta a tabela e os totais. A navegação não tem mais Relatórios separado; DashboardPage normaliza links antigos #reports para #financial e #insurance para #conveniences antes de validar o perfil. A mudança não copia contas nem cria outra coleção.
+
+## Contas a pagar e a receber
+
+Account acrescenta kind (receivable/payable), unitId opcional e rentalPeriod para descrever turnos/horas contratados. accountKind trata contas antigas sem tipo como recebimentos, preservando seu significado. AccountEditor permite cadastrar despesas sem profissional e manter unidade, descrição, valor e vencimento; recebimentos exigem profissional. saveRecord valida referências e vencimento antes de gravar.
+
+filterAccounts combina tipo, unidade, profissional, status e mês de vencimento. accountTotals separa recebido, despesas pagas, saldo realizado (recebido menos despesas), a receber e a pagar. Todas as somas e a exportação usam a mesma seleção. O período de um pagamento é o vencimento da conta, não um filtro de fluxo por data de caixa. Status continua manual.
+
+A planilha Contas teste fundamenta despesas por unidade (energia, condomínio, IPTU, internet etc.). Lançamentos pessoais, vencimentos incompletos e datas efetivas de pagamento não foram deduzidos/importados. A aba Conveniências continua com seu controle de consumo próprio, sem criar uma segunda cobrança no financeiro. Validação desta etapa: 62 testes aprovados, build e lint aprovados.
