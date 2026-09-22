@@ -1,6 +1,8 @@
 import type { User } from './auth'
 import type { DashboardSnapshot } from './dashboard'
 import { readData, readSettings, requireUser } from './repository'
+import { fixedSchedules } from './attentoReference'
+import { dateKey, slotDate } from './dates'
 
 export type Theme = 'light' | 'dark'
 export type NavItem = { key: string; label: string; icon: string }
@@ -26,7 +28,8 @@ export const titles: Record<string, string> = Object.fromEntries(Object.values(n
 export function allowed(view: string, role: User['role']) { return navigation[role]?.some(item => item.key === view) || false }
 export function readDashboard(): DashboardSnapshot {
   const user = requireUser(), data = readData()
-  return { user, rooms: data.rooms, units: data.units, professionals: data.professionals, schedules: user.role === 'admin' ? data.schedules : data.schedules.filter(item => item.userId === user.id), accounts: data.financial, whatsapp: readSettings().whatsapp || '' }
+  const months = [...new Set([slotDate(0, 0).slice(0, 7), dateKey().slice(0, 7), slotDate(1, 6).slice(0, 7)])]
+  return { user, rooms: data.rooms.filter(room => !room.archived), units: data.units, professionals: data.professionals, schedules: user.role === 'admin' ? [...data.schedules, ...months.flatMap(fixedSchedules)] : data.schedules.filter(item => item.userId === user.id), accounts: data.financial, whatsapp: readSettings().whatsapp || '' }
 }
 export const panel = { readDashboard, navigation, titles, allowed }
 export type PanelApi = typeof panel

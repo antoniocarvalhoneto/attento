@@ -6,7 +6,7 @@ export type Account = { id: string; professionalId: string; description: string;
 export type Convenience = { id: string; productId: string; professionalId: string; quantity: number; unitValue: number; date: string; status: string }
 export type Collections = { units: Unit[]; rooms: Room[]; professionals: Professional[]; schedules: Schedule[]; financial: Account[]; conveniences: Convenience[] }
 export type Settings = { theme?: 'light' | 'dark'; whatsapp?: string }
-export const HOURS = Array.from({ length: 13 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`)
+export const HOURS = Array.from({ length: 14 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`)
 export const CONVENIENCE_PRODUCTS = [
   { id: 'coffee-capsule', name: 'Cápsula de café', price: 2 },
   { id: 'cappuccino', name: 'Cappuccino', price: 5 },

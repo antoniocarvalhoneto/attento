@@ -4,7 +4,7 @@ import { KEYS, loadData, saveData, uid } from './storage'
 import { dateKey, migrateSchedules, slotUnavailableReason } from './dates'
 import type { Collections, Schedule, Settings } from './models'
 import { CONVENIENCE_PRODUCTS } from './models'
-import { hasFixedLink } from './attentoReference'
+import { fixedSchedules, hasFixedLink } from './attentoReference'
 
 export function requireUser(admin = false) {
   const user = createAuth().restoreSession()
@@ -67,18 +67,18 @@ export function markPaid(key: 'financial' | 'conveniences', id: string) {
     saveRecord(key, { ...item, status: 'pago' })
   }
 }
-export function reserveSlot(input: Pick<Schedule, 'roomId' | 'date' | 'time'> & Partial<Pick<Schedule, 'professionalId' | 'value' | 'note' | 'shift'>>) {
+export function reserveSlot(input: Pick<Schedule, 'roomId' | 'date' | 'time'> & Partial<Pick<Schedule, 'professionalId' | 'value' | 'note' | 'shift' | 'endTime'>>) {
   const user = requireUser()
   const data = readData()
   const room = data.rooms.find(item => item.id === input.roomId)
-  const reason = slotUnavailableReason(room, data.schedules, input.date, input.time)
+  const reason = slotUnavailableReason(room, [...data.schedules, ...fixedSchedules(input.date.slice(0, 7))], input.date, input.time, new Date(), input.endTime)
   if (reason || !room) throw new Error(reason)
   const active = data.professionals.filter(item => item.status === 'ativo')
-  const professional = user.role === 'admin' ? active.find(item => item.id === input.professionalId) : active.find(item => item.roomId === room.id) || active[0]
+  const professional = user.role === 'admin' ? active.find(item => item.id === input.professionalId) : undefined
   if (user.role === 'admin' && !professional) throw new Error('Selecione um profissional ativo.')
-  const value = user.role === 'admin' ? Number(input.value || 0) : professional?.value || 0
+  const value = user.role === 'admin' ? Number(input.value || 0) : 0
   if (!Number.isFinite(value) || value < 0) throw new Error('Informe um valor válido.')
-  const item: Schedule = { id: uid('sch'), date: input.date, time: input.time, roomId: room.id, unitId: room.unitId, professionalId: professional?.id || null, userId: user.role === 'user' ? user.id : null, shift: input.shift || '', value, note: input.note?.trim() || '', status: 'reservado' }
+  const item: Schedule = { id: uid('sch'), date: input.date, time: input.time, endTime: input.endTime, roomId: room.id, unitId: room.unitId, professionalId: professional?.id || null, userId: user.role === 'user' ? user.id : null, shift: input.shift || '', value, note: input.note?.trim() || '', status: 'reservado' }
   saveData(KEYS.schedules, [...data.schedules, item])
   return item
 }
