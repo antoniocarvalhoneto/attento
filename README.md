@@ -40,6 +40,8 @@ O dashboard dá prioridade às próximas reservas e à ação de reservar/alocar
 
 A interface usa tipografia única, fundos neutros e azul nas ações. Indicadores são compactos e o financeiro aparece como uma lista de contas por situação, reduzindo cartões e ícones decorativos.
 
+Login e cabeçalho usam `Attento Logomarca.png`, sem nome escrito separadamente. A imagem mantém a proporção, com tamanho adaptado para celular e fundo branco para leitura nos dois temas.
+
 Os textos e estados vazios indicam a próxima ação: criar um cadastro, rever filtros ou escolher um horário. Mensagens sobre reservas futuras não confundem ausência de próximos horários com ausência de histórico.
 
 - Dashboard por perfil, com indicadores, próximas reservas e gráficos.

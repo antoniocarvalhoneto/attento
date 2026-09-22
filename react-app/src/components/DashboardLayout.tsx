@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { User } from '../services/auth'
 import type { NavItem, Theme } from '../services/panel'
-import logo from '../assets/logo.png'
+import logo from '../assets/Attento Logomarca.png'
 
 type Props = {
   user: User; theme: Theme; view: string; title: string; items: NavItem[]
@@ -28,8 +28,7 @@ export function DashboardLayout({ user, theme, view, title, items, onNavigate, o
         <header className="app-header">
           <div className="topbar">
             <div className="app-brand">
-              <div className="app-logo"><img src={logo} alt="" className="logo-mark" /></div>
-              <span className="app-brand-title">Attento</span>
+              <div className="app-logo"><img src={logo} alt="Attento Saúde Integral" className="logo-mark" /></div>
             </div>
             <h1 className="topbar-title">{title}</h1>
             <div className="topbar-actions">

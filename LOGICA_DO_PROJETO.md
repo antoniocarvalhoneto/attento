@@ -169,6 +169,8 @@ Os estados vazios orientam a próxima ação. Agenda distingue ausência de rese
 
 ## 11. Estilos e build
 
+`AuthLayout` e `DashboardLayout` importam `assets/Attento Logomarca.png`. A identificação visual está na própria imagem; o texto alternativo identifica a marca para leitores de tela. O CSS mantém altura automática, limita largura no celular e oferece fundo branco para a marca no tema escuro. Não há um nome Attento adicional ao lado da imagem.
+
 A identidade usa Inter em títulos e textos, pesos mais contidos e uma escala de espaçamento consistente. O azul identifica ações e navegação; os fundos são neutros. Indicadores ficam em uma faixa com divisórias, sem caixas ou ícones repetidos. Gráfico e resumo financeiro são seções abertas. Os estilos do resumo semanal e da barra financeira removidos não permanecem no CSS.
 
 `src/style.css` contém os estilos preservados, menu horizontal, temas e responsividade. O login usa camadas de gradiente com animação CSS; `prefers-reduced-motion` desativa o movimento. Modais possuem sobreposição própria e formulários com rolagem interna.
