@@ -29,6 +29,14 @@ async function start(role: 'admin' | 'user' = 'admin', hash = '#dashboard') {
   return screen.findByRole('navigation', { name: 'Navegação principal' })
 }
 
+test('link antigo de relatórios abre financeiro com cadastro e exportação', async () => {
+  const nav = await start('admin', '#reports')
+  expect(window.location.hash).toBe('#financial')
+  expect(within(nav).queryByRole('button', { name: 'Relatórios' })).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Nova conta' })).toBeVisible()
+  expect(screen.getByRole('button', { name: 'Exportar CSV' })).toBeVisible()
+})
+
 test('troca de identidade em outra aba descarta formulário da conta anterior', async () => {
   await start('admin', '#rooms')
   await userEvent.click(screen.getByRole('button', { name: 'Nova sala' }))

@@ -23,7 +23,8 @@ export function DashboardPage({ user, theme, onThemeChange, onSignOut, error }: 
     return () => window.removeEventListener('hashchange', handleHash)
   }, [])
 
-  const view = api.allowed(requested, user.role) ? requested : 'dashboard'
+  const route = requested === 'reports' ? 'financial' : requested === 'insurance' ? 'conveniences' : requested
+  const view = api.allowed(route, user.role) ? route : 'dashboard'
   useEffect(() => {
     if (window.location.hash !== `#${view}`) window.history.replaceState(null, '', `#${view}`)
     document.title = `${api.titles[view]} | Attento`
@@ -52,7 +53,7 @@ export function DashboardPage({ user, theme, onThemeChange, onSignOut, error }: 
       : view === 'availability' ? <AvailabilityPage user={user} />
       : view === 'myschedule' ? <MySchedulePage user={user} />
       : view === 'rooms' || view === 'professionals' ? <CatalogPage key={view} kind={view} />
-      : view === 'financial' || view === 'reports' ? <FinancialPage key={view} reports={view === 'reports'} />
+      : view === 'financial' ? <FinancialPage />
       : view === 'conveniences' ? <ConveniencesPage />
       : <SettingsPage user={user} theme={theme} onThemeChange={onThemeChange} />}
   </DashboardLayout>

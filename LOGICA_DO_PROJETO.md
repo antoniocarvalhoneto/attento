@@ -222,3 +222,7 @@ Availability seleciona mês, semana, unidade, sala e visualização. monthWeeks 
 overlaps compara intervalos com início inclusivo e fim exclusivo. endOfHour dá duração de uma hora a registros antigos sem término. slotUnavailableReason verifica datas, expediente e sobreposição. reserveSlot relê os registros e expande os fixos do mês na confirmação, impedindo conflito mesmo se o formulário estiver aberto. Grava somente a nova reserva avulsa, com início e fim, sem copiar recorrências ou criar cobranças. O valor zero significa “a definir”.
 
 Administradores veem os profissionais e observações dos fixos; usuários veem somente a ocupação na grade. Novas reservas de usuário pertencem à conta e não recebem um profissional arbitrário da sala. readDashboard inclui ocorrências fixas nos meses que abrangem as semanas atual e seguinte; a repetição futura não tem data final. A grade de origem é referência de leitura: editar um cadastro não altera esses intervalos; uma revisão de turnos fixos exige atualizar a referência.
+
+## Financeiro e relatórios unificados
+
+FinancialPage reúne cadastro, edição, exclusão, pagamento, filtros, indicadores e exportação CSV. exportReport usa exatamente a lista filtrada que alimenta a tabela e os totais. A navegação não tem mais Relatórios separado; DashboardPage normaliza links antigos #reports para #financial e #insurance para #conveniences antes de validar o perfil. A mudança não copia contas nem cria outra coleção.

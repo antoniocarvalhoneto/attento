@@ -113,3 +113,5 @@ Conveniências substitui Convênios: cadastro de consumo por profissional, catá
 As oito salas e os profissionais das grades de Horizonte (julho/2026) e Europa (setembro/2026) substituem o exemplo inicial nas novas instalações. Dados já salvos são preservados; salas do exemplo anterior ficam no filtro “Mostrar salas anteriores”. Metragem e preços de referência aparecem nos detalhes da sala. A grade fixa repete a partir do mês de origem e não gera contas automaticamente.
 
 Disponibilidade permite escolher mês e semana e reservar por hora ou turno. Os turnos fixos, extras e a sala exclusiva bloqueiam reservas conflitantes. Horário adotado: segunda a sexta 08–22h, sábado 08–12h. A grade importada é uma referência recorrente de leitura; reservas avulsas continuam editadas pelo fluxo de alocação. Nomes de terceiros ficam ocultos na grade do usuário comum.
+
+Relatórios foi incorporado a Contas / Financeiro. O botão Exportar CSV usa os mesmos filtros da tabela, ao lado de Nova conta. Links antigos continuam direcionando à tela unificada.

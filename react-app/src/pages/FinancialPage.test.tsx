@@ -50,7 +50,7 @@ test('relatório exporta apenas linhas filtradas e escapa CSV', async () => {
   readData()
   saveRecord('financial', { id: '', professionalId: 'reference_marlene', description: 'Aluguel', value: 300, dueDate: '2026-09-30', status: 'pendente', paymentDate: null })
   const data = readData()
-  render(<FinancialPage reports />)
+  render(<FinancialPage />)
   await userEvent.selectOptions(screen.getByLabelText('Profissional'), 'reference_marlene')
   await userEvent.click(screen.getByRole('button', { name: 'Exportar CSV' }))
   const blob = create.mock.calls[0][0] as Blob
