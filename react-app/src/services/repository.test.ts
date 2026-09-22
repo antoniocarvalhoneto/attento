@@ -15,15 +15,16 @@ test('preserva registros e migra datas antigas uma única vez', () => {
 
 test('revalida conflitos e sala na confirmação sem perder reservas existentes', () => {
   localStorage.setItem('app_schedules', '[]')
-  const input = { roomId: 'room_1', date: slotDate(1, 0), time: '10:00', professionalId: 'prof_1' }
+  const input = { roomId: 'duna', date: slotDate(1, 0), time: '10:00', professionalId: 'reference_beatriz' }
   reserveSlot(input)
   expect(() => reserveSlot(input)).toThrow('indisponível')
-  expect(() => reserveSlot({ ...input, roomId: 'room_3' })).toThrow('não está disponível')
+  saveRecord('rooms', { ...readData().rooms.find(room => room.id === 'mare')!, status: 'manutencao' })
+  expect(() => reserveSlot({ ...input, roomId: 'mare' })).toThrow('não está disponível')
   expect(readData().schedules).toHaveLength(1)
 })
 
 test('bloqueia exclusão vinculada e não altera dados quando gravação falha', () => {
-  expect(() => deleteRecord('rooms', 'room_1')).toThrow('vinculados')
+  expect(() => deleteRecord('rooms', 'duna')).toThrow('vinculados')
   const before = localStorage.getItem('app_rooms')
   vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota') })
   expect(() => saveRecord('rooms', { ...readData().rooms[0], name: 'Alterada' })).toThrow('Não foi possível salvar')
@@ -31,7 +32,8 @@ test('bloqueia exclusão vinculada e não altera dados quando gravação falha',
 })
 
 test('pagamento grava data e usuário comum não altera cadastros nem acessa financeiro', () => {
-  const id = readData().financial.find(item => item.status !== 'pago')!.id
+  saveRecord('financial', { id: '', professionalId: 'reference_beatriz', description: 'Aluguel', value: 300, dueDate: '2026-09-30', status: 'pendente', paymentDate: null })
+  const id = readData().financial[0].id
   markPaid('financial', id)
   expect(readData().financial.find(item => item.id === id)?.paymentDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   createAuth().signIn('usuario@demo.com', '123456')
@@ -41,8 +43,8 @@ test('pagamento grava data e usuário comum não altera cadastros nem acessa fin
 
 test.each(['app_schedules', 'app_financial_accounts', 'app_conveniences'])('exclusão de profissional preserva vínculos em %s', key => {
   for (const name of ['app_schedules', 'app_financial_accounts', 'app_conveniences']) localStorage.setItem(name, '[]')
-  localStorage.setItem(key, JSON.stringify([{ id: 'history', professionalId: 'prof_1', date: '2020-01-01' }]))
-  expect(() => deleteRecord('professionals', 'prof_1')).toThrow('vinculados')
+  localStorage.setItem(key, JSON.stringify([{ id: 'history', professionalId: 'reference_beatriz', date: '2020-01-01' }]))
+  expect(() => deleteRecord('professionals', 'reference_beatriz')).toThrow('vinculados')
 })
 
 test('dados corrompidos interrompem leitura sem apagar o conteúdo original', () => {

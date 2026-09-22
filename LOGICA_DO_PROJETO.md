@@ -206,3 +206,11 @@ Regras de negócio preservadas para decisão futura: vencimento não altera stat
 A aba Conveniências substitui Convênios. Registra produto, profissional, data, quantidade, preço unitário e pagamento. Cappuccino custa R$ 5 por unidade, conforme confirmação do usuário. O catálogo inclui café, alimentos e impressões. Os lançamentos históricos da planilha sem ano ou situação de pagamento não são importados automaticamente.
 
 `ConveniencesList` filtra consumos e coordena edição, exclusão e pagamento. `ConvenienceEditor` aplica o preço do catálogo ao escolher o produto, calcula quantidade × preço e preserva o formulário se a gravação falhar. `saveRecord` valida produto, data e quantidade inteira. A coleção `app_conveniences` é independente: registros antigos de `app_insurance` permanecem armazenados, sem conversão.
+
+## Salas e referência fixa das planilhas
+
+Fonte: Horizonte teste — TURNOS FIXOS JULHO 26 (2 páginas) e Europa teste — TURNOS FIXOS SETEMBRO 26 (2 páginas), confrontadas visualmente com os PDFs. Horizonte tem Duna, Maré e Costa; Europa tem Onda, Areia, Brisa, Mar e Estrela. Metragens vêm da planilha de Europa; capacidade não informada permanece vazia. Nomes de profissionais mantêm a grafia da fonte.
+
+Em attentoReference.ts, referenceRooms contém áreas e valores de referência dos turnos; referenceProfessionals deriva os nomes únicos da grade, sem inventar especialidade ou credenciais. fixed registra cada intervalo semanal, inclusive horas extras. fixedSchedules expande os intervalos apenas para o mês solicitado: Horizonte desde julho/2026 e Europa desde setembro/2026, repetindo indefinidamente conforme confirmação do usuário. Estrela é exclusiva de Poliana Reis. Cada ocorrência tem valor zero porque a grade não gera cobrança; preços de turnos não são multiplicados pelas horas. hasFixedLink impede apagar cadastros usados pela grade.
+
+initializeData importa cadastros ausentes uma vez, faz cópia dos cadastros anteriores em app_before_attento_reference e preserva reservas e contas existentes. Salas reconhecidas do exemplo antigo ficam arquivadas e acessíveis em “Mostrar salas anteriores”. Cadastros personalizados não são removidos. Em instalação nova não há reservas nem dívidas fictícias. A migração só é marcada após salvar os cadastros; uma nova tentativa não duplica IDs.

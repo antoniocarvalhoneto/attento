@@ -4,7 +4,7 @@ import { beforeEach, expect, test, vi } from 'vitest'
 import { FinancialPage } from './FinancialPage'
 import { ConveniencesPage } from './ConveniencesPage'
 import { createAuth } from '../services/auth'
-import { readData } from '../services/repository'
+import { readData, saveRecord } from '../services/repository'
 import { buildCSV } from '../services/finance'
 
 beforeEach(() => { vi.spyOn(window, 'scrollTo').mockImplementation(() => {}); createAuth().signIn('admin@demo.com', '123456') })
@@ -19,7 +19,7 @@ test('cria conta, registra pagamento e combina filtros financeiros', async () =>
   const account = readData().financial.find(item => item.description === 'Conta React')!
   expect(account).toMatchObject({ status: 'pago', value: 123.45 })
   expect(account.paymentDate).toBeTruthy()
-  await userEvent.selectOptions(screen.getByLabelText('Profissional'), 'prof_1')
+  await userEvent.selectOptions(screen.getByLabelText('Profissional'), 'reference_beatriz')
   await userEvent.selectOptions(screen.getByLabelText('Status'), 'pago')
   await userEvent.selectOptions(screen.getByLabelText('Mês de vencimento'), account.dueDate.slice(0, 7))
   expect(screen.getByRole('table')).toHaveTextContent('Conta React')
@@ -47,14 +47,16 @@ test('relatório exporta apenas linhas filtradas e escapa CSV', async () => {
   const create = vi.fn().mockReturnValue('blob:report'), revoke = vi.fn()
   vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: create, revokeObjectURL: revoke }))
   vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+  readData()
+  saveRecord('financial', { id: '', professionalId: 'reference_marlene', description: 'Aluguel', value: 300, dueDate: '2026-09-30', status: 'pendente', paymentDate: null })
   const data = readData()
   render(<FinancialPage reports />)
-  await userEvent.selectOptions(screen.getByLabelText('Profissional'), 'prof_3')
+  await userEvent.selectOptions(screen.getByLabelText('Profissional'), 'reference_marlene')
   await userEvent.click(screen.getByRole('button', { name: 'Exportar CSV' }))
   const blob = create.mock.calls[0][0] as Blob
   const csv = await new Promise<string>(resolve => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.readAsText(blob) })
-  expect(csv).toContain(data.professionals.find(item => item.id === 'prof_3')!.name)
-  expect(csv).not.toContain(data.professionals.find(item => item.id === 'prof_1')!.name)
+  expect(csv).toContain(data.professionals.find(item => item.id === 'reference_marlene')!.name)
+  expect(csv).not.toContain(data.professionals.find(item => item.id === 'reference_beatriz')!.name)
   expect(revoke).toHaveBeenCalledWith('blob:report')
   expect(buildCSV([['a;"b', '=SUM(A1)', 12]])).toContain('"a;""b";\'=SUM(A1);12')
 })

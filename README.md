@@ -109,3 +109,5 @@ A explicação das funções está em [LOGICA_DO_PROJETO.md](LOGICA_DO_PROJETO.m
 ## Referências operacionais Attento
 
 Conveniências substitui Convênios: cadastro de consumo por profissional, catálogo com preços, quantidades e pagamento. Cappuccino: R$ 5/unidade. A referência é UNIT Attento e a planilha de conveniências fornecida. Não há backend; dados continuam no navegador.
+
+As oito salas e os profissionais das grades de Horizonte (julho/2026) e Europa (setembro/2026) substituem o exemplo inicial nas novas instalações. Dados já salvos são preservados; salas do exemplo anterior ficam no filtro “Mostrar salas anteriores”. Metragem e preços de referência aparecem nos detalhes da sala. A grade fixa repete a partir do mês de origem e não gera contas automaticamente.

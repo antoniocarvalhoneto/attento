@@ -4,6 +4,7 @@ import { KEYS, loadData, saveData, uid } from './storage'
 import { dateKey, migrateSchedules, slotUnavailableReason } from './dates'
 import type { Collections, Schedule, Settings } from './models'
 import { CONVENIENCE_PRODUCTS } from './models'
+import { hasFixedLink } from './attentoReference'
 
 export function requireUser(admin = false) {
   const user = createAuth().restoreSession()
@@ -36,6 +37,7 @@ export function saveRecord<K extends Editable>(key: K, record: Collections[K][nu
   if ('description' in record && key === 'financial' && !record.description.trim()) throw new Error('Informe a descrição da conta.')
   for (const field of ['value', 'unitValue', 'quantity', 'capacity'] as const) {
     if (field in record) {
+      if (field === 'capacity' && 'capacity' in record && record.capacity === null) continue
       const value = Number((record as unknown as Record<string, unknown>)[field])
       if (!Number.isFinite(value) || value < (field === 'quantity' || field === 'capacity' ? 1 : 0)) throw new Error('Informe valores numéricos válidos.')
     }
@@ -50,7 +52,7 @@ export function deleteRecord(key: Editable, id: string) {
   const data = readData()
   const linked = key === 'rooms' ? data.professionals.some(item => item.roomId === id) || data.schedules.some(item => item.roomId === id)
     : key === 'professionals' && [...data.schedules, ...data.financial, ...data.conveniences].some(item => item.professionalId === id)
-  if (linked) throw new Error('Este cadastro possui registros vinculados. Inative-o para preservar o histórico.')
+  if (linked || ((key === 'rooms' || key === 'professionals') && hasFixedLink(id))) throw new Error('Este cadastro possui registros vinculados. Inative-o para preservar o histórico.')
   saveData(KEYS[key], data[key].filter(item => item.id !== id))
 }
 export function markPaid(key: 'financial' | 'conveniences', id: string) {
