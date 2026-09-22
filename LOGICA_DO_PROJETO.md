@@ -14,8 +14,8 @@ Este arquivo explica a implementação atual em React. A lógica das versões an
 | availability | AvailabilityPage |
 | myschedule | MySchedulePage |
 | rooms / professionals | CatalogPage |
-| financial / reports | FinancialPage |
-| insurance | InsurancePage |
+| financial (reports é redirecionado) | FinancialPage |
+| conveniences (insurance é redirecionado) | ConveniencesPage |
 | settings | SettingsPage |
 
 O estado dos formulários pertence aos componentes. Os serviços leem e gravam no armazenamento. Uma operação que falha não fecha o formulário nem informa sucesso.
@@ -64,22 +64,22 @@ Uma falha de atualização em segundo plano conserva os dados anteriores e os ra
 
 ## 4. Tipos, armazenamento e dados iniciais
 
-`models.ts` define `Unit`, `Room`, `Professional`, `Schedule`, `Account`, `Insurance`, `Collections` e `Settings`. `HOURS` contém os horários de 08h a 20h; `INSURANCE_TYPES` contém os convênios existentes. `money` formata reais e `nameOf` resolve nomes por ID, usando travessão quando o vínculo não existe.
+`models.ts` define `Unit`, `Room`, `Professional`, `Schedule`, `Account`, `Convenience`, `Collections` e `Settings`. `HOURS` contém os horários de 08h a 21h; `CONVENIENCE_PRODUCTS` contém produtos e preços. `money` formata reais e `nameOf` resolve nomes por ID, usando travessão quando o vínculo não existe.
 
 | Função | O que faz |
 | --- | --- |
-| `storage.KEYS` | Mantém as mesmas chaves da versão anterior. |
+| `storage.KEYS` | Define as coleções, incluindo app_conveniences; app_insurance não é reinterpretada. |
 | `loadData` | Lê e interpreta JSON; propaga falhas em vez de substituir conteúdo inválido. |
 | `saveData` | Grava JSON e transforma falhas de armazenamento em mensagem para o formulário. |
 | `uid` | Gera identificadores com UUID. |
-| `initializeData` | Cria somente coleções ausentes, com os registros de demonstração anteriores. |
+| `initializeData` | Importa os cadastros de referência uma vez, preserva registros existentes e inicia contas/consumos/reservas avulsas vazios. |
 | `requireUser(admin)` | Verifica sessão e, quando solicitado, perfil administrativo. |
 | `readCollection` | Lê uma coleção e exige um array válido. |
-| `readData` | Verifica sessão, inicializa coleções, migra datas antigas e lê o conjunto. Contas e convênios não são retornados ao usuário comum. |
+| `readData` | Verifica sessão, inicializa coleções, migra datas antigas e lê o conjunto. Contas e conveniências não são retornados ao usuário comum. |
 | `readSettings` | Lê as preferências atuais. |
 | `saveRecord` | Valida campos e referências, relê a coleção e cria/edita preservando outros registros. Em contas, ajusta a data de pagamento. |
 | `deleteRecord` | Verifica vínculos de sala/profissional antes de excluir. Inclui histórico e cadastros inativos. |
-| `markPaid` | Marca conta ou convênio como pago; contas recebem data local de pagamento. |
+| `markPaid` | Marca conta ou consumo como pago; contas recebem data local de pagamento. |
 | `reserveSlot` | Relê sala e agenda na confirmação, verifica disponibilidade e grava a reserva com identidade obtida da sessão. |
 
 Datas antigas em semana/dia são fixadas usando a semana do primeiro acesso após a migração. Uma vez datadas, não são deslocadas novamente. Coleções ausentes recebem seed; coleções vazias são preservadas.
@@ -124,9 +124,9 @@ O dashboard prioriza a agenda: data e reservas restantes de hoje, ação de rese
 
 ## 7. Disponibilidade e agenda pessoal
 
-`AvailabilityPage` conecta os dados a `Availability`. Este componente mantém filtros de unidade/sala/semana e o horário escolhido. A grade usa botões de horário, com datas visíveis e bloqueios calculados. O horário selecionado tem data fixa enquanto o modal permanece aberto.
+`AvailabilityPage` conecta os dados a `Availability`. Este componente mantém filtros de mês/unidade/sala/semana e visualização por hora/turno e o horário escolhido. A grade usa botões de horário, com datas visíveis e bloqueios calculados. O horário selecionado tem data fixa enquanto o modal permanece aberto.
 
-`ReserveDialog` mantém profissional, turno, valor, observação e erro. No envio chama `reserveSlot`; a validação consulta o armazenamento novamente. Falhas preservam os campos. O administrador escolhe profissional ativo. O usuário recebe profissional ativo da sala ou, pela regra já existente, o primeiro ativo disponível. Após reservar, recebe confirmação e contato quando configurado.
+`ReserveDialog` mantém profissional, turno, valor, observação e erro. No envio chama `reserveSlot`; a validação consulta o armazenamento novamente. Falhas preservam os campos. O administrador escolhe profissional ativo. A reserva do usuário pertence à sua conta, sem vínculo automático com um profissional de terceiros. Após reservar, recebe confirmação e contato quando configurado.
 
 `MySchedulePage` mostra somente reservas futuras do usuário conectado, com sala, unidade, profissional, valor e link de contato usando a data real.
 
@@ -138,15 +138,15 @@ O dashboard prioriza a agenda: data e reservas restantes de hoje, ação de rese
 
 `RecordActions` apresenta consulta, edição, exclusão e pagamento conforme a tela. `DeleteDialog` exige confirmação, mostra falhas e só fecha quando a operação tiver sucesso.
 
-## 9. Financeiro, convênios e relatórios
+## 9. Financeiro, conveniências e relatórios
 
-`FinancialPage` carrega contas ou relatórios. `Financial` mantém filtros, edição, exclusão e erro. `pay` marca pagamento; `total` soma os valores filtrados; `exportReport` exporta somente a seleção. `AccountEditor` mantém profissional, descrição, valor, vencimento e status; a persistência calcula a data de pagamento.
+`FinancialPage` reúne contas e relatórios. `Financial` mantém filtros, edição, exclusão e erro. `pay` marca pagamento; `accountTotals` separa receitas, despesas e saldo filtrados; `exportReport` exporta somente a seleção. `AccountEditor` mantém profissional, descrição, valor, vencimento e status; a persistência calcula a data de pagamento.
 
-`InsurancePage` carrega `InsuranceList`, que filtra por convênio e controla ações. `InsuranceEditor` mantém campos e calcula quantidade × valor unitário durante a edição. Sem profissionais, as telas orientam cadastrar um antes de criar registros.
+`ConveniencesPage` carrega `ConveniencesList`, que filtra por produto e controla ações. `ConvenienceEditor` mantém campos e calcula quantidade × valor unitário durante a edição. Consumos e recebimentos exigem profissional; despesas podem ser cadastradas sem profissional.
 
 | Função | O que faz |
 | --- | --- |
-| `filterAccounts` | Combina profissional, status e mês de vencimento. |
+| `filterAccounts` | Combina tipo, unidade, profissional, status e mês de vencimento. |
 | `monthOptions` | Lista os meses presentes nos dados em ordem decrescente. |
 | `buildCSV` | Usa ponto e vírgula, escapa aspas/quebras e neutraliza fórmulas em campos textuais. |
 | `downloadCSV` | Cria Blob e URL temporária, dispara o download e libera os recursos. |
@@ -165,7 +165,7 @@ Sem edição em andamento, o telefone acompanha a leitura atual após alteraçõ
 
 Os callbacks de campos alteram rascunhos; callbacks de envio chamam serviços; callbacks de map/filter/find/reduce transformam coleções. A explicação fica neste documento em vez de comentários adicionados ao código.
 
-Os estados vazios orientam a próxima ação. Agenda distingue ausência de reservas futuras de ausência de histórico; financeiro e convênios distinguem coleção vazia de filtros sem resultados. Descrições de páginas citam a operação concreta (vencimento, repasse, sala ou turno). A agenda pessoal oferece acesso direto a reservar.
+Os estados vazios orientam a próxima ação. Agenda distingue ausência de reservas futuras de ausência de histórico; financeiro e conveniências distinguem coleção vazia de filtros sem resultados. Descrições de páginas citam a operação concreta (vencimento, repasse, sala ou turno). A agenda pessoal oferece acesso direto a reservar.
 
 ## 11. Estilos e build
 
@@ -188,7 +188,7 @@ Vite usa apenas o plugin React. O logo e o CSS estão dentro da aplicação. Nã
 - Dashboard: modelos, datas, isolamento por perfil, indicadores, estados vazios e nova tentativa.
 - Reservas: confirmação, conflito surgido com modal aberto, falha e agenda pessoal.
 - Cadastros: criação, edição, exclusão, vínculos e seleção de unidade/sala.
-- Financeiro: pagamento, filtros, total de convênio, falha e exportação.
+- Financeiro: pagamento, filtros, total de consumo, falha e exportação.
 - Configurações: telefone inválido, gravação, remoção e preservação de tema.
 - Serviços: datas fixas, virada de semana/ano, corrupção, referências e permissões.
 - Modal: Tab, Escape e restauração de foco.
@@ -197,9 +197,9 @@ Os testes antigos que executavam os scripts removidos foram substituídos pelos 
 
 Build TypeScript/Vite e lint verificam a aplicação. A conferência visual real ainda está pendente porque nenhum navegador estava conectado.
 
-Resultado final da migração: 52 testes aprovados, build aprovado e lint sem avisos. O preview respondeu corretamente para HTML e assets; o diretório de build contém somente a entrada React, JavaScript, CSS e logo.
+Revisão das planilhas: 62 testes aprovados, build aprovado e lint sem avisos. O preview respondeu corretamente para HTML e assets; o diretório de build contém somente a entrada React, JavaScript, CSS e logo.
 
-Regras de negócio preservadas para decisão futura: vencimento não altera status financeiro automaticamente; contato é global e editável por ambos os perfis; reserva do usuário pode recorrer a profissional ativo de outra sala. React não modifica essas regras nem acrescenta backend.
+Regras de negócio preservadas para decisão futura: vencimento não altera status financeiro automaticamente; contato é global e editável por ambos os perfis; reserva do usuário permanece vinculada somente à própria conta. Não há backend.
 
 ## Conveniências — referência UNIT Attento
 
@@ -234,3 +234,6 @@ Account acrescenta kind (receivable/payable), unitId opcional e rentalPeriod par
 filterAccounts combina tipo, unidade, profissional, status e mês de vencimento. accountTotals separa recebido, despesas pagas, saldo realizado (recebido menos despesas), a receber e a pagar. Todas as somas e a exportação usam a mesma seleção. O período de um pagamento é o vencimento da conta, não um filtro de fluxo por data de caixa. Status continua manual.
 
 A planilha Contas teste fundamenta despesas por unidade (energia, condomínio, IPTU, internet etc.). Lançamentos pessoais, vencimentos incompletos e datas efetivas de pagamento não foram deduzidos/importados. A aba Conveniências continua com seu controle de consumo próprio, sem criar uma segunda cobrança no financeiro. Validação desta etapa: 62 testes aprovados, build e lint aprovados.
+
+
+A agenda pessoal e a prévia do dashboard exibem o término das reservas por turno. MySchedulePage mostra “A combinar” para valor ainda indefinido e inclui o intervalo no contato. A conferência visual continua pendente: nesta revisão, a descoberta do navegador não encontrou conexão disponível.

@@ -22,7 +22,8 @@ Publique o conteúdo de `dist/` na raiz da origem. A navegação usa hash e a ap
 ## Organização
 
 - `src/App.tsx`: sessão, login, tema e atualização entre abas.
-- `src/pages/`: login, dashboard, disponibilidade, agenda pessoal, cadastros, financeiro, convênios e configurações. Relatórios compartilham a tela financeira.
+- `src/pages/`: login, dashboard, disponibilidade, agenda pessoal, cadastros, financeiro, conveniências e configurações. Cadastro, filtros e relatórios estão na mesma tela financeira.
+- `src/services/attentoReference.ts`: oito salas e grade semanal recorrente baseada nas planilhas de Horizonte/Europa. Consulte o README da raiz para regras da importação.
 - `src/components/`: estrutura, modais, campos, tabelas, ações e gráficos.
 - `src/services/`: autenticação local, tipos, persistência, dados iniciais, datas, contato, financeiro, dashboard e navegação.
 - `src/assets/` e `src/style.css`: identidade visual, estilos e temas.

@@ -4,7 +4,7 @@ import type { User } from './auth'
 
 type NamedRecord = { id: string; name: string; status?: string }
 export type Reservation = {
-  id: string; date: string; time: string; status: string
+  id: string; date: string; time: string; endTime?: string; status: string
   roomId: string; unitId: string; professionalId: string | null; userId: string | null
 }
 export type DashboardSnapshot = {
@@ -23,7 +23,7 @@ export function buildDashboard(snapshot: DashboardSnapshot, now = new Date()) {
   const schedules = isAdmin ? snapshot.schedules : snapshot.schedules.filter(item => item.userId === snapshot.user.id)
   const nameOf = (items: NamedRecord[], id: string | null) => items.find(item => item.id === id)?.name || '—'
   const reservations = data.upcomingSchedules(schedules, now).map(item => ({
-    id: item.id, date: displayDate(item.date), time: item.time,
+    id: item.id, date: displayDate(item.date), time: item.endTime ? `${item.time}–${item.endTime}` : item.time,
     room: nameOf(snapshot.rooms, item.roomId), unit: nameOf(snapshot.units, item.unitId),
     professional: nameOf(snapshot.professionals, item.professionalId),
   }))

@@ -22,6 +22,8 @@ test('usuário reserva pela grade e encontra somente sua reserva na agenda pesso
   view.unmount()
   render(<MySchedulePage user={user} />)
   expect(screen.getByRole('table')).toHaveTextContent('Duna')
+  expect(screen.getByRole('table')).toHaveTextContent('08:00–09:00')
+  expect(screen.getByRole('table')).toHaveTextContent('A combinar')
   expect(screen.getAllByRole('row')).toHaveLength(2)
 })
 test('falha ao salvar mantém formulário e permite nova tentativa', async () => {
